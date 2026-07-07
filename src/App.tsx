@@ -1,4 +1,5 @@
 import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
+import type { ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
@@ -28,7 +29,7 @@ import BillingPage from '@/pages/dashboard/BillingPage';
 import ModelsPage from '@/pages/dashboard/ModelsPage';
 import ProfilePage from '@/pages/dashboard/ProfilePage';
 
-const PageTransition = ({ children }: { children: React.ReactNode }) => (
+const PageTransition = ({ children }: { children: ReactNode }) => (
   <motion.div
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
@@ -40,13 +41,13 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
   </motion.div>
 );
 
-const publicPage = (page: React.ReactNode) => (
+const publicPage = (page: ReactNode) => (
   <PublicRoute>
     <PageTransition>{page}</PageTransition>
   </PublicRoute>
 );
 
-const dashboardPage = (page: React.ReactNode) => (
+const dashboardPage = (page: ReactNode) => (
   <PageTransition>{page}</PageTransition>
 );
 
