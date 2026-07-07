@@ -1,6 +1,7 @@
 import { useSignIn } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, ArrowLeft, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -27,7 +28,7 @@ const ForgotPasswordPage = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError('');
 
