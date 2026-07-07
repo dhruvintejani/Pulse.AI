@@ -1,4 +1,6 @@
+import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 interface AvatarProps {
   src?: string;
@@ -8,29 +10,31 @@ interface AvatarProps {
   online?: boolean;
 }
 
+const sizes = {
+  xs: 'w-6 h-6 text-[10px]',
+  sm: 'w-8 h-8 text-xs',
+  md: 'w-10 h-10 text-sm',
+  lg: 'w-12 h-12 text-base',
+  xl: 'w-16 h-16 text-xl',
+};
+
+const dotSizes = {
+  xs: 'w-1.5 h-1.5 -bottom-0 -right-0',
+  sm: 'w-2 h-2 -bottom-0.5 -right-0.5',
+  md: 'w-2.5 h-2.5 bottom-0 right-0',
+  lg: 'w-3 h-3 bottom-0 right-0',
+  xl: 'w-4 h-4 bottom-0.5 right-0.5',
+};
+
+const getInitials = (value: string) => {
+  const parts = value.trim().split(' ');
+  return parts.length > 1
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : value.slice(0, 2).toUpperCase();
+};
+
 const Avatar = ({ src, name, size = 'md', className, online }: AvatarProps) => {
-  const sizes = {
-    xs: 'w-6 h-6 text-[10px]',
-    sm: 'w-8 h-8 text-xs',
-    md: 'w-10 h-10 text-sm',
-    lg: 'w-12 h-12 text-base',
-    xl: 'w-16 h-16 text-xl',
-  };
-
-  const dotSizes = {
-    xs: 'w-1.5 h-1.5 -bottom-0 -right-0',
-    sm: 'w-2 h-2 -bottom-0.5 -right-0.5',
-    md: 'w-2.5 h-2.5 bottom-0 right-0',
-    lg: 'w-3 h-3 bottom-0 right-0',
-    xl: 'w-4 h-4 bottom-0.5 right-0.5',
-  };
-
-  const getInitials = (n: string) => {
-    const parts = n.trim().split(' ');
-    return parts.length > 1
-      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      : n.slice(0, 2).toUpperCase();
-  };
+  const initials = useMemo(() => (name ? getInitials(name) : 'AI'), [name]);
 
   return (
     <div className={cn('relative inline-flex shrink-0', className)}>
@@ -42,9 +46,15 @@ const Avatar = ({ src, name, size = 'md', className, online }: AvatarProps) => {
         )}
       >
         {src ? (
-          <img src={src} alt={name} className="w-full h-full object-cover" />
+          <OptimizedImage
+            src={src}
+            alt={name ?? 'User avatar'}
+            sizes="64px"
+            className="w-full h-full object-cover"
+            eager={size === 'xl'}
+          />
         ) : (
-          <span>{name ? getInitials(name) : 'AI'}</span>
+          <span>{initials}</span>
         )}
       </div>
       {online !== undefined && (
@@ -60,4 +70,4 @@ const Avatar = ({ src, name, size = 'md', className, online }: AvatarProps) => {
   );
 };
 
-export default Avatar;
+export default memo(Avatar);
