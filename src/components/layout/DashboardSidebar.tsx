@@ -33,7 +33,7 @@ const mainNav = [
 const secondaryNav = [
   { id: 'notifications', label: 'Notifications', icon: Bell, path: DASHBOARD_PATHS.NOTIFICATIONS, badge: '3' },
   { id: 'billing', label: 'Billing', icon: CreditCard, path: DASHBOARD_PATHS.BILLING, badge: '' },
-  { id: 'team', label: 'Team', icon: Users, path: '/dashboard/team', badge: '' },
+  { id: 'team', label: 'Team', icon: Users, path: DASHBOARD_PATHS.TEAM, badge: '' },
   { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS, badge: '' },
 ];
 
