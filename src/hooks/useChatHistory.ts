@@ -1,45 +1,141 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { queryKeys } from '@/constants/queryKeys';
 import { chatService } from '@/services/chat/chatService';
-import type { ChatMessage, RecentChat } from '@/types/chat';
+import type { ConversationMessagePayload, RenameConversationPayload } from '@/types/chat';
+
+const invalidateChatQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.conversations });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.activeConversation });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.chatMessages });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.chatHistory });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.recentChats });
+};
+
+export const useConversations = () => {
+  const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const conversationsQuery = useQuery({
+    queryKey: [...queryKeys.conversations, searchQuery],
+    queryFn: () => chatService.searchConversations(searchQuery),
+  });
+
+  const activeConversationQuery = useQuery({
+    queryKey: queryKeys.activeConversation,
+    queryFn: chatService.getActiveConversation,
+  });
+
+  const createConversationMutation = useMutation({
+    mutationFn: chatService.createConversation,
+    onSuccess: () => invalidateChatQueries(queryClient),
+  });
+
+  const setActiveConversationMutation = useMutation({
+    mutationFn: chatService.setActiveConversation,
+    onSuccess: () => invalidateChatQueries(queryClient),
+  });
+
+  const deleteConversationMutation = useMutation({
+    mutationFn: chatService.deleteConversation,
+    onSuccess: () => invalidateChatQueries(queryClient),
+  });
+
+  const renameConversationMutation = useMutation({
+    mutationFn: chatService.renameConversation,
+    onSuccess: () => invalidateChatQueries(queryClient),
+  });
+
+  const togglePinnedMutation = useMutation({
+    mutationFn: chatService.togglePinned,
+    onSuccess: () => invalidateChatQueries(queryClient),
+  });
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: chatService.toggleFavorite,
+    onSuccess: () => invalidateChatQueries(queryClient),
+  });
+
+  const conversations = conversationsQuery.data ?? [];
+
+  const groupedConversations = useMemo(() => ({
+    pinned: conversations.filter((conversation) => conversation.pinned),
+    favorites: conversations.filter((conversation) => conversation.favorite && !conversation.pinned),
+    today: conversations.filter((conversation) => conversation.period === 'today' && !conversation.pinned && !conversation.favorite),
+    yesterday: conversations.filter((conversation) => conversation.period === 'yesterday' && !conversation.pinned && !conversation.favorite),
+  }), [conversations]);
+
+  return {
+    conversations,
+    groupedConversations,
+    activeConversation: activeConversationQuery.data ?? null,
+    searchQuery,
+    setSearchQuery,
+    isLoading: conversationsQuery.isLoading || activeConversationQuery.isLoading,
+    isError: conversationsQuery.isError || activeConversationQuery.isError,
+    error: conversationsQuery.error ?? activeConversationQuery.error,
+    createConversation: createConversationMutation.mutateAsync,
+    setActiveConversation: setActiveConversationMutation.mutateAsync,
+    deleteConversation: deleteConversationMutation.mutateAsync,
+    renameConversation: (payload: RenameConversationPayload) => renameConversationMutation.mutateAsync(payload),
+    togglePinned: togglePinnedMutation.mutateAsync,
+    toggleFavorite: toggleFavoriteMutation.mutateAsync,
+    isMutating:
+      createConversationMutation.isPending ||
+      setActiveConversationMutation.isPending ||
+      deleteConversationMutation.isPending ||
+      renameConversationMutation.isPending ||
+      togglePinnedMutation.isPending ||
+      toggleFavoriteMutation.isPending,
+  };
+};
 
 export const useChatMessages = () => {
   const queryClient = useQueryClient();
+  const activeConversationQuery = useQuery({
+    queryKey: queryKeys.activeConversation,
+    queryFn: chatService.getActiveConversation,
+  });
+
   const messagesQuery = useQuery({
-    queryKey: queryKeys.chatMessages,
+    queryKey: [...queryKeys.chatMessages, activeConversationQuery.data?.id],
+    enabled: Boolean(activeConversationQuery.data?.id),
     queryFn: chatService.getMessages,
   });
 
   const addMessageMutation = useMutation({
     mutationFn: chatService.addMessage,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.chatMessages });
-    },
+    onSuccess: () => invalidateChatQueries(queryClient),
+  });
+
+  const addAssistantReplyMutation = useMutation({
+    mutationFn: chatService.addAssistantReply,
+    onSuccess: () => invalidateChatQueries(queryClient),
+  });
+
+  const regenerateMutation = useMutation({
+    mutationFn: chatService.regenerateLastAssistantMessage,
+    onSuccess: () => invalidateChatQueries(queryClient),
   });
 
   return {
+    activeConversation: activeConversationQuery.data ?? null,
     messages: messagesQuery.data ?? [],
-    isLoading: messagesQuery.isLoading,
-    isError: messagesQuery.isError,
-    error: messagesQuery.error,
-    addMessage: (message: ChatMessage) => addMessageMutation.mutateAsync(message),
-    isAddingMessage: addMessageMutation.isPending,
+    isLoading: activeConversationQuery.isLoading || messagesQuery.isLoading,
+    isError: activeConversationQuery.isError || messagesQuery.isError,
+    error: activeConversationQuery.error ?? messagesQuery.error,
+    addMessage: (payload: ConversationMessagePayload) => addMessageMutation.mutateAsync(payload),
+    addAssistantReply: (conversationId: string) => addAssistantReplyMutation.mutateAsync(conversationId),
+    regenerateLastAssistantMessage: (conversationId: string) => regenerateMutation.mutateAsync(conversationId),
+    isAddingMessage: addMessageMutation.isPending || addAssistantReplyMutation.isPending,
+    isRegenerating: regenerateMutation.isPending,
   };
 };
 
 export const useRecentChats = () => {
-  const queryClient = useQueryClient();
   const recentChatsQuery = useQuery({
     queryKey: queryKeys.recentChats,
     queryFn: chatService.getRecentChats,
-  });
-
-  const addRecentChatMutation = useMutation({
-    mutationFn: chatService.addRecentChat,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.recentChats });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.chatHistory });
-    },
   });
 
   return {
@@ -47,7 +143,6 @@ export const useRecentChats = () => {
     isLoading: recentChatsQuery.isLoading,
     isError: recentChatsQuery.isError,
     error: recentChatsQuery.error,
-    addRecentChat: (chat: RecentChat) => addRecentChatMutation.mutateAsync(chat),
   };
 };
 
