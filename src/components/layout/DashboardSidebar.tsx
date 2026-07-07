@@ -17,23 +17,24 @@ import {
   Layers,
   Cpu,
 } from 'lucide-react';
+import { DASHBOARD_PATHS } from '@/constants/routes';
 import { cn } from '@/lib/utils';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
 
 const mainNav = [
-  { id: 'chat', label: 'AI Chat', icon: MessageSquare, path: '/dashboard/chat', badge: '' },
-  { id: 'documents', label: 'Documents', icon: FileText, path: '/dashboard/documents', badge: '' },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/dashboard/analytics', badge: '' },
-  { id: 'workspace', label: 'Workspace', icon: Layers, path: '/dashboard/workspace', badge: '' },
-  { id: 'models', label: 'AI Models', icon: Cpu, path: '/dashboard/models', badge: 'New' },
+  { id: 'chat', label: 'AI Chat', icon: MessageSquare, path: DASHBOARD_PATHS.CHAT, badge: '' },
+  { id: 'documents', label: 'Documents', icon: FileText, path: DASHBOARD_PATHS.DOCUMENTS, badge: '' },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3, path: DASHBOARD_PATHS.ANALYTICS, badge: '' },
+  { id: 'workspace', label: 'Workspace', icon: Layers, path: DASHBOARD_PATHS.WORKSPACE, badge: '' },
+  { id: 'models', label: 'AI Models', icon: Cpu, path: DASHBOARD_PATHS.MODELS, badge: 'New' },
 ];
 
 const secondaryNav = [
-  { id: 'notifications', label: 'Notifications', icon: Bell, path: '/dashboard/notifications', badge: '3' },
-  { id: 'billing', label: 'Billing', icon: CreditCard, path: '/dashboard/billing', badge: '' },
+  { id: 'notifications', label: 'Notifications', icon: Bell, path: DASHBOARD_PATHS.NOTIFICATIONS, badge: '3' },
+  { id: 'billing', label: 'Billing', icon: CreditCard, path: DASHBOARD_PATHS.BILLING, badge: '' },
   { id: 'team', label: 'Team', icon: Users, path: '/dashboard/team', badge: '' },
-  { id: 'settings', label: 'Settings', icon: Settings, path: '/dashboard/settings', badge: '' },
+  { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS, badge: '' },
 ];
 
 const recentChats = [
@@ -83,7 +84,7 @@ const DashboardSidebar = ({ collapsed = false }: SidebarProps) => {
       {!collapsed && (
         <div className="px-3 pt-4 pb-2">
           <button
-            onClick={() => navigate('/dashboard/chat')}
+            onClick={() => navigate(DASHBOARD_PATHS.CHAT)}
             className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#E9A24C] to-[#D4853A] text-white text-sm font-medium hover:shadow-premium transition-all duration-200 hover:-translate-y-0.5"
           >
             <Plus size={15} />
@@ -135,7 +136,7 @@ const DashboardSidebar = ({ collapsed = false }: SidebarProps) => {
               {recentChats.map((chat) => (
                 <motion.button
                   key={chat.id}
-                  onClick={() => navigate('/dashboard/chat')}
+                  onClick={() => navigate(DASHBOARD_PATHS.CHAT)}
                   whileHover={{ x: 2 }}
                   className="sidebar-item w-full flex items-center gap-2.5 px-3 py-2 text-left"
                 >
@@ -190,7 +191,7 @@ const DashboardSidebar = ({ collapsed = false }: SidebarProps) => {
       {/* User Profile */}
       <div className="p-3 border-t border-[rgba(0,0,0,0.05)]">
         <button
-          onClick={() => navigate('/dashboard/profile')}
+          onClick={() => navigate(DASHBOARD_PATHS.PROFILE)}
           className={cn(
             'w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-[rgba(233,162,76,0.06)] transition-all duration-200',
           )}
