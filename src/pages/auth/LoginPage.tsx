@@ -1,46 +1,43 @@
 import { useSignIn } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, Lock, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import AuthAlert from '@/components/auth/AuthAlert';
 import AuroraBackground from '@/components/backgrounds/AuroraBackground';
-import { getClerkErrorMessage, getClerkFieldErrors } from '@/lib/clerkErrors';
-
-type OAuthStrategy = 'oauth_google' | 'oauth_github';
+import { LOGIN_DEFAULTS, OAUTH_STRATEGIES } from '@/constants/auth';
+import { ROUTES } from '@/constants/routes';
+import { useAuthFormErrors } from '@/hooks/useAuthFormErrors';
+import { useOAuthLoading } from '@/hooks/useOAuthLoading';
+import { startOAuthRedirect } from '@/services/auth/oauthService';
+import type { FieldErrors, OAuthStrategy } from '@/types/auth';
+import { getClerkErrorMessage, getClerkFieldErrors } from '@/utils/clerkErrors';
+import { hasErrors, validateEmail } from '@/utils/validation';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { isLoaded, signIn, setActive } = useSignIn();
-  const [email, setEmail] = useState('demo@pulseai.com');
-  const [password, setPassword] = useState('password123');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [authError, setAuthError] = useState('');
+  const [email, setEmail] = useState(LOGIN_DEFAULTS.email);
+  const [password, setPassword] = useState(LOGIN_DEFAULTS.password);
+  const { fieldErrors, setFieldErrors, authError, setAuthError, clearFieldError } = useAuthFormErrors();
+  const { oauthLoading, setOauthLoading, isOAuthLoading } = useOAuthLoading();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<OAuthStrategy | null>(null);
-
-  const clearFieldError = (field: string) => {
-    setFieldErrors((current) => {
-      const next = { ...current };
-      delete next[field];
-      return next;
-    });
-  };
 
   const validate = () => {
-    const errors: Record<string, string> = {};
+    const errors: FieldErrors = {};
+    const emailError = validateEmail(email);
 
-    if (!email.trim()) errors.email = 'Email address is required.';
-    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Enter a valid email address.';
+    if (emailError) errors.email = emailError;
     if (!password) errors.password = 'Password is required.';
 
     setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    return !hasErrors(errors);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError('');
 
@@ -52,7 +49,7 @@ const LoginPage = () => {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        navigate('/dashboard', { replace: true });
+        navigate(ROUTES.DASHBOARD, { replace: true });
         return;
       }
 
@@ -71,18 +68,14 @@ const LoginPage = () => {
     try {
       setAuthError('');
       setOauthLoading(strategy);
-      await signIn.authenticateWithRedirect({
-        strategy,
-        redirectUrl: '/sso-callback',
-        redirectUrlComplete: '/dashboard',
-      });
+      await startOAuthRedirect(signIn, strategy);
     } catch (error) {
       setAuthError(getClerkErrorMessage(error, 'Unable to continue with this provider. Please try again.'));
       setOauthLoading(null);
     }
   };
 
-  const busy = isSubmitting || oauthLoading !== null;
+  const busy = isSubmitting || isOAuthLoading;
 
   return (
     <div className="relative min-h-screen flex overflow-hidden">
@@ -179,7 +172,7 @@ const LoginPage = () => {
             <h2 className="text-2xl font-black text-[#1F1F1F] mb-2">Sign in</h2>
             <p className="text-sm text-[#666]">
               Don't have an account?{' '}
-              <button onClick={() => navigate('/signup')} className="text-[#E9A24C] font-semibold hover:underline">
+              <button onClick={() => navigate(ROUTES.SIGNUP)} className="text-[#E9A24C] font-semibold hover:underline">
                 Sign up free
               </button>
             </p>
@@ -190,12 +183,12 @@ const LoginPage = () => {
             <motion.button
               type="button"
               disabled={busy}
-              onClick={() => handleOAuth('oauth_google')}
+              onClick={() => handleOAuth(OAUTH_STRATEGIES.google)}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white hover:border-[rgba(233,162,76,0.3)] transition-all text-sm font-medium text-[#444] shadow-sm"
             >
-              {oauthLoading === 'oauth_google' ? (
+              {oauthLoading === OAUTH_STRATEGIES.google ? (
                 <span className="w-4 h-4 rounded-full border-2 border-[#E9A24C]/30 border-t-[#E9A24C] animate-spin" />
               ) : (
                 <span className="w-4 h-4 text-blue-500 font-bold text-xs">G</span>
@@ -205,12 +198,12 @@ const LoginPage = () => {
             <motion.button
               type="button"
               disabled={busy}
-              onClick={() => handleOAuth('oauth_github')}
+              onClick={() => handleOAuth(OAUTH_STRATEGIES.github)}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white hover:border-[rgba(233,162,76,0.3)] transition-all text-sm font-medium text-[#444] shadow-sm"
             >
-              {oauthLoading === 'oauth_github' ? (
+              {oauthLoading === OAUTH_STRATEGIES.github ? (
                 <span className="w-4 h-4 rounded-full border-2 border-[#E9A24C]/30 border-t-[#E9A24C] animate-spin" />
               ) : (
                 <span className="w-4 h-4 text-[#1F1F1F] font-bold text-xs">⌘</span>
@@ -262,7 +255,7 @@ const LoginPage = () => {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={() => navigate('/forgot-password')}
+                onClick={() => navigate(ROUTES.FORGOT_PASSWORD)}
                 className="text-xs text-[#E9A24C] font-medium hover:underline"
               >
                 Forgot password?
