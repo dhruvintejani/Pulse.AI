@@ -1,9 +1,15 @@
+import { useSignUp } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import AuthAlert from '@/components/auth/AuthAlert';
 import AuroraBackground from '@/components/backgrounds/AuroraBackground';
+import { getClerkErrorMessage, getClerkFieldErrors } from '@/lib/clerkErrors';
+
+type OAuthStrategy = 'oauth_google' | 'oauth_github';
 
 const perks = [
   'Free 14-day Pro trial',
@@ -14,6 +20,80 @@ const perks = [
 
 const SignupPage = () => {
   const navigate = useNavigate();
+  const { isLoaded, signUp } = useSignUp();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [authError, setAuthError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<OAuthStrategy | null>(null);
+
+  const clearFieldError = (field: string) => {
+    setFieldErrors((current) => {
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const validate = () => {
+    const errors: Record<string, string> = {};
+
+    if (!firstName.trim()) errors.firstName = 'First name is required.';
+    if (!lastName.trim()) errors.lastName = 'Last name is required.';
+    if (!email.trim()) errors.email = 'Work email is required.';
+    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Enter a valid email address.';
+    if (!password) errors.password = 'Password is required.';
+    if (password && password.length < 8) errors.password = 'Password must be at least 8 characters.';
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAuthError('');
+
+    if (!validate() || !isLoaded || !signUp) return;
+
+    try {
+      setIsSubmitting(true);
+      await signUp.create({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        emailAddress: email.trim(),
+        password,
+      });
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      navigate('/verify', { state: { email: email.trim() } });
+    } catch (error) {
+      setFieldErrors(getClerkFieldErrors(error));
+      setAuthError(getClerkErrorMessage(error, 'Unable to create your account. Please try again.'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleOAuth = async (strategy: OAuthStrategy) => {
+    if (!isLoaded || !signUp) return;
+
+    try {
+      setAuthError('');
+      setOauthLoading(strategy);
+      await signUp.authenticateWithRedirect({
+        strategy,
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/dashboard',
+      });
+    } catch (error) {
+      setAuthError(getClerkErrorMessage(error, 'Unable to continue with this provider. Please try again.'));
+      setOauthLoading(null);
+    }
+  };
+
+  const busy = isSubmitting || oauthLoading !== null;
 
   return (
     <div className="relative min-h-screen flex overflow-hidden">
@@ -114,16 +194,23 @@ const SignupPage = () => {
           {/* Social logins */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
-              { icon: '🌐', label: 'Google' },
-              { icon: '⌘', label: 'GitHub' },
+              { icon: '🌐', label: 'Google', strategy: 'oauth_google' as const },
+              { icon: '⌘', label: 'GitHub', strategy: 'oauth_github' as const },
             ].map((btn) => (
               <motion.button
                 key={btn.label}
+                type="button"
+                disabled={busy}
+                onClick={() => handleOAuth(btn.strategy)}
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white hover:border-[rgba(233,162,76,0.3)] transition-all text-sm font-medium text-[#444] shadow-sm"
               >
-                <span>{btn.icon}</span>
+                {oauthLoading === btn.strategy ? (
+                  <span className="w-4 h-4 rounded-full border-2 border-[#E9A24C]/30 border-t-[#E9A24C] animate-spin" />
+                ) : (
+                  <span>{btn.icon}</span>
+                )}
                 {btn.label}
               </motion.button>
             ))}
@@ -135,19 +222,35 @@ const SignupPage = () => {
             <div className="flex-1 h-px bg-[rgba(0,0,0,0.07)]" />
           </div>
 
+          <div className="mb-4">
+            <AuthAlert message={authError} />
+          </div>
+
           {/* Form */}
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); navigate('/verify'); }}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label="First name"
                 type="text"
                 placeholder="Alex"
                 icon={<User size={16} />}
+                value={firstName}
+                onChange={(event) => {
+                  setFirstName(event.target.value);
+                  clearFieldError('firstName');
+                }}
+                error={fieldErrors.firstName}
               />
               <Input
                 label="Last name"
                 type="text"
                 placeholder="Morgan"
+                value={lastName}
+                onChange={(event) => {
+                  setLastName(event.target.value);
+                  clearFieldError('lastName');
+                }}
+                error={fieldErrors.lastName}
               />
             </div>
             <Input
@@ -155,6 +258,12 @@ const SignupPage = () => {
               type="email"
               placeholder="you@company.com"
               icon={<Mail size={16} />}
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                clearFieldError('email');
+              }}
+              error={fieldErrors.email}
             />
             <Input
               label="Password"
@@ -162,6 +271,12 @@ const SignupPage = () => {
               placeholder="Create a strong password"
               icon={<Lock size={16} />}
               showPasswordToggle
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                clearFieldError('password');
+              }}
+              error={fieldErrors.password}
             />
 
             {/* Password strength */}
@@ -180,6 +295,7 @@ const SignupPage = () => {
               size="lg"
               className="w-full mt-2"
               iconRight={<ArrowRight size={16} />}
+              loading={isSubmitting}
             >
               Create free account
             </Button>
