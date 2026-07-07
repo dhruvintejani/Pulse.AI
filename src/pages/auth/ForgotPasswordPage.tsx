@@ -1,12 +1,52 @@
+import { useSignIn } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, ArrowLeft, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import AuthAlert from '@/components/auth/AuthAlert';
 import AuroraBackground from '@/components/backgrounds/AuroraBackground';
+import { getClerkErrorMessage, getClerkFieldErrors } from '@/lib/clerkErrors';
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
+  const { isLoaded, signIn } = useSignIn();
+  const [email, setEmail] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [authError, setAuthError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validate = () => {
+    const errors: Record<string, string> = {};
+
+    if (!email.trim()) errors.email = 'Email address is required.';
+    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Enter a valid email address.';
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAuthError('');
+
+    if (!validate() || !isLoaded || !signIn) return;
+
+    try {
+      setIsSubmitting(true);
+      await signIn.create({
+        strategy: 'reset_password_email_code',
+        identifier: email.trim(),
+      });
+      navigate('/reset-password', { state: { email: email.trim() } });
+    } catch (error) {
+      setFieldErrors(getClerkFieldErrors(error));
+      setAuthError(getClerkErrorMessage(error, 'Unable to send reset instructions. Please try again.'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-6">
@@ -37,12 +77,22 @@ const ForgotPasswordPage = () => {
             </p>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); navigate('/reset-password'); }}>
+          <div className="mb-4">
+            <AuthAlert message={authError} />
+          </div>
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <Input
               label="Email address"
               type="email"
               placeholder="you@company.com"
               icon={<Mail size={16} />}
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                setFieldErrors({});
+              }}
+              error={fieldErrors.email}
             />
             <Button
               type="submit"
@@ -50,6 +100,7 @@ const ForgotPasswordPage = () => {
               size="lg"
               className="w-full"
               iconRight={<ArrowRight size={16} />}
+              loading={isSubmitting}
             >
               Send reset link
             </Button>
