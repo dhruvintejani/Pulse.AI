@@ -6,7 +6,7 @@ interface SkeletonProps {
 }
 
 const Skeleton = memo(({ className }: SkeletonProps) => (
-  <div className={cn('animate-pulse rounded-xl bg-[rgba(0,0,0,0.06)]', className)} />
+  <div className={cn('animate-pulse rounded-xl bg-[rgba(0,0,0,0.06)]', className)} aria-hidden="true" />
 ));
 
 Skeleton.displayName = 'Skeleton';
