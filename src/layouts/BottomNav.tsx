@@ -45,6 +45,7 @@ const BottomNav = () => {
   return (
     <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 px-4">
       <motion.nav
+        aria-label="Primary mobile navigation"
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1], delay: 0.2 }}
@@ -60,10 +61,13 @@ const BottomNav = () => {
               return (
                 <motion.button
                   key={item.id}
+                  type="button"
+                  aria-label="Open Pulse dashboard"
+                  aria-current={active ? 'page' : undefined}
                   onClick={() => handleNavigate(item.path)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.93 }}
-                  className="relative mx-1"
+                  className="relative mx-1 rounded-full focus-ring"
                 >
                   <div className={cn(
                     'w-12 h-12 rounded-full flex items-center justify-center',
@@ -71,7 +75,7 @@ const BottomNav = () => {
                     'shadow-[0_4px_20px_rgba(233,162,76,0.5)]',
                     'transition-all duration-200'
                   )}>
-                    <Icon size={20} className="text-white" />
+                    <Icon size={20} className="text-white" aria-hidden="true" />
                   </div>
                   {active && (
                     <motion.div
@@ -86,11 +90,14 @@ const BottomNav = () => {
             return (
               <motion.button
                 key={item.id}
+                type="button"
+                aria-label={item.label}
+                aria-current={active ? 'page' : undefined}
                 onClick={() => handleNavigate(item.path)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.93 }}
                 className={cn(
-                  'relative flex flex-col items-center gap-0.5 px-4 py-2 rounded-full transition-all duration-200',
+                  'relative flex flex-col items-center gap-0.5 px-4 py-2 rounded-full transition-all duration-200 focus-ring',
                   active ? 'text-[#E9A24C]' : 'text-[#999] hover:text-[#666]'
                 )}
               >
@@ -101,7 +108,7 @@ const BottomNav = () => {
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
-                <Icon size={18} className="relative z-10" strokeWidth={active ? 2.5 : 1.8} />
+                <Icon size={18} className="relative z-10" strokeWidth={active ? 2.5 : 1.8} aria-hidden="true" />
                 <span className={cn(
                   'text-[10px] font-medium relative z-10 transition-all duration-200',
                   active ? 'opacity-100' : 'opacity-70'
