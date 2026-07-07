@@ -1,6 +1,10 @@
+import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+
+import PublicRoute from '@/components/auth/PublicRoute';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 // Layouts
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -11,6 +15,7 @@ import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/auth/LoginPage';
 import SignupPage from '@/pages/auth/SignupPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
 import VerifyPage from '@/pages/auth/VerifyPage';
 import DashboardHome from '@/pages/dashboard/DashboardHome';
 import ChatPage from '@/pages/dashboard/ChatPage';
@@ -35,6 +40,16 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
   </motion.div>
 );
 
+const publicPage = (page: React.ReactNode) => (
+  <PublicRoute>
+    <PageTransition>{page}</PageTransition>
+  </PublicRoute>
+);
+
+const dashboardPage = (page: React.ReactNode) => (
+  <PageTransition>{page}</PageTransition>
+);
+
 const AppRoutes = () => {
   const location = useLocation();
 
@@ -43,84 +58,33 @@ const AppRoutes = () => {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* Public */}
-          <Route path="/" element={
-            <PageTransition>
-              <LandingPage />
-            </PageTransition>
-          } />
-          <Route path="/login" element={
-            <PageTransition>
-              <LoginPage />
-            </PageTransition>
-          } />
-          <Route path="/signup" element={
-            <PageTransition>
-              <SignupPage />
-            </PageTransition>
-          } />
-          <Route path="/forgot-password" element={
-            <PageTransition>
-              <ForgotPasswordPage />
-            </PageTransition>
-          } />
-          <Route path="/verify" element={
-            <PageTransition>
-              <VerifyPage />
-            </PageTransition>
-          } />
+          <Route path="/" element={publicPage(<LandingPage />)} />
+          <Route path="/login" element={publicPage(<LoginPage />)} />
+          <Route path="/signup" element={publicPage(<SignupPage />)} />
+          <Route path="/forgot-password" element={publicPage(<ForgotPasswordPage />)} />
+          <Route path="/reset-password" element={publicPage(<ResetPasswordPage />)} />
+          <Route path="/verify" element={publicPage(<VerifyPage />)} />
+          <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
 
           {/* Dashboard */}
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={
-              <PageTransition>
-                <DashboardHome />
-              </PageTransition>
-            } />
-            <Route path="chat" element={
-              <PageTransition>
-                <ChatPage />
-              </PageTransition>
-            } />
-            <Route path="documents" element={
-              <PageTransition>
-                <DocumentsPage />
-              </PageTransition>
-            } />
-            <Route path="analytics" element={
-              <PageTransition>
-                <AnalyticsPage />
-              </PageTransition>
-            } />
-            <Route path="workspace" element={
-              <PageTransition>
-                <WorkspacePage />
-              </PageTransition>
-            } />
-            <Route path="models" element={
-              <PageTransition>
-                <ModelsPage />
-              </PageTransition>
-            } />
-            <Route path="notifications" element={
-              <PageTransition>
-                <NotificationsPage />
-              </PageTransition>
-            } />
-            <Route path="settings" element={
-              <PageTransition>
-                <SettingsPage />
-              </PageTransition>
-            } />
-            <Route path="billing" element={
-              <PageTransition>
-                <BillingPage />
-              </PageTransition>
-            } />
-            <Route path="profile" element={
-              <PageTransition>
-                <ProfilePage />
-              </PageTransition>
-            } />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={dashboardPage(<DashboardHome />)} />
+            <Route path="chat" element={dashboardPage(<ChatPage />)} />
+            <Route path="documents" element={dashboardPage(<DocumentsPage />)} />
+            <Route path="analytics" element={dashboardPage(<AnalyticsPage />)} />
+            <Route path="workspace" element={dashboardPage(<WorkspacePage />)} />
+            <Route path="models" element={dashboardPage(<ModelsPage />)} />
+            <Route path="notifications" element={dashboardPage(<NotificationsPage />)} />
+            <Route path="settings" element={dashboardPage(<SettingsPage />)} />
+            <Route path="billing" element={dashboardPage(<BillingPage />)} />
+            <Route path="profile" element={dashboardPage(<ProfilePage />)} />
           </Route>
 
           {/* Fallback */}
