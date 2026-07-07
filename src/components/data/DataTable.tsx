@@ -25,6 +25,7 @@ interface DataTableProps<T> {
   emptyDescription?: string;
   pageSize?: number;
   className?: string;
+  ariaLabel?: string;
 }
 
 type SortDirection = 'asc' | 'desc';
@@ -41,6 +42,7 @@ const DataTableComponent = <T,>({
   emptyDescription = 'Try changing your search or filter.',
   pageSize = 5,
   className,
+  ariaLabel = 'Data table',
 }: DataTableProps<T>) => {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState(columns.find((column) => column.sortable)?.id ?? columns[0]?.id ?? '');
@@ -128,11 +130,15 @@ const DataTableComponent = <T,>({
     <div className={cn('bg-[#FFFDF8] rounded-2xl border border-[rgba(0,0,0,0.05)] shadow-card overflow-hidden', className)}>
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 border-b border-[rgba(0,0,0,0.05)]">
         <div className="relative flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#CCC]" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#CCC]" aria-hidden="true" />
+          <label className="sr-only" htmlFor="data-table-search">Search table</label>
           <input
+            id="data-table-search"
+            type="search"
             value={search}
             onChange={handleSearchChange}
             placeholder={searchPlaceholder}
+            aria-label="Search table"
             className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-[#1F1F1F] placeholder:text-[#CCC] outline-none focus:border-[rgba(233,162,76,0.4)]"
           />
         </div>
@@ -141,6 +147,7 @@ const DataTableComponent = <T,>({
             <select
               value={filters[column.id] ?? ''}
               onChange={(event) => updateFilter(column.id, event.target.value)}
+              aria-label={`Filter by ${column.header}`}
               className="appearance-none min-w-36 pr-8 pl-3 py-2.5 text-xs font-medium rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-[#666] outline-none focus:border-[rgba(233,162,76,0.4)]"
             >
               <option value="">All {column.header}</option>
@@ -148,27 +155,37 @@ const DataTableComponent = <T,>({
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
-            <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#CCC]" />
+            <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#CCC]" aria-hidden="true" />
           </div>
         ))}
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px]">
+        <table className="w-full min-w-[640px]" aria-label={ariaLabel} aria-busy={loading || undefined}>
           <thead>
             <tr className="border-b border-[rgba(0,0,0,0.05)]">
-              {columns.map((column) => (
-                <th key={column.id} className={cn('px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-[#999]', column.className)}>
-                  <button
-                    type="button"
-                    onClick={() => toggleSort(column)}
-                    className={cn('inline-flex items-center gap-1.5', column.sortable && 'hover:text-[#E9A24C] transition-colors')}
+              {columns.map((column) => {
+                const activeSort = sortBy === column.id;
+                return (
+                  <th
+                    key={column.id}
+                    scope="col"
+                    aria-sort={activeSort ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+                    className={cn('px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-[#999]', column.className)}
                   >
-                    {column.header}
-                    {column.sortable && <ChevronsUpDown size={11} className={sortBy === column.id ? 'text-[#E9A24C]' : 'text-[#CCC]'} />}
-                  </button>
-                </th>
-              ))}
+                    <button
+                      type="button"
+                      onClick={() => toggleSort(column)}
+                      disabled={!column.sortable}
+                      aria-label={column.sortable ? `Sort by ${column.header}` : column.header}
+                      className={cn('inline-flex items-center gap-1.5 rounded-md focus-ring', column.sortable && 'hover:text-[#E9A24C] transition-colors', !column.sortable && 'cursor-default')}
+                    >
+                      {column.header}
+                      {column.sortable && <ChevronsUpDown size={11} className={activeSort ? 'text-[#E9A24C]' : 'text-[#CCC]'} aria-hidden="true" />}
+                    </button>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -193,8 +210,10 @@ const DataTableComponent = <T,>({
             {!loading && paginatedData.length === 0 && (
               <tr>
                 <td colSpan={totalColumns} className="px-4 py-12 text-center">
-                  <p className="text-sm font-bold text-[#1F1F1F]">{emptyTitle}</p>
-                  <p className="text-xs text-[#999] mt-1">{emptyDescription}</p>
+                  <div role="status">
+                    <p className="text-sm font-bold text-[#1F1F1F]">{emptyTitle}</p>
+                    <p className="text-xs text-[#999] mt-1">{emptyDescription}</p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -203,24 +222,28 @@ const DataTableComponent = <T,>({
       </div>
 
       <div className="flex items-center justify-between px-4 py-3 border-t border-[rgba(0,0,0,0.05)]">
-        <p className="text-xs text-[#999]">
+        <p className="text-xs text-[#999]" aria-live="polite">
           Showing {sortedData.length ? (safePage - 1) * pageSize + 1 : 0}-{Math.min(safePage * pageSize, sortedData.length)} of {sortedData.length}
         </p>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={goToPreviousPage}
             disabled={safePage === 1}
-            className="p-1.5 rounded-lg border border-[rgba(0,0,0,0.06)] text-[#999] disabled:opacity-40 hover:text-[#E9A24C] transition-colors"
+            aria-label="Go to previous page"
+            className="p-1.5 rounded-lg border border-[rgba(0,0,0,0.06)] text-[#999] disabled:opacity-40 hover:text-[#E9A24C] transition-colors focus-ring"
           >
-            <ChevronLeft size={14} />
+            <ChevronLeft size={14} aria-hidden="true" />
           </button>
-          <span className="text-xs font-semibold text-[#666]">{safePage} / {totalPages}</span>
+          <span className="text-xs font-semibold text-[#666]" aria-label={`Page ${safePage} of ${totalPages}`}>{safePage} / {totalPages}</span>
           <button
+            type="button"
             onClick={goToNextPage}
             disabled={safePage === totalPages}
-            className="p-1.5 rounded-lg border border-[rgba(0,0,0,0.06)] text-[#999] disabled:opacity-40 hover:text-[#E9A24C] transition-colors"
+            aria-label="Go to next page"
+            className="p-1.5 rounded-lg border border-[rgba(0,0,0,0.06)] text-[#999] disabled:opacity-40 hover:text-[#E9A24C] transition-colors focus-ring"
           >
-            <ChevronRight size={14} />
+            <ChevronRight size={14} aria-hidden="true" />
           </button>
         </div>
       </div>
