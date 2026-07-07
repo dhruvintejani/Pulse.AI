@@ -1,20 +1,31 @@
+import { useSignUp } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, ArrowRight, RefreshCw } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import AuthAlert from '@/components/auth/AuthAlert';
 import AuroraBackground from '@/components/backgrounds/AuroraBackground';
-import { useState, useRef } from 'react';
+import { getClerkErrorMessage } from '@/lib/clerkErrors';
 
 const VerifyPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isLoaded, signUp, setActive } = useSignUp();
   const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [authError, setAuthError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const stateEmail = (location.state as { email?: string } | null)?.email;
+  const verificationEmail = stateEmail || signUp?.emailAddress || 'your email address';
 
   const handleChange = (index: number, value: string) => {
     if (!/^[0-9]*$/.test(value)) return;
     const newCode = [...code];
     newCode[index] = value.slice(-1);
     setCode(newCode);
+    setAuthError('');
     if (value && index < 5) {
       inputsRef.current[index + 1]?.focus();
     }
@@ -23,6 +34,44 @@ const VerifyPage = () => {
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !code[index] && index > 0) {
       inputsRef.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!allFilled || !isLoaded || !signUp) return;
+
+    try {
+      setAuthError('');
+      setIsSubmitting(true);
+      const result = await signUp.attemptEmailAddressVerification({ code: code.join('') });
+
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        navigate('/dashboard', { replace: true });
+        return;
+      }
+
+      setAuthError('Please complete email verification to continue.');
+    } catch (error) {
+      setAuthError(getClerkErrorMessage(error, 'Invalid verification code. Please try again.'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!isLoaded || !signUp) return;
+
+    try {
+      setAuthError('');
+      setIsResending(true);
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      setCode(['', '', '', '', '', '']);
+      inputsRef.current[0]?.focus();
+    } catch (error) {
+      setAuthError(getClerkErrorMessage(error, 'Unable to resend the code. Please try again.'));
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -59,8 +108,12 @@ const VerifyPage = () => {
           <p className="text-sm text-[#666] leading-relaxed mb-8">
             We sent a 6-digit verification code to
             <br />
-            <span className="font-semibold text-[#1F1F1F]">you@company.com</span>
+            <span className="font-semibold text-[#1F1F1F]">{verificationEmail}</span>
           </p>
+
+          <div className="mb-6 text-left">
+            <AuthAlert message={authError} />
+          </div>
 
           {/* OTP Input */}
           <div className="flex items-center justify-center gap-3 mb-8">
@@ -87,16 +140,22 @@ const VerifyPage = () => {
             variant="primary"
             size="lg"
             className="w-full mb-4"
-            disabled={!allFilled}
-            onClick={() => navigate('/dashboard')}
+            disabled={!allFilled || isSubmitting}
+            onClick={handleVerify}
             iconRight={<ArrowRight size={16} />}
+            loading={isSubmitting}
           >
             Verify and continue
           </Button>
 
-          <button className="flex items-center justify-center gap-2 text-sm text-[#999] hover:text-[#E9A24C] transition-colors w-full mt-2">
-            <RefreshCw size={14} />
-            Resend code in 0:45
+          <button
+            type="button"
+            disabled={isResending}
+            onClick={handleResend}
+            className="flex items-center justify-center gap-2 text-sm text-[#999] hover:text-[#E9A24C] transition-colors w-full mt-2"
+          >
+            <RefreshCw size={14} className={isResending ? 'animate-spin' : ''} />
+            {isResending ? 'Resending code...' : 'Resend code in 0:45'}
           </button>
         </div>
       </motion.div>
