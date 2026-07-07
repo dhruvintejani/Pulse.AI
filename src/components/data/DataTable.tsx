@@ -48,8 +48,8 @@ const DataTable = <T,>({
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
 
-  const searchableColumns = columns.filter((column) => column.filterable !== false);
-  const filterColumns = columns.filter((column) => column.filterOptions?.length);
+  const searchableColumns = useMemo(() => columns.filter((column) => column.filterable !== false), [columns]);
+  const filterColumns = useMemo(() => columns.filter((column) => column.filterOptions?.length), [columns]);
   const totalColumns = columns.length;
 
   const filteredData = useMemo(() => {
