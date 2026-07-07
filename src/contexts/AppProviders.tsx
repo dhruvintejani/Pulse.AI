@@ -5,7 +5,7 @@ import { AUTH_REDIRECTS } from '@/constants/auth';
 import { CurrentUserProvider } from '@/contexts/CurrentUserContext';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
-import { useApiAuth, ApiAuthProvider } from '@/hooks/useApiAuth';
+import { ApiAuthProvider } from '@/hooks/useApiAuth';
 import { queryClient } from '@/lib/queryClient';
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -33,4 +33,3 @@ const AppProviders = ({ children }: AppProvidersProps) => (
 );
 
 export default AppProviders;
-export { useApiAuth };
