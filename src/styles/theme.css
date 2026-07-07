@@ -1,0 +1,221 @@
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --pulse-bg: #F8F4EC;
+  --pulse-surface: #FFFDF8;
+  --pulse-surface-soft: rgba(255, 253, 248, 0.82);
+  --pulse-text: #1F1F1F;
+  --pulse-muted: #666666;
+  --pulse-subtle: #999999;
+  --pulse-border: rgba(0, 0, 0, 0.08);
+  --pulse-shadow: 0 2px 16px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+html.dark {
+  --pulse-bg: #0F0D0A;
+  --pulse-surface: #17130F;
+  --pulse-surface-soft: rgba(23, 19, 15, 0.84);
+  --pulse-text: #F7EBDD;
+  --pulse-muted: #CDBFAF;
+  --pulse-subtle: #9E907F;
+  --pulse-border: rgba(255, 255, 255, 0.1);
+  --pulse-shadow: 0 18px 48px rgba(0, 0, 0, 0.34), 0 2px 10px rgba(0, 0, 0, 0.22);
+}
+
+body {
+  background-color: var(--pulse-bg);
+  color: var(--pulse-text);
+}
+
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition:
+    background-color 240ms ease,
+    background-image 240ms ease,
+    border-color 240ms ease,
+    color 240ms ease,
+    box-shadow 240ms ease,
+    opacity 240ms ease !important;
+}
+
+html.dark body {
+  background-color: var(--pulse-bg);
+  color: var(--pulse-text);
+}
+
+html.dark .glass,
+html.dark .glass-card {
+  background: rgba(23, 19, 15, 0.78);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .shadow-card {
+  box-shadow: var(--pulse-shadow);
+}
+
+html.dark .shadow-float {
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42), 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+html.dark .input-premium {
+  background: rgba(22, 18, 14, 0.92);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--pulse-text);
+}
+
+html.dark .input-premium:focus {
+  background: rgba(25, 21, 16, 0.98);
+  border-color: #E9A24C;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: rgba(205, 191, 175, 0.55) !important;
+}
+
+html.dark .btn-secondary {
+  background: rgba(30, 25, 20, 0.88);
+  color: var(--pulse-text);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+html.dark .btn-secondary:hover {
+  background: rgba(38, 31, 24, 0.96);
+  border-color: rgba(233, 162, 76, 0.38);
+}
+
+html.dark .chat-bubble-ai {
+  background: rgba(23, 19, 15, 0.92);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .code-block {
+  background: #080706;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+html.dark .animated-gradient {
+  background: linear-gradient(-45deg, #0F0D0A, #17130F, #211811, #120F0C);
+  background-size: 400% 400%;
+}
+
+html.dark .mesh-gradient {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(233, 162, 76, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(215, 185, 142, 0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(233, 162, 76, 0.06) 0%, transparent 50%),
+    #0F0D0A;
+}
+
+html.dark .line-grid {
+  background-image:
+    linear-gradient(rgba(233, 162, 76, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(233, 162, 76, 0.08) 1px, transparent 1px);
+}
+
+html.dark .dot-grid {
+  background-image: radial-gradient(circle, rgba(233, 162, 76, 0.18) 1px, transparent 1px);
+}
+
+html.dark [class~="bg-[#F8F4EC]"],
+html.dark [class~="bg-[#FFFDF8]"] {
+  background-color: var(--pulse-surface) !important;
+}
+
+html.dark [class~="bg-[#FFFDF8]/50"],
+html.dark [class~="bg-[#FFFDF8]/80"] {
+  background-color: var(--pulse-surface-soft) !important;
+}
+
+html.dark [class~="bg-white"],
+html.dark [class~="bg-white/40"],
+html.dark [class~="bg-white/50"],
+html.dark [class~="bg-white/60"],
+html.dark [class~="bg-white/70"],
+html.dark [class~="bg-white/80"] {
+  background-color: rgba(26, 21, 17, 0.82) !important;
+}
+
+html.dark [class~="bg-[rgba(0,0,0,0.01)]"],
+html.dark [class~="bg-[rgba(0,0,0,0.02)]"],
+html.dark [class~="bg-[rgba(0,0,0,0.03)]"],
+html.dark [class~="bg-[rgba(0,0,0,0.04)]"],
+html.dark [class~="bg-[rgba(0,0,0,0.05)]"],
+html.dark [class~="bg-[rgba(0,0,0,0.06)]"],
+html.dark [class~="bg-[rgba(0,0,0,0.08)]"],
+html.dark [class~="bg-[rgba(0,0,0,0.12)]"] {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark [class~="bg-red-50"] { background-color: rgba(239, 68, 68, 0.12) !important; }
+html.dark [class~="bg-green-50"] { background-color: rgba(34, 197, 94, 0.12) !important; }
+html.dark [class~="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.12) !important; }
+html.dark [class~="bg-blue-50"] { background-color: rgba(59, 130, 246, 0.12) !important; }
+html.dark [class~="bg-purple-50"] { background-color: rgba(139, 92, 246, 0.12) !important; }
+html.dark [class~="bg-amber-50"] { background-color: rgba(245, 158, 11, 0.12) !important; }
+html.dark [class~="bg-gray-100"] { background-color: rgba(255, 255, 255, 0.08) !important; }
+
+html.dark [class~="from-[#FFFDF8]"][class~="to-[#F8F4EC]"] {
+  background-image: linear-gradient(to bottom right, rgba(25, 21, 17, 0.96), rgba(15, 13, 10, 0.96)) !important;
+}
+
+html.dark [class~="from-orange-100"][class~="to-amber-50"] {
+  background-image: linear-gradient(to bottom right, rgba(54, 37, 20, 0.9), rgba(28, 22, 16, 0.95)) !important;
+}
+
+html.dark [class~="from-blue-50"][class~="to-indigo-50"] {
+  background-image: linear-gradient(to bottom right, rgba(24, 34, 55, 0.88), rgba(20, 22, 36, 0.95)) !important;
+}
+
+html.dark [class~="from-purple-50"][class~="to-pink-50"] {
+  background-image: linear-gradient(to bottom right, rgba(43, 31, 58, 0.88), rgba(31, 22, 36, 0.95)) !important;
+}
+
+html.dark [class~="from-emerald-50"][class~="to-green-50"] {
+  background-image: linear-gradient(to bottom right, rgba(20, 48, 36, 0.88), rgba(17, 32, 25, 0.95)) !important;
+}
+
+html.dark [class~="text-[#1F1F1F]"],
+html.dark [class~="text-[#444]"] {
+  color: var(--pulse-text) !important;
+}
+
+html.dark [class~="text-[#666]"],
+html.dark [class~="text-[#666666]"] {
+  color: var(--pulse-muted) !important;
+}
+
+html.dark [class~="text-[#999]"],
+html.dark [class~="text-[#BBB]"],
+html.dark [class~="text-[#CCC]"] {
+  color: var(--pulse-subtle) !important;
+}
+
+html.dark [class~="border-[rgba(0,0,0,0.04)]"],
+html.dark [class~="border-[rgba(0,0,0,0.05)]"],
+html.dark [class~="border-[rgba(0,0,0,0.06)]"],
+html.dark [class~="border-[rgba(0,0,0,0.08)]"],
+html.dark [class~="border-[rgba(0,0,0,0.12)]"] {
+  border-color: var(--pulse-border) !important;
+}
+
+html.dark [class~="border-white/70"],
+html.dark [class~="border-white/80"] {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark [class~="divide-[rgba(0,0,0,0.05)]"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--pulse-border) !important;
+}
+
+html.dark table tr:hover {
+  background-color: rgba(233, 162, 76, 0.06) !important;
+}
+
+html.dark select,
+html.dark input,
+html.dark textarea {
+  color-scheme: dark;
+}
