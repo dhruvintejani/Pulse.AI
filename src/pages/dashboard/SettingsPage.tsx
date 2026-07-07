@@ -4,6 +4,7 @@ import {
   User, Bell, Shield, Cpu, Palette, Globe,
   ChevronRight, Check, Sparkles, Sun, Moon, Monitor
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
@@ -22,7 +23,7 @@ const sections = [
   { id: 'language', label: 'Language & Region', icon: Globe },
 ];
 
-const themeOptions: Array<{ id: ThemeMode; label: string; desc: string; icon: typeof Sun; colors: string[] }> = [
+const themeOptions: Array<{ id: ThemeMode; label: string; desc: string; icon: LucideIcon; colors: string[] }> = [
   { id: 'light', label: 'Light', desc: 'Warm bright interface', icon: Sun, colors: ['#F8F4EC', '#FFFDF8', '#E9A24C'] },
   { id: 'dark', label: 'Dark', desc: 'Low-light interface', icon: Moon, colors: ['#0F0D0A', '#17130F', '#E9A24C'] },
   { id: 'system', label: 'System', desc: 'Match your device', icon: Monitor, colors: ['#F8F4EC', '#1F1F1F', '#E9A24C'] },
