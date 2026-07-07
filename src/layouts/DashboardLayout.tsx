@@ -30,12 +30,14 @@ const DashboardLayout = () => {
       <AnimatePresence>
         {mobileSidebarOpen && (
           <>
-            <motion.div
+            <motion.button
+              type="button"
+              aria-label="Close navigation menu"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleCloseMobileSidebar}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden focus:outline-none"
             />
             <motion.div
               initial={{ x: -280 }}
@@ -55,16 +57,19 @@ const DashboardLayout = () => {
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#FFFDF8]/80 backdrop-blur-lg border-b border-[rgba(0,0,0,0.06)]">
           <button
+            type="button"
             onClick={handleOpenMobileSidebar}
-            className="p-2 rounded-xl hover:bg-[rgba(233,162,76,0.08)] transition-colors"
+            aria-label="Open navigation menu"
+            aria-expanded={mobileSidebarOpen}
+            className="p-2 rounded-xl hover:bg-[rgba(233,162,76,0.08)] transition-colors focus-ring"
           >
-            <Menu size={20} className="text-[#666]" />
+            <Menu size={20} className="text-[#666]" aria-hidden="true" />
           </button>
           <span className="text-sm font-bold text-[#1F1F1F]">Pulse AI</span>
-          <div className="w-9" />
+          <div className="w-9" aria-hidden="true" />
         </div>
 
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden" id="main-content">
           <Outlet />
         </main>
       </div>
