@@ -35,9 +35,10 @@ const getInitials = (value: string) => {
 
 const Avatar = ({ src, name, size = 'md', className, online }: AvatarProps) => {
   const initials = useMemo(() => (name ? getInitials(name) : 'AI'), [name]);
+  const label = name ? `${name}${online === true ? ', online' : online === false ? ', offline' : ''}` : 'Pulse AI avatar';
 
   return (
-    <div className={cn('relative inline-flex shrink-0', className)}>
+    <div className={cn('relative inline-flex shrink-0', className)} aria-label={label} title={name}>
       <div
         className={cn(
           'rounded-full overflow-hidden flex items-center justify-center font-semibold',
@@ -48,13 +49,13 @@ const Avatar = ({ src, name, size = 'md', className, online }: AvatarProps) => {
         {src ? (
           <OptimizedImage
             src={src}
-            alt={name ?? 'User avatar'}
+            alt=""
             sizes="64px"
             className="w-full h-full object-cover"
             eager={size === 'xl'}
           />
         ) : (
-          <span>{initials}</span>
+          <span aria-hidden="true">{initials}</span>
         )}
       </div>
       {online !== undefined && (
@@ -64,6 +65,7 @@ const Avatar = ({ src, name, size = 'md', className, online }: AvatarProps) => {
             dotSizes[size],
             online ? 'bg-green-500' : 'bg-gray-400'
           )}
+          aria-hidden="true"
         />
       )}
     </div>
