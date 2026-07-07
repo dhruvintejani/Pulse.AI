@@ -1,4 +1,7 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
+
+const lightBeamIndexes = [0, 1, 2];
 
 const MeshBackground = () => {
   return (
@@ -55,7 +58,7 @@ const MeshBackground = () => {
 
       {/* Light beams */}
       <div className="absolute inset-0 overflow-hidden opacity-30">
-        {[...Array(3)].map((_, i) => (
+        {lightBeamIndexes.map((_, i) => (
           <motion.div
             key={i}
             className="absolute"
@@ -88,4 +91,4 @@ const MeshBackground = () => {
   );
 };
 
-export default MeshBackground;
+export default memo(MeshBackground);
