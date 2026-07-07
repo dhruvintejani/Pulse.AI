@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import type { ResolvedThemeMode, ThemeContextValue, ThemeMode } from '@/types/theme';
 
 const THEME_STORAGE_KEY = 'pulse-theme';
@@ -50,7 +50,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const nextResolvedTheme = resolveTheme(theme);
     setResolvedTheme(nextResolvedTheme);
     applyThemeToDocument(theme, nextResolvedTheme);
