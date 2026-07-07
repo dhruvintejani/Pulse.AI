@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { Copy, Check, Code2 } from 'lucide-react';
 
 interface CodeBlockProps {
@@ -8,12 +8,13 @@ interface CodeBlockProps {
 
 const CodeBlock = ({ code, language = 'text' }: CodeBlockProps) => {
   const [copied, setCopied] = useState(false);
+  const codeLines = useMemo(() => code.split('\n'), [code]);
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(code);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+    window.setTimeout(() => setCopied(false), 2000);
+  }, [code]);
 
   return (
     <div className="code-block overflow-hidden shadow-card my-2">
@@ -32,7 +33,7 @@ const CodeBlock = ({ code, language = 'text' }: CodeBlockProps) => {
       </div>
       <pre className="px-4 py-4 overflow-x-auto no-scrollbar">
         <code className="text-sm font-mono text-[#E9A24C]/80 leading-relaxed">
-          {code.split('\n').map((line, i) => (
+          {codeLines.map((line, i) => (
             <div key={`${line}-${i}`} className="flex">
               <span className="text-white/20 select-none w-7 shrink-0 text-right mr-4 text-xs">{i + 1}</span>
               <span className="text-green-300/80">{line || ' '}</span>
@@ -44,4 +45,4 @@ const CodeBlock = ({ code, language = 'text' }: CodeBlockProps) => {
   );
 };
 
-export default CodeBlock;
+export default memo(CodeBlock);
