@@ -1,7 +1,8 @@
-import { memo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
+import type { ImgHTMLAttributes, SyntheticEvent } from 'react';
 import { cn } from '@/lib/utils';
 
-interface OptimizedImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'loading' | 'decoding'> {
+interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'loading' | 'decoding'> {
   eager?: boolean;
   fallbackClassName?: string;
 }
@@ -17,6 +18,11 @@ const OptimizedImage = ({
 }: OptimizedImageProps) => {
   const [loaded, setLoaded] = useState(false);
 
+  const handleLoad = useCallback((event: SyntheticEvent<HTMLImageElement>) => {
+    setLoaded(true);
+    onLoad?.(event);
+  }, [onLoad]);
+
   return (
     <img
       {...props}
@@ -25,10 +31,7 @@ const OptimizedImage = ({
       decoding="async"
       fetchPriority={eager ? 'high' : 'auto'}
       sizes={sizes}
-      onLoad={(event) => {
-        setLoaded(true);
-        onLoad?.(event);
-      }}
+      onLoad={handleLoad}
       className={cn(
         'transition-opacity duration-300',
         loaded ? 'opacity-100' : 'opacity-0',
