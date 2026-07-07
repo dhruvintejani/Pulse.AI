@@ -20,7 +20,7 @@ import {
 import { DASHBOARD_PATHS } from '@/constants/routes';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useNotifications } from '@/hooks/useNotifications';
-import { useRecentChats } from '@/hooks/useChatHistory';
+import { useConversations, useRecentChats } from '@/hooks/useChatHistory';
 import { useSidebar } from '@/hooks/useSidebar';
 import { cn } from '@/lib/utils';
 import Avatar from '@/components/ui/Avatar';
@@ -41,6 +41,7 @@ const DashboardSidebar = () => {
   const { currentUser } = useCurrentUser();
   const { unreadCount } = useNotifications();
   const { recentChats } = useRecentChats();
+  const { createConversation, setActiveConversation } = useConversations();
 
   const secondaryNav = [
     { id: 'notifications', label: 'Notifications', icon: Bell, path: DASHBOARD_PATHS.NOTIFICATIONS, badge: unreadCount ? String(unreadCount) : '' },
@@ -51,6 +52,14 @@ const DashboardSidebar = () => {
 
   const isActive = (path: string) => location.pathname === path;
   const displayName = currentUser?.fullName || 'Alex Morgan';
+
+  const handleNewConversation = () => {
+    void createConversation().then(() => navigate(DASHBOARD_PATHS.CHAT));
+  };
+
+  const handleRecentChatClick = (chatId: string) => {
+    void setActiveConversation(chatId).then(() => navigate(DASHBOARD_PATHS.CHAT));
+  };
 
   return (
     <motion.aside
@@ -83,7 +92,7 @@ const DashboardSidebar = () => {
       {!collapsed && (
         <div className="px-3 pt-4 pb-2">
           <button
-            onClick={() => navigate(DASHBOARD_PATHS.CHAT)}
+            onClick={handleNewConversation}
             className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#E9A24C] to-[#D4853A] text-white text-sm font-medium hover:shadow-premium transition-all duration-200 hover:-translate-y-0.5"
           >
             <Plus size={15} />
@@ -135,7 +144,7 @@ const DashboardSidebar = () => {
               {recentChats.map((chat) => (
                 <motion.button
                   key={chat.id}
-                  onClick={() => navigate(DASHBOARD_PATHS.CHAT)}
+                  onClick={() => handleRecentChatClick(chat.id)}
                   whileHover={{ x: 2 }}
                   className="sidebar-item w-full flex items-center gap-2.5 px-3 py-2 text-left"
                 >
