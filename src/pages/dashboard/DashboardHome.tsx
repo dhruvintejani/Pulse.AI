@@ -153,7 +153,9 @@ const DashboardHome = () => {
             <motion.button type="button" whileHover={{ scale: 1.01 }} className="w-full bg-gradient-to-br from-[#E9A24C] to-[#D4853A] rounded-2xl p-5 text-white cursor-pointer text-left focus-ring" onClick={() => navigate('/dashboard/billing')}>
               <div className="flex items-center gap-2 mb-2"><Star size={15} className="text-white/80" aria-hidden="true" /><span className="text-xs font-semibold uppercase tracking-wider text-white/80">Upgrade</span></div>
               <p className="text-sm font-bold mb-3">Unlock unlimited AI access</p>
-              <Button variant="secondary" size="sm" className="w-full">View Enterprise plans <ArrowRight size={13} className="ml-1" aria-hidden="true" /></Button>
+              <span className="inline-flex items-center justify-center select-none cursor-pointer btn-secondary rounded-xl px-3 py-1.5 text-xs font-medium gap-1.5 w-full">
+                View Enterprise plans <ArrowRight size={13} className="ml-1" aria-hidden="true" />
+              </span>
             </motion.button>
           </FadeIn>
         </div>
