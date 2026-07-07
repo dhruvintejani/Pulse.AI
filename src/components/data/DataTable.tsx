@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
+import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronsUpDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Skeleton from '@/components/ui/Skeleton';
@@ -31,7 +31,7 @@ type SortDirection = 'asc' | 'desc';
 
 const normalizeValue = (value: string | number | boolean | null | undefined) => String(value ?? '').toLowerCase();
 
-const DataTable = <T,>({
+const DataTableComponent = <T,>({
   data,
   columns,
   getRowId,
@@ -47,13 +47,15 @@ const DataTable = <T,>({
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
+  const deferredSearch = useDeferredValue(search);
 
   const searchableColumns = useMemo(() => columns.filter((column) => column.filterable !== false), [columns]);
   const filterColumns = useMemo(() => columns.filter((column) => column.filterOptions?.length), [columns]);
+  const skeletonRows = useMemo(() => Array.from({ length: pageSize }), [pageSize]);
   const totalColumns = columns.length;
 
   const filteredData = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedSearch = deferredSearch.trim().toLowerCase();
 
     return data.filter((row) => {
       const matchesSearch = !normalizedSearch || searchableColumns.some((column) => (
@@ -69,7 +71,7 @@ const DataTable = <T,>({
 
       return matchesSearch && matchesFilters;
     });
-  }, [columns, data, filters, search, searchableColumns]);
+  }, [columns, data, deferredSearch, filters, searchableColumns]);
 
   const sortedData = useMemo(() => {
     const column = columns.find((item) => item.id === sortBy);
@@ -86,11 +88,19 @@ const DataTable = <T,>({
     });
   }, [columns, filteredData, sortBy, sortDirection]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedData.length / pageSize));
-  const safePage = Math.min(page, totalPages);
-  const paginatedData = sortedData.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(sortedData.length / pageSize)), [pageSize, sortedData.length]);
+  const safePage = useMemo(() => Math.min(page, totalPages), [page, totalPages]);
+  const paginatedData = useMemo(
+    () => sortedData.slice((safePage - 1) * pageSize, safePage * pageSize),
+    [pageSize, safePage, sortedData]
+  );
 
-  const toggleSort = (column: DataTableColumn<T>) => {
+  const handleSearchChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+    setPage(1);
+  }, []);
+
+  const toggleSort = useCallback((column: DataTableColumn<T>) => {
     if (!column.sortable) return;
     if (sortBy === column.id) {
       setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
@@ -99,12 +109,20 @@ const DataTable = <T,>({
       setSortDirection('asc');
     }
     setPage(1);
-  };
+  }, [sortBy]);
 
-  const updateFilter = (columnId: string, value: string) => {
+  const updateFilter = useCallback((columnId: string, value: string) => {
     setFilters((current) => ({ ...current, [columnId]: value }));
     setPage(1);
-  };
+  }, []);
+
+  const goToPreviousPage = useCallback(() => {
+    setPage((current) => Math.max(1, current - 1));
+  }, []);
+
+  const goToNextPage = useCallback(() => {
+    setPage((current) => Math.min(totalPages, current + 1));
+  }, [totalPages]);
 
   return (
     <div className={cn('bg-[#FFFDF8] rounded-2xl border border-[rgba(0,0,0,0.05)] shadow-card overflow-hidden', className)}>
@@ -113,7 +131,7 @@ const DataTable = <T,>({
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#CCC]" />
           <input
             value={search}
-            onChange={(event) => { setSearch(event.target.value); setPage(1); }}
+            onChange={handleSearchChange}
             placeholder={searchPlaceholder}
             className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-[#1F1F1F] placeholder:text-[#CCC] outline-none focus:border-[rgba(233,162,76,0.4)]"
           />
@@ -154,7 +172,7 @@ const DataTable = <T,>({
             </tr>
           </thead>
           <tbody>
-            {loading && Array.from({ length: pageSize }).map((_, rowIndex) => (
+            {loading && skeletonRows.map((_, rowIndex) => (
               <tr key={rowIndex} className="border-b border-[rgba(0,0,0,0.04)] last:border-0">
                 {columns.map((column) => (
                   <td key={column.id} className="px-4 py-4"><Skeleton className="h-4 w-28" /></td>
@@ -190,7 +208,7 @@ const DataTable = <T,>({
         </p>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            onClick={goToPreviousPage}
             disabled={safePage === 1}
             className="p-1.5 rounded-lg border border-[rgba(0,0,0,0.06)] text-[#999] disabled:opacity-40 hover:text-[#E9A24C] transition-colors"
           >
@@ -198,7 +216,7 @@ const DataTable = <T,>({
           </button>
           <span className="text-xs font-semibold text-[#666]">{safePage} / {totalPages}</span>
           <button
-            onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+            onClick={goToNextPage}
             disabled={safePage === totalPages}
             className="p-1.5 rounded-lg border border-[rgba(0,0,0,0.06)] text-[#999] disabled:opacity-40 hover:text-[#E9A24C] transition-colors"
           >
@@ -209,5 +227,7 @@ const DataTable = <T,>({
     </div>
   );
 };
+
+const DataTable = memo(DataTableComponent) as typeof DataTableComponent;
 
 export default DataTable;
