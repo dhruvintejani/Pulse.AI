@@ -1,83 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
+import type { KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Sparkles, Copy, RefreshCw, ThumbsUp, ThumbsDown,
   Paperclip, Mic, Code2, MoreHorizontal, ChevronDown,
   Hash, Plus, Search, Zap, Brain
 } from 'lucide-react';
+import { CODE_EXAMPLE, MODELS, SUGGESTIONS } from '@/constants/chat';
+import { useChatHistory, useChatMessages, useRecentChats } from '@/hooks/useChatHistory';
 import { cn } from '@/lib/utils';
-
-
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  isCode?: boolean;
-  codeLanguage?: string;
-}
-
-const INITIAL_MESSAGES: Message[] = [
-  {
-    id: '1',
-    role: 'assistant',
-    content: "Hello! I'm Pulse AI, your intelligent workspace companion. I can help you with research, writing, coding, analysis, and much more. What would you like to explore today?",
-    timestamp: new Date(),
-  },
-  {
-    id: '2',
-    role: 'user',
-    content: "Can you analyze the Q3 market research data and identify the top 3 growth opportunities?",
-    timestamp: new Date(),
-  },
-  {
-    id: '3',
-    role: 'assistant',
-    content: `Based on the Q3 market research data, here are the **top 3 growth opportunities** I've identified:
-
-**1. 🌏 APAC Market Expansion**
-The Asia-Pacific region shows a 47% YoY growth rate, significantly outpacing other markets. Mobile-first consumers in Southeast Asia represent an untapped segment worth approximately $2.3B.
-
-**2. 📱 Mobile Experience Optimization**  
-With 67% of traffic from mobile devices but only 34% of conversions, there's a clear gap. Optimizing the mobile funnel could yield a 40-60% conversion uplift based on industry benchmarks.
-
-**3. 🤖 AI-Powered Personalization**
-Competitors leveraging AI personalization are seeing 2.8x higher customer LTV. Implementing recommendation engines for your top 20% of users could drive $4.2M in incremental revenue.
-
-Would you like me to dive deeper into any of these opportunities?`,
-    timestamp: new Date(),
-  },
-];
-
-const CODE_EXAMPLE = `// React component for AI Chat
-const ChatInterface = () => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-
-  const sendMessage = async () => {
-    const response = await pulseAI.chat({
-      model: 'gpt-4o',
-      messages: [...messages, { role: 'user', content: input }]
-    });
-    setMessages(prev => [...prev, response]);
-  };
-
-  return (
-    <div className="chat-container">
-      {messages.map(msg => <Message key={msg.id} {...msg} />)}
-      <InputBox onSend={sendMessage} />
-    </div>
-  );
-};`;
-
-const MODELS = ['GPT-4o', 'Claude 3.5', 'Gemini Pro', 'Llama 3'];
-
-const SUGGESTIONS = [
-  '📊 Analyze my uploaded documents',
-  '✍️ Write a compelling product brief',
-  '🔬 Research latest AI trends',
-  '💻 Debug this React component',
-];
+import type { ChatMessage } from '@/types/chat';
 
 const TypingIndicator = () => (
   <motion.div
@@ -99,7 +31,7 @@ const TypingIndicator = () => (
   </motion.div>
 );
 
-const MessageBubble = ({ message }: { message: Message }) => {
+const MessageBubble = ({ message }: { message: ChatMessage }) => {
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState<null | boolean>(null);
 
@@ -221,7 +153,9 @@ const CodeBlock = () => (
 );
 
 const ChatPage = () => {
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const { messages, addMessage, isLoading: isMessagesLoading, isError: isMessagesError } = useChatMessages();
+  const { todayChats, yesterdayChats, isLoading: isChatHistoryLoading, isError: isChatHistoryError } = useChatHistory();
+  const { addRecentChat } = useRecentChats();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [selectedModel, setSelectedModel] = useState('GPT-4o');
@@ -234,36 +168,46 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    
-    const userMsg: Message = {
-      id: Date.now().toString(),
+  const handleSend = async () => {
+    const content = input.trim();
+    if (!content) return;
+
+    const id = Date.now().toString();
+    const userMsg: ChatMessage = {
+      id,
       role: 'user',
-      content: input,
+      content,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, userMsg]);
+
+    await addMessage(userMsg);
+    await addRecentChat({
+      id,
+      title: content.length > 32 ? `${content.slice(0, 32)}...` : content,
+      time: 'now',
+      period: 'today',
+    });
+
     setInput('');
     setIsTyping(true);
     setShowCode(false);
 
     setTimeout(() => {
       setIsTyping(false);
-      const aiMsg: Message = {
+      const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: "That's a great question! I've analyzed your request thoroughly. Based on the context and data available, here's my comprehensive response: The key insights suggest that focusing on user experience improvements, combined with data-driven decision making, will yield the best results. I recommend starting with a phased approach that prioritizes quick wins while building toward longer-term strategic goals.",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, aiMsg]);
+      void addMessage(aiMsg);
     }, 2000);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      void handleSend();
     }
   };
 
@@ -289,25 +233,31 @@ const ChatPage = () => {
         </div>
         <div className="flex-1 overflow-y-auto no-scrollbar px-2 pb-4">
           <p className="text-[10px] font-semibold text-[#CCC] uppercase tracking-widest px-2 mb-2">Today</p>
-          {['Market Research Analysis', 'React Architecture', 'Content Strategy', 'Product Roadmap'].map((chat, i) => (
+          {isChatHistoryLoading && (
+            <p className="text-xs text-[#999] px-3 py-2">Loading chats...</p>
+          )}
+          {isChatHistoryError && (
+            <p className="text-xs text-red-400 px-3 py-2">Unable to load chats.</p>
+          )}
+          {!isChatHistoryLoading && !isChatHistoryError && todayChats.map((chat, i) => (
             <motion.button
-              key={i}
+              key={chat.id}
               whileHover={{ x: 2 }}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left mb-0.5 ${i === 0 ? 'bg-[rgba(233,162,76,0.1)] text-[#E9A24C]' : 'text-[#666] hover:bg-[rgba(0,0,0,0.03)]'}`}
             >
               <Hash size={12} className="shrink-0 opacity-60" />
-              <span className="text-xs font-medium truncate">{chat}</span>
+              <span className="text-xs font-medium truncate">{chat.title}</span>
             </motion.button>
           ))}
           <p className="text-[10px] font-semibold text-[#CCC] uppercase tracking-widest px-2 mb-2 mt-4">Yesterday</p>
-          {['SEO Optimization Plan', 'Brand Voice Guide', 'Investor Pitch Deck'].map((chat, i) => (
+          {!isChatHistoryLoading && !isChatHistoryError && yesterdayChats.map((chat) => (
             <motion.button
-              key={i}
+              key={chat.id}
               whileHover={{ x: 2 }}
               className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left mb-0.5 text-[#666] hover:bg-[rgba(0,0,0,0.03)]"
             >
               <Hash size={12} className="shrink-0 opacity-60" />
-              <span className="text-xs font-medium truncate">{chat}</span>
+              <span className="text-xs font-medium truncate">{chat.title}</span>
             </motion.button>
           ))}
         </div>
@@ -323,7 +273,7 @@ const ChatPage = () => {
             </div>
             <div>
               <p className="text-sm font-bold text-[#1F1F1F]">Market Research Analysis</p>
-              <p className="text-[11px] text-[#999]">24 messages · 2 minutes ago</p>
+              <p className="text-[11px] text-[#999]">{messages.length} messages · 2 minutes ago</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -369,7 +319,11 @@ const ChatPage = () => {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-6 space-y-5">
-          {messages.map((message) => (
+          {isMessagesLoading && <TypingIndicator />}
+          {isMessagesError && (
+            <div className="chat-bubble-ai px-4 py-3 shadow-card text-sm text-red-400">Unable to load chat messages.</div>
+          )}
+          {!isMessagesLoading && !isMessagesError && messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
           ))}
           {showCode && <CodeBlock />}
@@ -435,7 +389,7 @@ const ChatPage = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.93 }}
-                onClick={handleSend}
+                onClick={() => void handleSend()}
                 disabled={!input.trim()}
                 className={cn(
                   'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200',
