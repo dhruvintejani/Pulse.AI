@@ -14,6 +14,7 @@ const MarkdownRenderer = ({ content, className, tone = 'assistant' }: MarkdownRe
   const strongText = tone === 'user' ? 'text-white' : 'text-[#1F1F1F]';
   const accentText = tone === 'user' ? 'text-white' : 'text-[#E9A24C]';
   const inlineCode = tone === 'user' ? 'bg-white/15 text-white' : 'bg-black/5 text-[#D4853A]';
+  const markerText = tone === 'user' ? 'marker:text-white' : 'marker:text-[#E9A24C]';
 
   return (
     <div className={className}>
@@ -42,12 +43,12 @@ const MarkdownRenderer = ({ content, className, tone = 'assistant' }: MarkdownRe
             </a>
           ),
           ul: ({ children }) => (
-            <ul className="list-disc pl-5 my-2 space-y-1 marker:text-[#E9A24C]">
+            <ul className={cn('list-disc pl-5 my-2 space-y-1', markerText)}>
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal pl-5 my-2 space-y-1 marker:text-[#E9A24C]">
+            <ol className={cn('list-decimal pl-5 my-2 space-y-1', markerText)}>
               {children}
             </ol>
           ),
@@ -62,7 +63,7 @@ const MarkdownRenderer = ({ content, className, tone = 'assistant' }: MarkdownRe
             </blockquote>
           ),
           pre: ({ children }) => <>{children}</>,
-          code: ({ className: codeClassName, children, ...props }) => {
+          code: ({ className: codeClassName, children }) => {
             const language = /language-([\w-]+)/.exec(codeClassName ?? '')?.[1];
             const code = String(children).replace(/\n$/, '');
 
@@ -71,10 +72,7 @@ const MarkdownRenderer = ({ content, className, tone = 'assistant' }: MarkdownRe
             }
 
             return (
-              <code
-                {...props}
-                className={cn('px-1.5 py-0.5 rounded-md font-mono text-[0.92em]', inlineCode)}
-              >
+              <code className={cn('px-1.5 py-0.5 rounded-md font-mono text-[0.92em]', inlineCode)}>
                 {children}
               </code>
             );
