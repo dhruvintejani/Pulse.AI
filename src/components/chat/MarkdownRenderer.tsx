@@ -1,27 +1,37 @@
 import CodeBlock from './CodeBlock';
+import { cn } from '@/lib/utils';
 
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+  tone?: 'user' | 'assistant';
 }
 
-const renderInlineMarkdown = (text: string) => {
+const renderInlineMarkdown = (text: string, tone: 'user' | 'assistant') => {
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
 
   return parts.map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={index} className="font-semibold text-[#1F1F1F]">{part.slice(2, -2)}</strong>;
+      return (
+        <strong key={index} className={cn('font-semibold', tone === 'user' ? 'text-white' : 'text-[#1F1F1F]')}>
+          {part.slice(2, -2)}
+        </strong>
+      );
     }
 
     if (part.startsWith('`') && part.endsWith('`')) {
-      return <code key={index} className="px-1.5 py-0.5 rounded-md bg-black/5 text-[#D4853A] font-mono text-[0.92em]">{part.slice(1, -1)}</code>;
+      return (
+        <code key={index} className={cn('px-1.5 py-0.5 rounded-md font-mono text-[0.92em]', tone === 'user' ? 'bg-white/15 text-white' : 'bg-black/5 text-[#D4853A]')}>
+          {part.slice(1, -1)}
+        </code>
+      );
     }
 
     return <span key={index}>{part}</span>;
   });
 };
 
-const MarkdownRenderer = ({ content, className }: MarkdownRendererProps) => {
+const MarkdownRenderer = ({ content, className, tone = 'assistant' }: MarkdownRendererProps) => {
   const blocks = content.split(/```([\w-]*)\n([\s\S]*?)```/g);
 
   return (
@@ -41,15 +51,15 @@ const MarkdownRenderer = ({ content, className }: MarkdownRendererProps) => {
           if (/^[-*]\s+/.test(trimmedLine)) {
             return (
               <p key={`${index}-${lineIndex}`} className="text-sm leading-relaxed whitespace-pre-wrap">
-                <span className="text-[#E9A24C] mr-2">•</span>
-                {renderInlineMarkdown(trimmedLine.replace(/^[-*]\s+/, ''))}
+                <span className={cn('mr-2', tone === 'user' ? 'text-white' : 'text-[#E9A24C]')}>•</span>
+                {renderInlineMarkdown(trimmedLine.replace(/^[-*]\s+/, ''), tone)}
               </p>
             );
           }
 
           return (
             <p key={`${index}-${lineIndex}`} className="text-sm leading-relaxed whitespace-pre-wrap">
-              {renderInlineMarkdown(line)}
+              {renderInlineMarkdown(line, tone)}
             </p>
           );
         });
