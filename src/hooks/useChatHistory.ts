@@ -1,10 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { queryKeys } from '@/constants/queryKeys';
 import { chatService } from '@/services/chat/chatService';
 import type { ConversationMessagePayload, RenameConversationPayload } from '@/types/chat';
 
-const invalidateChatQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
+const invalidateChatQueries = (queryClient: QueryClient) => {
   void queryClient.invalidateQueries({ queryKey: queryKeys.conversations });
   void queryClient.invalidateQueries({ queryKey: queryKeys.activeConversation });
   void queryClient.invalidateQueries({ queryKey: queryKeys.chatMessages });
