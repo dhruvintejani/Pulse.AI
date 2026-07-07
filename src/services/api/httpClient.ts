@@ -5,8 +5,9 @@ import { getApiAuthToken } from './authToken';
 import { normalizeApiError } from './errors';
 import type { ApiRequestConfig } from './types';
 
-const applyAuthHeader = async (config: InternalAxiosRequestConfig & ApiRequestConfig) => {
-  if (config.skipAuth) return config;
+const applyAuthHeader = async (config: InternalAxiosRequestConfig) => {
+  const apiConfig = config as InternalAxiosRequestConfig & Pick<ApiRequestConfig, 'skipAuth'>;
+  if (apiConfig.skipAuth) return config;
 
   const token = await getApiAuthToken();
   if (!token) return config;
