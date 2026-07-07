@@ -1,12 +1,88 @@
+import { useSignIn } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, Lock, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import AuthAlert from '@/components/auth/AuthAlert';
 import AuroraBackground from '@/components/backgrounds/AuroraBackground';
+import { getClerkErrorMessage, getClerkFieldErrors } from '@/lib/clerkErrors';
+
+type OAuthStrategy = 'oauth_google' | 'oauth_github';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { isLoaded, signIn, setActive } = useSignIn();
+  const [email, setEmail] = useState('demo@pulseai.com');
+  const [password, setPassword] = useState('password123');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [authError, setAuthError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<OAuthStrategy | null>(null);
+
+  const clearFieldError = (field: string) => {
+    setFieldErrors((current) => {
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const validate = () => {
+    const errors: Record<string, string> = {};
+
+    if (!email.trim()) errors.email = 'Email address is required.';
+    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Enter a valid email address.';
+    if (!password) errors.password = 'Password is required.';
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAuthError('');
+
+    if (!validate() || !isLoaded || !signIn) return;
+
+    try {
+      setIsSubmitting(true);
+      const result = await signIn.create({ identifier: email.trim(), password });
+
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        navigate('/dashboard', { replace: true });
+        return;
+      }
+
+      setAuthError('Please complete the required authentication step to continue.');
+    } catch (error) {
+      setFieldErrors(getClerkFieldErrors(error));
+      setAuthError(getClerkErrorMessage(error, 'Unable to sign in. Please check your details and try again.'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleOAuth = async (strategy: OAuthStrategy) => {
+    if (!isLoaded || !signIn) return;
+
+    try {
+      setAuthError('');
+      setOauthLoading(strategy);
+      await signIn.authenticateWithRedirect({
+        strategy,
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/dashboard',
+      });
+    } catch (error) {
+      setAuthError(getClerkErrorMessage(error, 'Unable to continue with this provider. Please try again.'));
+      setOauthLoading(null);
+    }
+  };
+
+  const busy = isSubmitting || oauthLoading !== null;
 
   return (
     <div className="relative min-h-screen flex overflow-hidden">
@@ -112,19 +188,33 @@ const LoginPage = () => {
           {/* Social logins */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             <motion.button
+              type="button"
+              disabled={busy}
+              onClick={() => handleOAuth('oauth_google')}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white hover:border-[rgba(233,162,76,0.3)] transition-all text-sm font-medium text-[#444] shadow-sm"
             >
-              <span className="w-4 h-4 text-blue-500 font-bold text-xs">G</span>
+              {oauthLoading === 'oauth_google' ? (
+                <span className="w-4 h-4 rounded-full border-2 border-[#E9A24C]/30 border-t-[#E9A24C] animate-spin" />
+              ) : (
+                <span className="w-4 h-4 text-blue-500 font-bold text-xs">G</span>
+              )}
               Google
             </motion.button>
             <motion.button
+              type="button"
+              disabled={busy}
+              onClick={() => handleOAuth('oauth_github')}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white hover:border-[rgba(233,162,76,0.3)] transition-all text-sm font-medium text-[#444] shadow-sm"
             >
-              <span className="w-4 h-4 text-[#1F1F1F] font-bold text-xs">⌘</span>
+              {oauthLoading === 'oauth_github' ? (
+                <span className="w-4 h-4 rounded-full border-2 border-[#E9A24C]/30 border-t-[#E9A24C] animate-spin" />
+              ) : (
+                <span className="w-4 h-4 text-[#1F1F1F] font-bold text-xs">⌘</span>
+              )}
               GitHub
             </motion.button>
           </div>
@@ -136,14 +226,23 @@ const LoginPage = () => {
             <div className="flex-1 h-px bg-[rgba(0,0,0,0.07)]" />
           </div>
 
+          <div className="mb-4">
+            <AuthAlert message={authError} />
+          </div>
+
           {/* Form */}
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); navigate('/dashboard'); }}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <Input
               label="Email address"
               type="email"
               placeholder="you@company.com"
               icon={<Mail size={16} />}
-              defaultValue="demo@pulseai.com"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                clearFieldError('email');
+              }}
+              error={fieldErrors.email}
             />
             <Input
               label="Password"
@@ -151,7 +250,12 @@ const LoginPage = () => {
               placeholder="Enter your password"
               icon={<Lock size={16} />}
               showPasswordToggle
-              defaultValue="password123"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                clearFieldError('password');
+              }}
+              error={fieldErrors.password}
             />
 
             {/* Forgot password */}
@@ -171,6 +275,7 @@ const LoginPage = () => {
               size="lg"
               className="w-full mt-2"
               iconRight={<ArrowRight size={16} />}
+              loading={isSubmitting}
             >
               Sign in to workspace
             </Button>
