@@ -9,6 +9,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: ReactNode;
   iconRight?: ReactNode;
   loading?: boolean;
+  loadingLabel?: string;
   children?: ReactNode;
 }
 
@@ -33,34 +34,42 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   icon,
   iconRight,
   loading,
+  loadingLabel = 'Loading',
   children,
   className,
   disabled,
   ...props
-}, ref) => (
-  <motion.button
-    ref={ref}
-    whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
-    whileTap={{ scale: disabled || loading ? 1 : 0.97 }}
-    className={cn(
-      'inline-flex items-center justify-center select-none cursor-pointer',
-      variants[variant],
-      sizes[size],
-      (disabled || loading) && 'opacity-50 cursor-not-allowed',
-      className
-    )}
-    disabled={disabled || loading}
-    {...(props as ComponentProps<typeof motion.button>)}
-  >
-    {loading ? (
-      <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-    ) : icon ? (
-      <span className="shrink-0">{icon}</span>
-    ) : null}
-    {children && <span>{children}</span>}
-    {iconRight && !loading && <span className="shrink-0 ml-auto">{iconRight}</span>}
-  </motion.button>
-));
+}, ref) => {
+  const isDisabled = disabled || loading;
+
+  return (
+    <motion.button
+      ref={ref}
+      whileHover={{ scale: isDisabled ? 1 : 1.02 }}
+      whileTap={{ scale: isDisabled ? 1 : 0.97 }}
+      className={cn(
+        'inline-flex items-center justify-center select-none cursor-pointer focus-ring',
+        variants[variant],
+        sizes[size],
+        isDisabled && 'opacity-50 cursor-not-allowed',
+        className
+      )}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
+      aria-disabled={isDisabled || undefined}
+      {...(props as ComponentProps<typeof motion.button>)}
+    >
+      {loading ? (
+        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+      ) : icon ? (
+        <span className="shrink-0" aria-hidden="true">{icon}</span>
+      ) : null}
+      {children && <span>{children}</span>}
+      {loading && <span className="sr-only">{loadingLabel}</span>}
+      {iconRight && !loading && <span className="shrink-0 ml-auto" aria-hidden="true">{iconRight}</span>}
+    </motion.button>
+  );
+});
 
 Button.displayName = 'Button';
 
