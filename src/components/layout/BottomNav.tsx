@@ -17,6 +17,8 @@ const navItems = [
   { id: 'settings', label: 'Settings', icon: Settings, path: '/dashboard/settings' },
 ];
 
+const authRoutes = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify', '/sso-callback'];
+
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ const BottomNav = () => {
   };
 
   // Don't show on auth pages
-  if (['/login', '/signup', '/forgot-password', '/reset-password', '/verify'].some(p => location.pathname === p)) {
+  if (authRoutes.some(p => location.pathname === p)) {
     return null;
   }
 
