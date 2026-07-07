@@ -6,14 +6,14 @@ import type { ChatMessage, RecentChat } from '@/types/chat';
 export const useChatMessages = () => {
   const queryClient = useQueryClient();
   const messagesQuery = useQuery({
-    queryKey: queryKeys.chatHistory,
+    queryKey: queryKeys.chatMessages,
     queryFn: chatService.getMessages,
   });
 
   const addMessageMutation = useMutation({
     mutationFn: chatService.addMessage,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.chatHistory });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.chatMessages });
     },
   });
 
