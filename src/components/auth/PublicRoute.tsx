@@ -1,4 +1,5 @@
 import { useAuth } from '@clerk/clerk-react';
+import { memo } from 'react';
 import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import AuthLoadingScreen from './AuthLoadingScreen';
@@ -19,4 +20,4 @@ const PublicRoute = ({ children }: PublicRouteProps) => {
   return children;
 };
 
-export default PublicRoute;
+export default memo(PublicRoute);
