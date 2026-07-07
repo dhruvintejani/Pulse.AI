@@ -18,6 +18,10 @@ import {
   Cpu,
 } from 'lucide-react';
 import { DASHBOARD_PATHS } from '@/constants/routes';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useRecentChats } from '@/hooks/useChatHistory';
+import { useSidebar } from '@/hooks/useSidebar';
 import { cn } from '@/lib/utils';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
@@ -30,28 +34,23 @@ const mainNav = [
   { id: 'models', label: 'AI Models', icon: Cpu, path: DASHBOARD_PATHS.MODELS, badge: 'New' },
 ];
 
-const secondaryNav = [
-  { id: 'notifications', label: 'Notifications', icon: Bell, path: DASHBOARD_PATHS.NOTIFICATIONS, badge: '3' },
-  { id: 'billing', label: 'Billing', icon: CreditCard, path: DASHBOARD_PATHS.BILLING, badge: '' },
-  { id: 'team', label: 'Team', icon: Users, path: DASHBOARD_PATHS.TEAM, badge: '' },
-  { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS, badge: '' },
-];
-
-const recentChats = [
-  { id: '1', title: 'Market Research Analysis', time: '2m ago' },
-  { id: '2', title: 'React Architecture Review', time: '1h ago' },
-  { id: '3', title: 'Content Strategy Draft', time: '3h ago' },
-];
-
-interface SidebarProps {
-  collapsed?: boolean;
-}
-
-const DashboardSidebar = ({ collapsed = false }: SidebarProps) => {
+const DashboardSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { collapsed } = useSidebar();
+  const { currentUser } = useCurrentUser();
+  const { unreadCount } = useNotifications();
+  const { recentChats } = useRecentChats();
+
+  const secondaryNav = [
+    { id: 'notifications', label: 'Notifications', icon: Bell, path: DASHBOARD_PATHS.NOTIFICATIONS, badge: unreadCount ? String(unreadCount) : '' },
+    { id: 'billing', label: 'Billing', icon: CreditCard, path: DASHBOARD_PATHS.BILLING, badge: '' },
+    { id: 'team', label: 'Team', icon: Users, path: DASHBOARD_PATHS.TEAM, badge: '' },
+    { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS, badge: '' },
+  ];
 
   const isActive = (path: string) => location.pathname === path;
+  const displayName = currentUser?.fullName || 'Alex Morgan';
 
   return (
     <motion.aside
@@ -196,10 +195,10 @@ const DashboardSidebar = ({ collapsed = false }: SidebarProps) => {
             'w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-[rgba(233,162,76,0.06)] transition-all duration-200',
           )}
         >
-          <Avatar name="Alex Morgan" size="sm" online={true} />
+          <Avatar src={currentUser?.imageUrl} name={displayName} size="sm" online={true} />
           {!collapsed && (
             <div className="flex-1 text-left min-w-0">
-              <p className="text-sm font-semibold text-[#1F1F1F] truncate">Alex Morgan</p>
+              <p className="text-sm font-semibold text-[#1F1F1F] truncate">{displayName}</p>
               <p className="text-[11px] text-[#999] truncate">Pro Plan</p>
             </div>
           )}
