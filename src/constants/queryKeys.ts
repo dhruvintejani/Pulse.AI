@@ -11,5 +11,6 @@ export const queryKeys = {
   workspace: ['workspace'] as const,
   analytics: ['analytics'] as const,
   profile: ['profile'] as const,
+  settings: ['settings'] as const,
   billing: ['billing'] as const,
 } as const;
