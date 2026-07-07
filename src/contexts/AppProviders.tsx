@@ -1,5 +1,6 @@
 import { ClerkProvider } from '@clerk/clerk-react';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { MotionConfig } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { AUTH_REDIRECTS } from '@/constants/auth';
 import { CurrentUserProvider } from '@/contexts/CurrentUserContext';
@@ -23,9 +24,11 @@ const AppProviders = ({ children }: AppProvidersProps) => (
     <ApiAuthProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <CurrentUserProvider>
-            <SidebarProvider>{children}</SidebarProvider>
-          </CurrentUserProvider>
+          <MotionConfig reducedMotion="user">
+            <CurrentUserProvider>
+              <SidebarProvider>{children}</SidebarProvider>
+            </CurrentUserProvider>
+          </MotionConfig>
         </ThemeProvider>
       </QueryClientProvider>
     </ApiAuthProvider>
