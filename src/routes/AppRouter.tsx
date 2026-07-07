@@ -1,5 +1,5 @@
 import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, memo, Suspense, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import AuthLoadingScreen from '@/components/auth/AuthLoadingScreen';
@@ -7,8 +7,8 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import PublicRoute from '@/components/auth/PublicRoute';
 import { DASHBOARD_SEGMENTS, ROUTES } from '@/constants/routes';
 import BottomNav from '@/layouts/BottomNav';
-import DashboardLayout from '@/layouts/DashboardLayout';
 
+const DashboardLayout = lazy(() => import('@/layouts/DashboardLayout'));
 const LandingPage = lazy(() => import('@/pages/LandingPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const SignupPage = lazy(() => import('@/pages/auth/SignupPage'));
@@ -26,7 +26,7 @@ const BillingPage = lazy(() => import('@/pages/dashboard/BillingPage'));
 const ModelsPage = lazy(() => import('@/pages/dashboard/ModelsPage'));
 const ProfilePage = lazy(() => import('@/pages/dashboard/ProfilePage'));
 
-const PageTransition = ({ children }: { children: ReactNode }) => (
+const PageTransition = memo(({ children }: { children: ReactNode }) => (
   <motion.div
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
@@ -36,7 +36,9 @@ const PageTransition = ({ children }: { children: ReactNode }) => (
   >
     {children}
   </motion.div>
-);
+));
+
+PageTransition.displayName = 'PageTransition';
 
 const publicPage = (page: ReactNode) => (
   <PublicRoute>
@@ -89,4 +91,4 @@ const AppRouter = () => {
   );
 };
 
-export default AppRouter;
+export default memo(AppRouter);
