@@ -1,4 +1,5 @@
 export type MessageRole = 'user' | 'assistant';
+export type ConversationPeriod = 'today' | 'yesterday';
 
 export interface ChatMessage {
   id: string;
@@ -9,9 +10,25 @@ export interface ChatMessage {
   codeLanguage?: string;
 }
 
-export interface RecentChat {
+export interface ChatConversation {
   id: string;
   title: string;
   time: string;
-  period?: 'today' | 'yesterday';
+  period: ConversationPeriod;
+  messages: ChatMessage[];
+  pinned: boolean;
+  favorite: boolean;
+  updatedAt: Date;
+}
+
+export type RecentChat = Pick<ChatConversation, 'id' | 'title' | 'time' | 'period' | 'pinned' | 'favorite'>;
+
+export interface RenameConversationPayload {
+  conversationId: string;
+  title: string;
+}
+
+export interface ConversationMessagePayload {
+  conversationId: string;
+  message: ChatMessage;
 }
