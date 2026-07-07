@@ -5,6 +5,7 @@ import { AUTH_REDIRECTS } from '@/constants/auth';
 import { CurrentUserProvider } from '@/contexts/CurrentUserContext';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { useApiAuth, ApiAuthProvider } from '@/hooks/useApiAuth';
 import { queryClient } from '@/lib/queryClient';
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -19,14 +20,17 @@ interface AppProvidersProps {
 
 const AppProviders = ({ children }: AppProvidersProps) => (
   <ClerkProvider publishableKey={clerkPublishableKey} afterSignOutUrl={AUTH_REDIRECTS.afterSignOut}>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <CurrentUserProvider>
-          <SidebarProvider>{children}</SidebarProvider>
-        </CurrentUserProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ApiAuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <CurrentUserProvider>
+            <SidebarProvider>{children}</SidebarProvider>
+          </CurrentUserProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ApiAuthProvider>
   </ClerkProvider>
 );
 
 export default AppProviders;
+export { useApiAuth };
