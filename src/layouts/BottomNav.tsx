@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -22,13 +23,22 @@ const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isActive = (path: string) => {
+  const hiddenOnAuthPage = useMemo(
+    () => AUTH_ROUTES.some((path) => location.pathname === path),
+    [location.pathname]
+  );
+
+  const isActive = useCallback((path: string) => {
     if (path === ROUTES.HOME) return location.pathname === ROUTES.HOME;
     return location.pathname.startsWith(path);
-  };
+  }, [location.pathname]);
+
+  const handleNavigate = useCallback((path: string) => {
+    navigate(path);
+  }, [navigate]);
 
   // Don't show on auth pages
-  if (AUTH_ROUTES.some(p => location.pathname === p)) {
+  if (hiddenOnAuthPage) {
     return null;
   }
 
@@ -50,7 +60,7 @@ const BottomNav = () => {
               return (
                 <motion.button
                   key={item.id}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => handleNavigate(item.path)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.93 }}
                   className="relative mx-1"
@@ -76,7 +86,7 @@ const BottomNav = () => {
             return (
               <motion.button
                 key={item.id}
-                onClick={() => navigate(item.path)}
+                onClick={() => handleNavigate(item.path)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.93 }}
                 className={cn(
@@ -114,4 +124,4 @@ const BottomNav = () => {
   );
 };
 
-export default BottomNav;
+export default memo(BottomNav);
