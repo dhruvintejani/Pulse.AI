@@ -1,12 +1,21 @@
+import { memo, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
-import DashboardSidebar from '@/components/layout/DashboardSidebar';
-import MeshBackground from '@/components/backgrounds/MeshBackground';
 import { Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import DashboardSidebar from '@/components/layout/DashboardSidebar';
+import MeshBackground from '@/components/backgrounds/MeshBackground';
 import { useSidebar } from '@/hooks/useSidebar';
 
 const DashboardLayout = () => {
   const { mobileSidebarOpen, openMobileSidebar, closeMobileSidebar } = useSidebar();
+
+  const handleOpenMobileSidebar = useCallback(() => {
+    openMobileSidebar();
+  }, [openMobileSidebar]);
+
+  const handleCloseMobileSidebar = useCallback(() => {
+    closeMobileSidebar();
+  }, [closeMobileSidebar]);
 
   return (
     <div className="relative flex h-screen overflow-hidden bg-[#F8F4EC]">
@@ -25,7 +34,7 @@ const DashboardLayout = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={closeMobileSidebar}
+              onClick={handleCloseMobileSidebar}
               className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
             />
             <motion.div
@@ -46,7 +55,7 @@ const DashboardLayout = () => {
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#FFFDF8]/80 backdrop-blur-lg border-b border-[rgba(0,0,0,0.06)]">
           <button
-            onClick={openMobileSidebar}
+            onClick={handleOpenMobileSidebar}
             className="p-2 rounded-xl hover:bg-[rgba(233,162,76,0.08)] transition-colors"
           >
             <Menu size={20} className="text-[#666]" />
@@ -63,4 +72,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default memo(DashboardLayout);
