@@ -8,24 +8,27 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import AuthAlert from '@/components/auth/AuthAlert';
 import AuroraBackground from '@/components/backgrounds/AuroraBackground';
-import { getClerkErrorMessage, getClerkFieldErrors } from '@/lib/clerkErrors';
+import { ROUTES } from '@/constants/routes';
+import { useAuthFormErrors } from '@/hooks/useAuthFormErrors';
+import type { FieldErrors } from '@/types/auth';
+import { getClerkErrorMessage, getClerkFieldErrors } from '@/utils/clerkErrors';
+import { hasErrors, validateEmail } from '@/utils/validation';
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
   const { isLoaded, signIn } = useSignIn();
   const [email, setEmail] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [authError, setAuthError] = useState('');
+  const { fieldErrors, setFieldErrors, authError, setAuthError, clearErrors } = useAuthFormErrors();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
-    const errors: Record<string, string> = {};
+    const errors: FieldErrors = {};
+    const emailError = validateEmail(email);
 
-    if (!email.trim()) errors.email = 'Email address is required.';
-    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Enter a valid email address.';
+    if (emailError) errors.email = emailError;
 
     setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    return !hasErrors(errors);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -40,7 +43,7 @@ const ForgotPasswordPage = () => {
         strategy: 'reset_password_email_code',
         identifier: email.trim(),
       });
-      navigate('/reset-password', { state: { email: email.trim() } });
+      navigate(ROUTES.RESET_PASSWORD, { state: { email: email.trim() } });
     } catch (error) {
       setFieldErrors(getClerkFieldErrors(error));
       setAuthError(getClerkErrorMessage(error, 'Unable to send reset instructions. Please try again.'));
@@ -91,7 +94,7 @@ const ForgotPasswordPage = () => {
               value={email}
               onChange={(event) => {
                 setEmail(event.target.value);
-                setFieldErrors({});
+                clearErrors();
               }}
               error={fieldErrors.email}
             />
@@ -108,7 +111,7 @@ const ForgotPasswordPage = () => {
           </form>
 
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate(ROUTES.LOGIN)}
             className="flex items-center gap-2 text-sm text-[#999] hover:text-[#666] transition-colors mt-6 mx-auto"
           >
             <ArrowLeft size={14} />
