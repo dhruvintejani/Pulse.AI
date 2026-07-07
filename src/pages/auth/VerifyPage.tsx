@@ -1,23 +1,28 @@
 import { useSignUp } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
+import type { KeyboardEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, ArrowRight, RefreshCw } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import AuthAlert from '@/components/auth/AuthAlert';
 import AuroraBackground from '@/components/backgrounds/AuroraBackground';
-import { getClerkErrorMessage } from '@/lib/clerkErrors';
+import { ROUTES } from '@/constants/routes';
+import type { AuthEmailState } from '@/types/auth';
+import { getClerkErrorMessage } from '@/utils/clerkErrors';
+
+const EMPTY_CODE = ['', '', '', '', '', ''];
 
 const VerifyPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoaded, signUp, setActive } = useSignUp();
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [code, setCode] = useState(EMPTY_CODE);
   const [authError, setAuthError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
-  const stateEmail = (location.state as { email?: string } | null)?.email;
+  const stateEmail = (location.state as AuthEmailState | null)?.email;
   const verificationEmail = stateEmail || signUp?.emailAddress || 'your email address';
 
   const handleChange = (index: number, value: string) => {
@@ -31,7 +36,7 @@ const VerifyPage = () => {
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+  const handleKeyDown = (index: number, e: KeyboardEvent) => {
     if (e.key === 'Backspace' && !code[index] && index > 0) {
       inputsRef.current[index - 1]?.focus();
     }
@@ -47,7 +52,7 @@ const VerifyPage = () => {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        navigate('/dashboard', { replace: true });
+        navigate(ROUTES.DASHBOARD, { replace: true });
         return;
       }
 
@@ -66,7 +71,7 @@ const VerifyPage = () => {
       setAuthError('');
       setIsResending(true);
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-      setCode(['', '', '', '', '', '']);
+      setCode(EMPTY_CODE);
       inputsRef.current[0]?.focus();
     } catch (error) {
       setAuthError(getClerkErrorMessage(error, 'Unable to resend the code. Please try again.'));
