@@ -1,54 +1,50 @@
 import { useSignIn } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sparkles, Lock, Mail, KeyRound, ArrowLeft, ArrowRight, RefreshCw } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import AuthAlert from '@/components/auth/AuthAlert';
 import AuroraBackground from '@/components/backgrounds/AuroraBackground';
-import { getClerkErrorMessage, getClerkFieldErrors } from '@/lib/clerkErrors';
+import { ROUTES } from '@/constants/routes';
+import { useAuthFormErrors } from '@/hooks/useAuthFormErrors';
+import type { AuthEmailState, FieldErrors } from '@/types/auth';
+import { getClerkErrorMessage, getClerkFieldErrors } from '@/utils/clerkErrors';
+import { hasErrors, validateEmail, validatePassword } from '@/utils/validation';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoaded, signIn, setActive } = useSignIn();
-  const stateEmail = (location.state as { email?: string } | null)?.email ?? '';
+  const stateEmail = (location.state as AuthEmailState | null)?.email ?? '';
   const [email, setEmail] = useState(stateEmail);
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [authError, setAuthError] = useState('');
+  const { fieldErrors, setFieldErrors, authError, setAuthError, clearFieldError } = useAuthFormErrors();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
-  const clearFieldError = (field: string) => {
-    setFieldErrors((current) => {
-      const next = { ...current };
-      delete next[field];
-      return next;
-    });
-  };
-
   const validate = () => {
-    const errors: Record<string, string> = {};
+    const errors: FieldErrors = {};
+    const emailError = validateEmail(email);
+    const passwordError = validatePassword(password, 'New password is required.');
 
-    if (!email.trim()) errors.email = 'Email address is required.';
-    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Enter a valid email address.';
+    if (emailError) errors.email = emailError;
     if (!code.trim()) errors.code = 'Reset code is required.';
-    if (!password) errors.password = 'New password is required.';
-    if (password && password.length < 8) errors.password = 'Password must be at least 8 characters.';
+    if (passwordError) errors.password = passwordError;
     if (!confirmPassword) errors.confirmPassword = 'Please confirm your password.';
     if (password && confirmPassword && password !== confirmPassword) {
       errors.confirmPassword = 'Passwords do not match.';
     }
 
     setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    return !hasErrors(errors);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError('');
 
@@ -64,7 +60,7 @@ const ResetPasswordPage = () => {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        navigate('/dashboard', { replace: true });
+        navigate(ROUTES.DASHBOARD, { replace: true });
         return;
       }
 
@@ -209,7 +205,7 @@ const ResetPasswordPage = () => {
           </button>
 
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate(ROUTES.LOGIN)}
             className="flex items-center gap-2 text-sm text-[#999] hover:text-[#666] transition-colors mt-4 mx-auto"
           >
             <ArrowLeft size={14} />
