@@ -1,15 +1,21 @@
 import { useSignUp } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import AuthAlert from '@/components/auth/AuthAlert';
 import AuroraBackground from '@/components/backgrounds/AuroraBackground';
-import { getClerkErrorMessage, getClerkFieldErrors } from '@/lib/clerkErrors';
-
-type OAuthStrategy = 'oauth_google' | 'oauth_github';
+import { OAUTH_STRATEGIES } from '@/constants/auth';
+import { ROUTES } from '@/constants/routes';
+import { useAuthFormErrors } from '@/hooks/useAuthFormErrors';
+import { useOAuthLoading } from '@/hooks/useOAuthLoading';
+import { startOAuthRedirect } from '@/services/auth/oauthService';
+import type { FieldErrors, OAuthStrategy } from '@/types/auth';
+import { getClerkErrorMessage, getClerkFieldErrors } from '@/utils/clerkErrors';
+import { hasErrors, validateEmail, validatePassword } from '@/utils/validation';
 
 const perks = [
   'Free 14-day Pro trial',
@@ -25,34 +31,25 @@ const SignupPage = () => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [authError, setAuthError] = useState('');
+  const { fieldErrors, setFieldErrors, authError, setAuthError, clearFieldError } = useAuthFormErrors();
+  const { oauthLoading, setOauthLoading, isOAuthLoading } = useOAuthLoading();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<OAuthStrategy | null>(null);
-
-  const clearFieldError = (field: string) => {
-    setFieldErrors((current) => {
-      const next = { ...current };
-      delete next[field];
-      return next;
-    });
-  };
 
   const validate = () => {
-    const errors: Record<string, string> = {};
+    const errors: FieldErrors = {};
+    const emailError = validateEmail(email, 'Work email is required.');
+    const passwordError = validatePassword(password);
 
     if (!firstName.trim()) errors.firstName = 'First name is required.';
     if (!lastName.trim()) errors.lastName = 'Last name is required.';
-    if (!email.trim()) errors.email = 'Work email is required.';
-    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email)) errors.email = 'Enter a valid email address.';
-    if (!password) errors.password = 'Password is required.';
-    if (password && password.length < 8) errors.password = 'Password must be at least 8 characters.';
+    if (emailError) errors.email = emailError;
+    if (passwordError) errors.password = passwordError;
 
     setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    return !hasErrors(errors);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError('');
 
@@ -67,7 +64,7 @@ const SignupPage = () => {
         password,
       });
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-      navigate('/verify', { state: { email: email.trim() } });
+      navigate(ROUTES.VERIFY, { state: { email: email.trim() } });
     } catch (error) {
       setFieldErrors(getClerkFieldErrors(error));
       setAuthError(getClerkErrorMessage(error, 'Unable to create your account. Please try again.'));
@@ -82,18 +79,14 @@ const SignupPage = () => {
     try {
       setAuthError('');
       setOauthLoading(strategy);
-      await signUp.authenticateWithRedirect({
-        strategy,
-        redirectUrl: '/sso-callback',
-        redirectUrlComplete: '/dashboard',
-      });
+      await startOAuthRedirect(signUp, strategy);
     } catch (error) {
       setAuthError(getClerkErrorMessage(error, 'Unable to continue with this provider. Please try again.'));
       setOauthLoading(null);
     }
   };
 
-  const busy = isSubmitting || oauthLoading !== null;
+  const busy = isSubmitting || isOAuthLoading;
 
   return (
     <div className="relative min-h-screen flex overflow-hidden">
@@ -185,7 +178,7 @@ const SignupPage = () => {
             <h2 className="text-2xl font-black text-[#1F1F1F] mb-2">Create your account</h2>
             <p className="text-sm text-[#666]">
               Already have an account?{' '}
-              <button onClick={() => navigate('/login')} className="text-[#E9A24C] font-semibold hover:underline">
+              <button onClick={() => navigate(ROUTES.LOGIN)} className="text-[#E9A24C] font-semibold hover:underline">
                 Sign in
               </button>
             </p>
@@ -194,8 +187,8 @@ const SignupPage = () => {
           {/* Social logins */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
-              { icon: '🌐', label: 'Google', strategy: 'oauth_google' as const },
-              { icon: '⌘', label: 'GitHub', strategy: 'oauth_github' as const },
+              { icon: '🌐', label: 'Google', strategy: OAUTH_STRATEGIES.google },
+              { icon: '⌘', label: 'GitHub', strategy: OAUTH_STRATEGIES.github },
             ].map((btn) => (
               <motion.button
                 key={btn.label}
