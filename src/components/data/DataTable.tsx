@@ -1,4 +1,4 @@
-import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useId, useMemo, useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronsUpDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -44,6 +44,7 @@ const DataTableComponent = <T,>({
   className,
   ariaLabel = 'Data table',
 }: DataTableProps<T>) => {
+  const searchId = useId();
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState(columns.find((column) => column.sortable)?.id ?? columns[0]?.id ?? '');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -131,9 +132,9 @@ const DataTableComponent = <T,>({
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 border-b border-[rgba(0,0,0,0.05)]">
         <div className="relative flex-1">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#CCC]" aria-hidden="true" />
-          <label className="sr-only" htmlFor="data-table-search">Search table</label>
+          <label className="sr-only" htmlFor={searchId}>Search table</label>
           <input
-            id="data-table-search"
+            id={searchId}
             type="search"
             value={search}
             onChange={handleSearchChange}
