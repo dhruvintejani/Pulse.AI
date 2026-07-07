@@ -1,15 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
-import type { KeyboardEvent } from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Sparkles, Copy, RefreshCw, ThumbsUp, ThumbsDown,
   Paperclip, Mic, Code2, MoreHorizontal, ChevronDown,
-  Hash, Plus, Search, Zap, Brain
+  Hash, Plus, Search, Zap, Brain, Pin, Star, Trash2, Pencil, Check, X
 } from 'lucide-react';
+import CodeBlock from '@/components/chat/CodeBlock';
+import MarkdownRenderer from '@/components/chat/MarkdownRenderer';
 import { CODE_EXAMPLE, MODELS, SUGGESTIONS } from '@/constants/chat';
-import { useChatHistory, useChatMessages, useRecentChats } from '@/hooks/useChatHistory';
+import { useChatMessages, useConversations } from '@/hooks/useChatHistory';
 import { cn } from '@/lib/utils';
-import type { ChatMessage } from '@/types/chat';
+import type { ChatConversation, ChatMessage } from '@/types/chat';
 
 const TypingIndicator = () => (
   <motion.div
@@ -31,26 +33,15 @@ const TypingIndicator = () => (
   </motion.div>
 );
 
-const MessageBubble = ({ message }: { message: ChatMessage }) => {
+const MessageBubble = ({ message, onRegenerate }: { message: ChatMessage; onRegenerate: () => void }) => {
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState<null | boolean>(null);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(message.content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const isUser = message.role === 'user';
 
-  const renderContent = (content: string) => {
-    const parts = content.split(/(\*\*[^*]+\*\*)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={i} className="font-semibold text-[#1F1F1F]">{part.slice(2, -2)}</strong>;
-      }
-      return <span key={i}>{part}</span>;
-    });
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -73,47 +64,50 @@ const MessageBubble = ({ message }: { message: ChatMessage }) => {
       {/* Bubble */}
       <div className={cn('max-w-[78%] flex flex-col', isUser && 'items-end')}>
         <div className={cn(isUser ? 'chat-bubble-user' : 'chat-bubble-ai', 'px-4 py-3 shadow-card')}>
-          <p className={cn(
-            'text-sm leading-relaxed whitespace-pre-wrap',
-            isUser ? 'text-white' : 'text-[#1F1F1F]'
-          )}>
-            {renderContent(message.content)}
-          </p>
+          <MarkdownRenderer
+            content={message.content}
+            tone={isUser ? 'user' : 'assistant'}
+            className={cn(isUser ? 'text-white' : 'text-[#1F1F1F]')}
+          />
         </div>
 
-        {/* Actions (AI only) */}
-        {!isUser && (
-          <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)] transition-all"
-            >
-              <Copy size={11} />
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
-            <button className="p-1.5 rounded-lg hover:bg-[rgba(0,0,0,0.04)] transition-all">
+        {/* Actions */}
+        <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)] transition-all"
+          >
+            {copied ? <Check size={11} /> : <Copy size={11} />}
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+          {!isUser && (
+            <button onClick={onRegenerate} className="p-1.5 rounded-lg hover:bg-[rgba(0,0,0,0.04)] transition-all">
               <RefreshCw size={11} className="text-[#999]" />
             </button>
-            <button
-              onClick={() => setLiked(true)}
-              className={cn('p-1.5 rounded-lg transition-all', liked === true ? 'text-[#E9A24C]' : 'text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)]')}
-            >
-              <ThumbsUp size={11} />
-            </button>
-            <button
-              onClick={() => setLiked(false)}
-              className={cn('p-1.5 rounded-lg transition-all', liked === false ? 'text-red-400' : 'text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)]')}
-            >
-              <ThumbsDown size={11} />
-            </button>
-          </div>
-        )}
+          )}
+          {!isUser && (
+            <>
+              <button
+                onClick={() => setLiked(true)}
+                className={cn('p-1.5 rounded-lg transition-all', liked === true ? 'text-[#E9A24C]' : 'text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)]')}
+              >
+                <ThumbsUp size={11} />
+              </button>
+              <button
+                onClick={() => setLiked(false)}
+                className={cn('p-1.5 rounded-lg transition-all', liked === false ? 'text-red-400' : 'text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)]')}
+              >
+                <ThumbsDown size={11} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </motion.div>
   );
 };
 
-const CodeBlock = () => (
+const CodeExampleBlock = () => (
   <motion.div
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
@@ -126,36 +120,100 @@ const CodeBlock = () => (
       <div className="chat-bubble-ai px-4 py-3 mb-2 shadow-card">
         <p className="text-sm text-[#1F1F1F]">Here's a React component for the AI chat interface you requested:</p>
       </div>
-      <div className="code-block overflow-hidden shadow-card">
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/8">
-          <div className="flex items-center gap-2">
-            <Code2 size={13} className="text-[#E9A24C]" />
-            <span className="text-xs font-mono text-white/60">typescript</span>
-          </div>
-          <button className="text-xs text-white/40 hover:text-white/70 transition-colors flex items-center gap-1">
-            <Copy size={11} />
-            Copy
-          </button>
-        </div>
-        <pre className="px-4 py-4 overflow-x-auto no-scrollbar">
-          <code className="text-sm font-mono text-[#E9A24C]/80 leading-relaxed">
-            {CODE_EXAMPLE.split('\n').map((line, i) => (
-              <div key={i} className="flex">
-                <span className="text-white/20 select-none w-7 shrink-0 text-right mr-4 text-xs">{i + 1}</span>
-                <span className="text-green-300/80">{line}</span>
-              </div>
-            ))}
-          </code>
-        </pre>
-      </div>
+      <CodeBlock code={CODE_EXAMPLE} language="typescript" />
     </div>
   </motion.div>
 );
 
+interface ConversationRowProps {
+  conversation: ChatConversation;
+  active: boolean;
+  onSelect: () => void;
+  onRename: (title: string) => void;
+  onDelete: () => void;
+  onTogglePinned: () => void;
+  onToggleFavorite: () => void;
+}
+
+const ConversationRow = ({ conversation, active, onSelect, onRename, onDelete, onTogglePinned, onToggleFavorite }: ConversationRowProps) => {
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(conversation.title);
+
+  const stop = (event: MouseEvent) => event.stopPropagation();
+
+  const submitRename = () => {
+    onRename(title);
+    setEditing(false);
+  };
+
+  return (
+    <motion.button
+      whileHover={{ x: 2 }}
+      onClick={onSelect}
+      className={cn(
+        'group w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left mb-0.5',
+        active ? 'bg-[rgba(233,162,76,0.1)] text-[#E9A24C]' : 'text-[#666] hover:bg-[rgba(0,0,0,0.03)]'
+      )}
+    >
+      <Hash size={12} className="shrink-0 opacity-60" />
+      {editing ? (
+        <input
+          value={title}
+          autoFocus
+          onClick={stop}
+          onChange={(event) => setTitle(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') submitRename();
+            if (event.key === 'Escape') setEditing(false);
+          }}
+          className="min-w-0 flex-1 bg-transparent text-xs font-medium outline-none border-b border-[rgba(233,162,76,0.4)]"
+        />
+      ) : (
+        <span className="text-xs font-medium truncate flex-1">{conversation.title}</span>
+      )}
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={stop}>
+        {editing ? (
+          <>
+            <button onClick={submitRename} className="text-[#999] hover:text-[#E9A24C]"><Check size={12} /></button>
+            <button onClick={() => setEditing(false)} className="text-[#999] hover:text-red-400"><X size={12} /></button>
+          </>
+        ) : (
+          <>
+            <button onClick={onTogglePinned} className={cn('text-[#999] hover:text-[#E9A24C]', conversation.pinned && 'text-[#E9A24C]')}><Pin size={12} /></button>
+            <button onClick={onToggleFavorite} className={cn('text-[#999] hover:text-[#E9A24C]', conversation.favorite && 'text-[#E9A24C]')}><Star size={12} /></button>
+            <button onClick={() => setEditing(true)} className="text-[#999] hover:text-[#666]"><Pencil size={12} /></button>
+            <button onClick={onDelete} className="text-[#999] hover:text-red-400"><Trash2 size={12} /></button>
+          </>
+        )}
+      </div>
+    </motion.button>
+  );
+};
+
 const ChatPage = () => {
-  const { messages, addMessage, isLoading: isMessagesLoading, isError: isMessagesError } = useChatMessages();
-  const { todayChats, yesterdayChats, isLoading: isChatHistoryLoading, isError: isChatHistoryError } = useChatHistory();
-  const { addRecentChat } = useRecentChats();
+  const {
+    groupedConversations,
+    activeConversation,
+    searchQuery,
+    setSearchQuery,
+    isLoading: isConversationsLoading,
+    isError: isConversationsError,
+    createConversation,
+    setActiveConversation,
+    deleteConversation,
+    renameConversation,
+    togglePinned,
+    toggleFavorite,
+  } = useConversations();
+  const {
+    messages,
+    addMessage,
+    addAssistantReply,
+    regenerateLastAssistantMessage,
+    isLoading: isMessagesLoading,
+    isError: isMessagesError,
+    isRegenerating,
+  } = useChatMessages();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [selectedModel, setSelectedModel] = useState('GPT-4o');
@@ -166,49 +224,68 @@ const ChatPage = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [messages, isTyping, activeConversation?.id]);
+
+  const activeConversationId = activeConversation?.id;
 
   const handleSend = async () => {
     const content = input.trim();
-    if (!content) return;
+    if (!content || !activeConversationId) return;
 
-    const id = Date.now().toString();
     const userMsg: ChatMessage = {
-      id,
+      id: Date.now().toString(),
       role: 'user',
       content,
       timestamp: new Date(),
     };
 
-    await addMessage(userMsg);
-    await addRecentChat({
-      id,
-      title: content.length > 32 ? `${content.slice(0, 32)}...` : content,
-      time: 'now',
-      period: 'today',
-    });
-
+    await addMessage({ conversationId: activeConversationId, message: userMsg });
     setInput('');
     setIsTyping(true);
     setShowCode(false);
 
     setTimeout(() => {
       setIsTyping(false);
-      const aiMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: "That's a great question! I've analyzed your request thoroughly. Based on the context and data available, here's my comprehensive response: The key insights suggest that focusing on user experience improvements, combined with data-driven decision making, will yield the best results. I recommend starting with a phased approach that prioritizes quick wins while building toward longer-term strategic goals.",
-        timestamp: new Date(),
-      };
-      void addMessage(aiMsg);
-    }, 2000);
+      void addAssistantReply(activeConversationId);
+    }, 900);
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  const handleRegenerate = async () => {
+    if (!activeConversationId) return;
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      void regenerateLastAssistantMessage(activeConversationId);
+    }, 700);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
       void handleSend();
     }
+  };
+
+  const renderConversationGroup = (label: string, conversations: ChatConversation[]) => {
+    if (!conversations.length) return null;
+
+    return (
+      <>
+        <p className="text-[10px] font-semibold text-[#CCC] uppercase tracking-widest px-2 mb-2 mt-4 first:mt-0">{label}</p>
+        {conversations.map((conversation) => (
+          <ConversationRow
+            key={conversation.id}
+            conversation={conversation}
+            active={conversation.id === activeConversationId}
+            onSelect={() => void setActiveConversation(conversation.id)}
+            onRename={(title) => void renameConversation({ conversationId: conversation.id, title })}
+            onDelete={() => void deleteConversation(conversation.id)}
+            onTogglePinned={() => void togglePinned(conversation.id)}
+            onToggleFavorite={() => void toggleFavorite(conversation.id)}
+          />
+        ))}
+      </>
+    );
   };
 
   return (
@@ -216,7 +293,10 @@ const ChatPage = () => {
       {/* Conversations Sidebar */}
       <div className="hidden xl:flex flex-col w-64 border-r border-[rgba(0,0,0,0.06)] bg-[#FFFDF8]/50 backdrop-blur-sm">
         <div className="p-4 border-b border-[rgba(0,0,0,0.05)]">
-          <button className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#E9A24C] to-[#D4853A] text-white text-sm font-medium hover:shadow-premium transition-all duration-200">
+          <button
+            onClick={() => void createConversation()}
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#E9A24C] to-[#D4853A] text-white text-sm font-medium hover:shadow-premium transition-all duration-200"
+          >
             <Plus size={15} />
             New conversation
           </button>
@@ -226,40 +306,24 @@ const ChatPage = () => {
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#CCC]" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search chats..."
               className="w-full pl-8 pr-3 py-2 text-xs rounded-xl bg-[rgba(0,0,0,0.04)] border border-[rgba(0,0,0,0.06)] text-[#666] placeholder:text-[#CCC] outline-none focus:border-[rgba(233,162,76,0.3)]"
             />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto no-scrollbar px-2 pb-4">
-          <p className="text-[10px] font-semibold text-[#CCC] uppercase tracking-widest px-2 mb-2">Today</p>
-          {isChatHistoryLoading && (
-            <p className="text-xs text-[#999] px-3 py-2">Loading chats...</p>
+          {isConversationsLoading && <p className="text-xs text-[#999] px-3 py-2">Loading chats...</p>}
+          {isConversationsError && <p className="text-xs text-red-400 px-3 py-2">Unable to load chats.</p>}
+          {!isConversationsLoading && !isConversationsError && (
+            <>
+              {renderConversationGroup('Pinned', groupedConversations.pinned)}
+              {renderConversationGroup('Favorites', groupedConversations.favorites)}
+              {renderConversationGroup('Today', groupedConversations.today)}
+              {renderConversationGroup('Yesterday', groupedConversations.yesterday)}
+            </>
           )}
-          {isChatHistoryError && (
-            <p className="text-xs text-red-400 px-3 py-2">Unable to load chats.</p>
-          )}
-          {!isChatHistoryLoading && !isChatHistoryError && todayChats.map((chat, i) => (
-            <motion.button
-              key={chat.id}
-              whileHover={{ x: 2 }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left mb-0.5 ${i === 0 ? 'bg-[rgba(233,162,76,0.1)] text-[#E9A24C]' : 'text-[#666] hover:bg-[rgba(0,0,0,0.03)]'}`}
-            >
-              <Hash size={12} className="shrink-0 opacity-60" />
-              <span className="text-xs font-medium truncate">{chat.title}</span>
-            </motion.button>
-          ))}
-          <p className="text-[10px] font-semibold text-[#CCC] uppercase tracking-widest px-2 mb-2 mt-4">Yesterday</p>
-          {!isChatHistoryLoading && !isChatHistoryError && yesterdayChats.map((chat) => (
-            <motion.button
-              key={chat.id}
-              whileHover={{ x: 2 }}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left mb-0.5 text-[#666] hover:bg-[rgba(0,0,0,0.03)]"
-            >
-              <Hash size={12} className="shrink-0 opacity-60" />
-              <span className="text-xs font-medium truncate">{chat.title}</span>
-            </motion.button>
-          ))}
         </div>
       </div>
 
@@ -272,8 +336,8 @@ const ChatPage = () => {
               <Sparkles size={14} className="text-white" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#1F1F1F]">Market Research Analysis</p>
-              <p className="text-[11px] text-[#999]">{messages.length} messages · 2 minutes ago</p>
+              <p className="text-sm font-bold text-[#1F1F1F]">{activeConversation?.title || 'New conversation'}</p>
+              <p className="text-[11px] text-[#999]">{messages.length} messages · {activeConversation?.time || 'now'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -324,11 +388,11 @@ const ChatPage = () => {
             <div className="chat-bubble-ai px-4 py-3 shadow-card text-sm text-red-400">Unable to load chat messages.</div>
           )}
           {!isMessagesLoading && !isMessagesError && messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+            <MessageBubble key={message.id} message={message} onRegenerate={handleRegenerate} />
           ))}
-          {showCode && <CodeBlock />}
+          {showCode && <CodeExampleBlock />}
           <AnimatePresence>
-            {isTyping && <TypingIndicator />}
+            {(isTyping || isRegenerating) && <TypingIndicator />}
           </AnimatePresence>
           <div ref={messagesEndRef} />
         </div>
@@ -342,7 +406,7 @@ const ChatPage = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                onClick={() => setInput(s.slice(2))}
+                onClick={() => setInput(s)}
                 className="text-xs text-[#666] px-3 py-1.5 rounded-xl border border-[rgba(0,0,0,0.08)] hover:border-[rgba(233,162,76,0.3)] hover:text-[#E9A24C] transition-all font-medium bg-white/60"
               >
                 {s}
@@ -390,10 +454,10 @@ const ChatPage = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.93 }}
                 onClick={() => void handleSend()}
-                disabled={!input.trim()}
+                disabled={!input.trim() || !activeConversationId}
                 className={cn(
                   'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200',
-                  input.trim()
+                  input.trim() && activeConversationId
                     ? 'bg-gradient-to-br from-[#E9A24C] to-[#D4853A] text-white shadow-premium-sm hover:shadow-premium'
                     : 'bg-[rgba(0,0,0,0.06)] text-[#CCC]'
                 )}
