@@ -6,4 +6,10 @@ export const queryKeys = {
   chatMessages: ['chat-messages'] as const,
   chatHistory: ['chat-history'] as const,
   recentChats: ['recent-chats'] as const,
+  dashboard: ['dashboard'] as const,
+  documents: ['documents'] as const,
+  workspace: ['workspace'] as const,
+  analytics: ['analytics'] as const,
+  profile: ['profile'] as const,
+  billing: ['billing'] as const,
 } as const;
