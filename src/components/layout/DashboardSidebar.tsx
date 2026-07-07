@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -43,23 +44,31 @@ const DashboardSidebar = () => {
   const { recentChats } = useRecentChats();
   const { createConversation, setActiveConversation } = useConversations();
 
-  const secondaryNav = [
+  const secondaryNav = useMemo(() => [
     { id: 'notifications', label: 'Notifications', icon: Bell, path: DASHBOARD_PATHS.NOTIFICATIONS, badge: unreadCount ? String(unreadCount) : '' },
     { id: 'billing', label: 'Billing', icon: CreditCard, path: DASHBOARD_PATHS.BILLING, badge: '' },
     { id: 'team', label: 'Team', icon: Users, path: DASHBOARD_PATHS.TEAM, badge: '' },
     { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS, badge: '' },
-  ];
+  ], [unreadCount]);
 
-  const isActive = (path: string) => location.pathname === path;
-  const displayName = currentUser?.fullName || 'Alex Morgan';
+  const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
+  const displayName = useMemo(() => currentUser?.fullName || 'Alex Morgan', [currentUser?.fullName]);
 
-  const handleNewConversation = () => {
+  const handleNavigate = useCallback((path: string) => {
+    navigate(path);
+  }, [navigate]);
+
+  const handleNewConversation = useCallback(() => {
     void createConversation().then(() => navigate(DASHBOARD_PATHS.CHAT));
-  };
+  }, [createConversation, navigate]);
 
-  const handleRecentChatClick = (chatId: string) => {
+  const handleRecentChatClick = useCallback((chatId: string) => {
     void setActiveConversation(chatId).then(() => navigate(DASHBOARD_PATHS.CHAT));
-  };
+  }, [navigate, setActiveConversation]);
+
+  const handleProfileClick = useCallback(() => {
+    navigate(DASHBOARD_PATHS.PROFILE);
+  }, [navigate]);
 
   return (
     <motion.aside
@@ -109,7 +118,7 @@ const DashboardSidebar = () => {
           return (
             <motion.button
               key={item.id}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
               whileHover={{ x: 2 }}
               className={cn(
                 'sidebar-item w-full flex items-center gap-3 px-3 py-2.5 text-left',
@@ -170,7 +179,7 @@ const DashboardSidebar = () => {
           return (
             <motion.button
               key={item.id}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
               whileHover={{ x: 2 }}
               className={cn(
                 'sidebar-item w-full flex items-center gap-3 px-3 py-2.5 text-left',
@@ -199,7 +208,7 @@ const DashboardSidebar = () => {
       {/* User Profile */}
       <div className="p-3 border-t border-[rgba(0,0,0,0.05)]">
         <button
-          onClick={() => navigate(DASHBOARD_PATHS.PROFILE)}
+          onClick={handleProfileClick}
           className={cn(
             'w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-[rgba(233,162,76,0.06)] transition-all duration-200',
           )}
@@ -222,4 +231,4 @@ const DashboardSidebar = () => {
   );
 };
 
-export default DashboardSidebar;
+export default memo(DashboardSidebar);
