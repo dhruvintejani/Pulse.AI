@@ -27,6 +27,7 @@ export default defineConfig({
           router: ["react-router-dom"],
           auth: ["@clerk/clerk-react"],
           query: ["@tanstack/react-query"],
+          http: ["axios"],
           motion: ["framer-motion"],
           icons: ["lucide-react"],
           charts: ["recharts"],
@@ -39,6 +40,7 @@ export default defineConfig({
     include: [
       "@clerk/clerk-react",
       "@tanstack/react-query",
+      "axios",
       "framer-motion",
       "lucide-react",
       "react-markdown",
