@@ -75,6 +75,7 @@ const DashboardSidebar = () => {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
+      aria-label="Dashboard sidebar"
       className={cn(
         'flex flex-col h-full bg-[#FFFDF8] border-r border-[rgba(0,0,0,0.06)]',
         collapsed ? 'w-16' : 'w-64'
@@ -83,7 +84,7 @@ const DashboardSidebar = () => {
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-[rgba(0,0,0,0.05)]">
         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E9A24C] to-[#D4853A] flex items-center justify-center shadow-premium-sm shrink-0">
-          <Sparkles size={16} className="text-white" />
+          <Sparkles size={16} className="text-white" aria-hidden="true" />
         </div>
         {!collapsed && (
           <motion.div
@@ -101,31 +102,36 @@ const DashboardSidebar = () => {
       {!collapsed && (
         <div className="px-3 pt-4 pb-2">
           <button
+            type="button"
             onClick={handleNewConversation}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#E9A24C] to-[#D4853A] text-white text-sm font-medium hover:shadow-premium transition-all duration-200 hover:-translate-y-0.5"
+            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#E9A24C] to-[#D4853A] text-white text-sm font-medium hover:shadow-premium transition-all duration-200 hover:-translate-y-0.5 focus-ring"
           >
-            <Plus size={15} />
+            <Plus size={15} aria-hidden="true" />
             New Conversation
           </button>
         </div>
       )}
 
       {/* Main Nav */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-3 py-2 space-y-0.5">
+      <nav className="flex-1 overflow-y-auto no-scrollbar px-3 py-2 space-y-0.5" aria-label="Dashboard sections">
         {mainNav.map((item) => {
           const active = isActive(item.path);
           const Icon = item.icon;
           return (
             <motion.button
               key={item.id}
+              type="button"
+              aria-label={item.label}
+              aria-current={active ? 'page' : undefined}
+              title={collapsed ? item.label : undefined}
               onClick={() => handleNavigate(item.path)}
               whileHover={{ x: 2 }}
               className={cn(
-                'sidebar-item w-full flex items-center gap-3 px-3 py-2.5 text-left',
+                'sidebar-item w-full flex items-center gap-3 px-3 py-2.5 text-left focus-ring',
                 active ? 'active' : 'text-[#666]'
               )}
             >
-              <Icon size={17} className={cn('shrink-0', active ? 'text-[#E9A24C]' : 'text-[#999]')} />
+              <Icon size={17} className={cn('shrink-0', active ? 'text-[#E9A24C]' : 'text-[#999]')} aria-hidden="true" />
               {!collapsed && (
                 <>
                   <span className={cn('text-sm flex-1', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>{item.label}</span>
@@ -142,25 +148,27 @@ const DashboardSidebar = () => {
 
         {/* Recent Chats */}
         {!collapsed && (
-          <div className="pt-4">
+          <div className="pt-4" aria-label="Recent chats">
             <div className="flex items-center justify-between px-3 mb-2">
               <span className="text-[10px] font-semibold text-[#999] uppercase tracking-widest">Recent</span>
-              <button className="text-[#999] hover:text-[#E9A24C] transition-colors">
-                <Star size={12} />
+              <button type="button" aria-label="View starred chats" className="text-[#999] hover:text-[#E9A24C] transition-colors focus-ring rounded-md">
+                <Star size={12} aria-hidden="true" />
               </button>
             </div>
             <div className="space-y-0.5">
               {recentChats.map((chat) => (
                 <motion.button
                   key={chat.id}
+                  type="button"
+                  aria-label={`Open ${chat.title}`}
                   onClick={() => handleRecentChatClick(chat.id)}
                   whileHover={{ x: 2 }}
-                  className="sidebar-item w-full flex items-center gap-2.5 px-3 py-2 text-left"
+                  className="sidebar-item w-full flex items-center gap-2.5 px-3 py-2 text-left focus-ring"
                 >
-                  <Hash size={13} className="text-[#CCC] shrink-0" />
+                  <Hash size={13} className="text-[#CCC] shrink-0" aria-hidden="true" />
                   <span className="text-xs text-[#666] flex-1 truncate">{chat.title}</span>
                   <span className="text-[10px] text-[#BBB] shrink-0 flex items-center gap-0.5">
-                    <Clock size={10} />
+                    <Clock size={10} aria-hidden="true" />
                     {chat.time}
                   </span>
                 </motion.button>
@@ -179,17 +187,21 @@ const DashboardSidebar = () => {
           return (
             <motion.button
               key={item.id}
+              type="button"
+              aria-label={item.badge ? `${item.label}, ${item.badge} unread` : item.label}
+              aria-current={active ? 'page' : undefined}
+              title={collapsed ? item.label : undefined}
               onClick={() => handleNavigate(item.path)}
               whileHover={{ x: 2 }}
               className={cn(
-                'sidebar-item w-full flex items-center gap-3 px-3 py-2.5 text-left',
+                'sidebar-item w-full flex items-center gap-3 px-3 py-2.5 text-left focus-ring',
                 active ? 'active' : 'text-[#666]'
               )}
             >
               <div className="relative shrink-0">
-                <Icon size={17} className={cn(active ? 'text-[#E9A24C]' : 'text-[#999]')} />
+                <Icon size={17} className={cn(active ? 'text-[#E9A24C]' : 'text-[#999]')} aria-hidden="true" />
                 {item.badge && (
-                  <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-[#E9A24C] text-white text-[9px] font-bold flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-[#E9A24C] text-white text-[9px] font-bold flex items-center justify-center" aria-hidden="true">
                     {item.badge}
                   </span>
                 )}
@@ -197,20 +209,22 @@ const DashboardSidebar = () => {
               {!collapsed && (
                 <>
                   <span className={cn('text-sm flex-1', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>{item.label}</span>
-                  <ChevronRight size={14} className="text-[#CCC]" />
+                  <ChevronRight size={14} className="text-[#CCC]" aria-hidden="true" />
                 </>
               )}
             </motion.button>
           );
         })}
-      </div>
+      </nav>
 
       {/* User Profile */}
       <div className="p-3 border-t border-[rgba(0,0,0,0.05)]">
         <button
+          type="button"
           onClick={handleProfileClick}
+          aria-label={`Open profile for ${displayName}`}
           className={cn(
-            'w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-[rgba(233,162,76,0.06)] transition-all duration-200',
+            'w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-[rgba(233,162,76,0.06)] transition-all duration-200 focus-ring',
           )}
         >
           <Avatar src={currentUser?.imageUrl} name={displayName} size="sm" online={true} />
