@@ -2,13 +2,16 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   User, Bell, Shield, Cpu, Palette, Globe,
-  ChevronRight, Check, Sparkles
+  ChevronRight, Check, Sparkles, Sun, Moon, Monitor
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { settingsMockData } from '@/constants/settingsData';
+import { useTheme } from '@/hooks/useTheme';
+import type { ThemeMode } from '@/types/theme';
 
 const sections = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -17,6 +20,12 @@ const sections = [
   { id: 'ai', label: 'AI Preferences', icon: Cpu },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'language', label: 'Language & Region', icon: Globe },
+];
+
+const themeOptions: Array<{ id: ThemeMode; label: string; desc: string; icon: typeof Sun; colors: string[] }> = [
+  { id: 'light', label: 'Light', desc: 'Warm bright interface', icon: Sun, colors: ['#F8F4EC', '#FFFDF8', '#E9A24C'] },
+  { id: 'dark', label: 'Dark', desc: 'Low-light interface', icon: Moon, colors: ['#0F0D0A', '#17130F', '#E9A24C'] },
+  { id: 'system', label: 'System', desc: 'Match your device', icon: Monitor, colors: ['#F8F4EC', '#1F1F1F', '#E9A24C'] },
 ];
 
 const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
@@ -36,23 +45,11 @@ const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void 
 );
 
 const SettingsPage = () => {
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [activeSection, setActiveSection] = useState('profile');
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    weekly: false,
-    newModel: true,
-    mentions: true,
-  });
-  const [aiPrefs, setAiPrefs] = useState({
-    streaming: true,
-    suggestions: true,
-    codeHighlight: true,
-    autoTitle: true,
-    memory: false,
-  });
-  const [selectedTheme, setSelectedTheme] = useState('warm');
-  const [selectedModel, setSelectedModel] = useState('gpt-4o');
+  const [notifications, setNotifications] = useState(settingsMockData.notifications);
+  const [aiPrefs, setAiPrefs] = useState(settingsMockData.aiPrefs);
+  const [selectedModel, setSelectedModel] = useState(settingsMockData.selectedModel);
 
   return (
     <div className="h-full overflow-y-auto no-scrollbar">
@@ -67,7 +64,6 @@ const SettingsPage = () => {
         </motion.div>
 
         <div className="flex gap-6">
-          {/* Sidebar */}
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
@@ -96,7 +92,6 @@ const SettingsPage = () => {
             </div>
           </motion.div>
 
-          {/* Content */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,20 +110,20 @@ const SettingsPage = () => {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <Input label="First name" defaultValue="Alex" />
-                    <Input label="Last name" defaultValue="Morgan" />
+                    <Input label="First name" defaultValue={settingsMockData.profile.firstName} />
+                    <Input label="Last name" defaultValue={settingsMockData.profile.lastName} />
                     <div className="col-span-2">
-                      <Input label="Email address" type="email" defaultValue="alex@company.com" />
+                      <Input label="Email address" type="email" defaultValue={settingsMockData.profile.email} />
                     </div>
                     <div className="col-span-2">
-                      <Input label="Company" defaultValue="Acme Corp" />
+                      <Input label="Company" defaultValue={settingsMockData.profile.company} />
                     </div>
                     <div className="col-span-2">
                       <label className="block text-sm font-medium text-[#1F1F1F] mb-1.5">Bio</label>
                       <textarea
                         className="input-premium w-full rounded-xl px-4 py-3 text-sm text-[#1F1F1F] placeholder:text-[#999] resize-none"
                         rows={3}
-                        defaultValue="Product leader passionate about AI and design systems."
+                        defaultValue={settingsMockData.profile.bio}
                       />
                     </div>
                   </div>
@@ -250,36 +245,46 @@ const SettingsPage = () => {
 
             {activeSection === 'appearance' && (
               <div className="bg-[#FFFDF8] rounded-2xl p-6 border border-[rgba(0,0,0,0.05)] shadow-card">
-                <h2 className="text-sm font-bold text-[#1F1F1F] mb-5">Theme</h2>
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h2 className="text-sm font-bold text-[#1F1F1F]">Theme</h2>
+                    <p className="text-xs text-[#999] mt-1">Current mode: {theme === 'system' ? `System (${resolvedTheme})` : theme}</p>
+                  </div>
+                  <Badge variant="accent" size="sm" dot>{resolvedTheme}</Badge>
+                </div>
                 <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { id: 'warm', label: 'Warm', colors: ['#F8F4EC', '#E9A24C', '#1F1F1F'] },
-                    { id: 'cool', label: 'Cool', colors: ['#F0F4F8', '#3B82F6', '#1E293B'] },
-                    { id: 'dark', label: 'Dark', colors: ['#1F1F1F', '#E9A24C', '#FFFFFF'] },
-                  ].map((theme) => (
-                    <button
-                      key={theme.id}
-                      onClick={() => setSelectedTheme(theme.id)}
-                      className={cn(
-                        'p-4 rounded-xl border-2 transition-all',
-                        selectedTheme === theme.id
-                          ? 'border-[#E9A24C] shadow-premium'
-                          : 'border-[rgba(0,0,0,0.06)] hover:border-[rgba(233,162,76,0.3)]'
-                      )}
-                    >
-                      <div className="flex gap-1.5 mb-3 justify-center">
-                        {theme.colors.map((color, i) => (
-                          <div key={i} className="w-5 h-5 rounded-full" style={{ background: color }} />
-                        ))}
-                      </div>
-                      <p className="text-xs font-semibold text-[#1F1F1F] text-center">{theme.label}</p>
-                      {selectedTheme === theme.id && (
-                        <div className="flex justify-center mt-2">
-                          <Check size={12} className="text-[#E9A24C]" strokeWidth={3} />
+                  {themeOptions.map((option) => {
+                    const Icon = option.icon;
+                    const selected = theme === option.id;
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => setTheme(option.id)}
+                        className={cn(
+                          'p-4 rounded-xl border-2 transition-all text-left dark:bg-[#17130F]',
+                          selected
+                            ? 'border-[#E9A24C] shadow-premium bg-[rgba(233,162,76,0.06)]'
+                            : 'border-[rgba(0,0,0,0.06)] hover:border-[rgba(233,162,76,0.3)]'
+                        )}
+                      >
+                        <div className="flex gap-1.5 mb-3 justify-center">
+                          {option.colors.map((color, i) => (
+                            <div key={i} className="w-5 h-5 rounded-full border border-white/70" style={{ background: color }} />
+                          ))}
                         </div>
-                      )}
-                    </button>
-                  ))}
+                        <div className="flex items-center justify-center gap-1.5">
+                          <Icon size={13} className={selected ? 'text-[#E9A24C]' : 'text-[#999]'} />
+                          <p className="text-xs font-semibold text-[#1F1F1F] text-center">{option.label}</p>
+                        </div>
+                        <p className="text-[10px] text-[#999] text-center mt-1">{option.desc}</p>
+                        {selected && (
+                          <div className="flex justify-center mt-2">
+                            <Check size={12} className="text-[#E9A24C]" strokeWidth={3} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div className="mt-6">
