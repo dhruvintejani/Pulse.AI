@@ -20,14 +20,16 @@ const CodeBlock = ({ code, language = 'text' }: CodeBlockProps) => {
     <div className="code-block overflow-hidden shadow-card my-2">
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/8">
         <div className="flex items-center gap-2">
-          <Code2 size={13} className="text-[#E9A24C]" />
+          <Code2 size={13} className="text-[#E9A24C]" aria-hidden="true" />
           <span className="text-xs font-mono text-white/60">{language}</span>
         </div>
         <button
+          type="button"
           onClick={handleCopy}
-          className="text-xs text-white/40 hover:text-white/70 transition-colors flex items-center gap-1"
+          aria-label={copied ? 'Code copied' : 'Copy code'}
+          className="text-xs text-white/40 hover:text-white/70 transition-colors flex items-center gap-1 rounded-md focus-ring"
         >
-          {copied ? <Check size={11} /> : <Copy size={11} />}
+          {copied ? <Check size={11} aria-hidden="true" /> : <Copy size={11} aria-hidden="true" />}
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
@@ -35,7 +37,7 @@ const CodeBlock = ({ code, language = 'text' }: CodeBlockProps) => {
         <code className="text-sm font-mono text-[#E9A24C]/80 leading-relaxed">
           {codeLines.map((line, i) => (
             <div key={`${line}-${i}`} className="flex">
-              <span className="text-white/20 select-none w-7 shrink-0 text-right mr-4 text-xs">{i + 1}</span>
+              <span className="text-white/20 select-none w-7 shrink-0 text-right mr-4 text-xs" aria-hidden="true">{i + 1}</span>
               <span className="text-green-300/80">{line || ' '}</span>
             </div>
           ))}
