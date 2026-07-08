@@ -1,5 +1,5 @@
 import { forwardRef, memo } from 'react';
-import type { HTMLAttributes, KeyboardEvent, ReactNode } from 'react';
+import type { ComponentProps, HTMLAttributes, KeyboardEvent, ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -74,7 +74,7 @@ const CardRoot = forwardRef<HTMLDivElement, CardProps>(({
       className={cn(cardVariants[resolvedVariant], cardPadding[padding], isInteractive && 'ds-card-interactive cursor-pointer ds-focus-ring', className)}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      {...props}
+      {...(props as ComponentProps<typeof motion.div>)}
     >
       {children}
     </motion.div>
