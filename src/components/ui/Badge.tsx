@@ -11,12 +11,12 @@ interface BadgeProps {
 }
 
 const variants = {
-  default: 'bg-[#F0EAE0] text-[#8B6B3D] border-[rgba(233,162,76,0.2)]',
-  accent: 'bg-[rgba(233,162,76,0.15)] text-[#C17F2A] border-[rgba(233,162,76,0.3)]',
-  success: 'bg-[rgba(34,197,94,0.1)] text-[#16A34A] border-[rgba(34,197,94,0.2)]',
-  warning: 'bg-[rgba(234,179,8,0.1)] text-[#B45309] border-[rgba(234,179,8,0.2)]',
-  error: 'bg-[rgba(239,68,68,0.1)] text-[#DC2626] border-[rgba(239,68,68,0.2)]',
-  neutral: 'bg-[rgba(0,0,0,0.04)] text-[#666] border-[rgba(0,0,0,0.08)]',
+  default: 'bg-[#F0EAE0] text-[#7A5524] border-[rgba(233,162,76,0.24)]',
+  accent: 'bg-[var(--ds-color-accent-soft)] text-[var(--ds-color-accent-strong)] border-[rgba(233,162,76,0.32)]',
+  success: 'bg-[var(--ds-color-success-soft)] text-[var(--ds-color-success)] border-[rgba(34,197,94,0.24)]',
+  warning: 'bg-[var(--ds-color-warning-soft)] text-[var(--ds-color-warning)] border-[rgba(234,179,8,0.24)]',
+  error: 'bg-[var(--ds-color-danger-soft)] text-[var(--ds-color-danger)] border-[rgba(239,68,68,0.24)]',
+  neutral: 'bg-[var(--ds-color-surface-muted)] text-[var(--ds-color-muted)] border-[var(--ds-color-border)]',
 };
 
 const sizes = {
@@ -36,13 +36,13 @@ const dotColors = {
 const Badge = ({ children, variant = 'default', size = 'md', className, dot }: BadgeProps) => (
   <span
     className={cn(
-      'inline-flex max-w-full items-center rounded-full border font-semibold leading-none whitespace-nowrap align-middle transition-colors duration-200',
+      'inline-flex max-w-full items-center rounded-full border font-bold leading-none whitespace-nowrap align-middle transition-colors duration-200 motion-reduce:transition-none',
       variants[variant],
       sizes[size],
       className
     )}
   >
-    {dot && <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', dotColors[variant])} aria-hidden="true" />}
+    {dot && <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', dotColors[variant])} aria-hidden="true" />}
     <span className="min-w-0 truncate">{children}</span>
   </span>
 );
