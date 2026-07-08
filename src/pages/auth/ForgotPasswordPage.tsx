@@ -43,7 +43,12 @@ const ForgotPasswordPage = () => {
         strategy: 'reset_password_email_code',
         identifier: email.trim(),
       });
-      navigate(ROUTES.RESET_PASSWORD, { state: { email: email.trim() } });
+      navigate(ROUTES.RESET_PASSWORD, {
+        state: {
+          email: email.trim(),
+          statusMessage: 'Reset code sent. Check your inbox and enter the code below.',
+        },
+      });
     } catch (error) {
       setFieldErrors(getClerkFieldErrors(error));
       setAuthError(getClerkErrorMessage(error, 'Unable to send reset instructions. Please try again.'));
@@ -77,7 +82,7 @@ const ForgotPasswordPage = () => {
             </div>
             <h2 className="text-2xl font-black text-[#1F1F1F] mb-2">Forgot password?</h2>
             <p className="text-sm text-[#666] leading-relaxed">
-              No worries. Enter your email address and we'll send you a secure reset link.
+              No worries. Enter your email address and we'll send you a secure reset code.
             </p>
           </div>
 
@@ -105,12 +110,14 @@ const ForgotPasswordPage = () => {
               className="w-full"
               iconRight={<ArrowRight size={16} />}
               loading={isSubmitting}
+              disabled={!isLoaded || isSubmitting}
             >
-              Send reset link
+              Send reset code
             </Button>
           </form>
 
           <button
+            type="button"
             onClick={() => navigate(ROUTES.LOGIN)}
             className="flex items-center gap-2 text-sm text-[#999] hover:text-[#666] transition-colors mt-6 mx-auto"
           >
