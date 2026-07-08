@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { MotionConfig } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { AUTH_REDIRECTS } from '@/constants/auth';
+import { ROUTES } from '@/constants/routes';
 import { CurrentUserProvider } from '@/contexts/CurrentUserContext';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -20,7 +21,12 @@ interface AppProvidersProps {
 }
 
 const AppProviders = ({ children }: AppProvidersProps) => (
-  <ClerkProvider publishableKey={clerkPublishableKey} afterSignOutUrl={AUTH_REDIRECTS.afterSignOut}>
+  <ClerkProvider
+    publishableKey={clerkPublishableKey}
+    signInUrl={ROUTES.LOGIN}
+    signUpUrl={ROUTES.SIGNUP}
+    afterSignOutUrl={AUTH_REDIRECTS.afterSignOut}
+  >
     <ApiAuthProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
