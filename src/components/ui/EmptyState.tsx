@@ -12,13 +12,13 @@ interface EmptyStateProps {
 }
 
 const EmptyState = ({ title, description, icon, action, className }: EmptyStateProps) => (
-  <div className={cn('flex flex-col items-center justify-center text-center px-4 py-12', className)} role="status">
-    <div className="w-10 h-10 rounded-2xl bg-[rgba(233,162,76,0.1)] text-[#E9A24C] flex items-center justify-center mb-3" aria-hidden="true">
+  <div className={cn('flex flex-col items-center justify-center px-4 py-12 text-center', className)} role="status" aria-live="polite">
+    <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[rgba(233,162,76,0.1)] text-[#E9A24C] shadow-premium-sm" aria-hidden="true">
       {icon ?? <Sparkles size={18} />}
     </div>
-    <p className="text-sm font-bold text-[#1F1F1F]">{title}</p>
-    {description && <p className="text-xs text-[#999] mt-1 max-w-xs">{description}</p>}
-    {action && <div className="mt-4">{action}</div>}
+    <p className="text-sm font-black text-[#1F1F1F]">{title}</p>
+    {description && <p className="mt-1 max-w-sm text-sm leading-relaxed text-[#999] sm:text-xs">{description}</p>}
+    {action && <div className="mt-4 flex flex-wrap justify-center gap-2">{action}</div>}
   </div>
 );
 
