@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useId, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
@@ -73,7 +73,7 @@ const Dropdown = ({ label, triggerLabel, items, align = 'end', className, menuCl
     setActiveIndex(firstEnabledIndex);
   };
 
-  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+  const handleTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       openMenu();
@@ -85,7 +85,7 @@ const Dropdown = ({ label, triggerLabel, items, align = 'end', className, menuCl
     }
   };
 
-  const handleItemKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, item: DropdownItem) => {
+  const handleItemKeyDown = (event: KeyboardEvent<HTMLButtonElement>, item: DropdownItem) => {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       moveActive(1);
