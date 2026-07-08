@@ -1,0 +1,121 @@
+services:
+  - type: web
+    name: pulse-ai-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: false
+      - key: APP_NAME
+        value: Pulse AI API
+      - key: APP_VERSION
+        value: 1.0.0
+      - key: API_V1_PREFIX
+        value: /api/v1
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: pulse_ai
+      - key: MONGODB_SERVER_SELECTION_TIMEOUT_MS
+        value: 5000
+      - key: BACKEND_CORS_ORIGINS
+        value: https://pulse-ai.vercel.app
+      - key: BACKEND_CORS_ALLOW_CREDENTIALS
+        value: true
+      - key: BACKEND_CORS_ALLOW_METHODS
+        value: GET,POST,PUT,PATCH,DELETE,OPTIONS
+      - key: BACKEND_CORS_ALLOW_HEADERS
+        value: Authorization,Content-Type,X-Request-ID,X-CSRF-Token
+      - key: BACKEND_CORS_EXPOSE_HEADERS
+        value: X-Request-ID,X-Process-Time-Ms
+      - key: SECURITY_ALLOWED_HOSTS
+        value: pulse-ai-api.onrender.com
+      - key: SECURITY_HEADERS_ENABLED
+        value: true
+      - key: SECURITY_ENABLE_HSTS
+        value: true
+      - key: SECURITY_MAX_REQUEST_SIZE_BYTES
+        value: 2097152
+      - key: SECURITY_INPUT_SANITIZATION_ENABLED
+        value: true
+      - key: SECURITY_BLOCK_SUSPICIOUS_INPUT
+        value: true
+      - key: RATE_LIMIT_DEFAULT
+        value: 120/minute
+      - key: RATE_LIMIT_HEALTH
+        value: 60/minute
+      - key: RATE_LIMIT_STORAGE_URI
+        value: memory://
+      - key: CLERK_ISSUER
+        sync: false
+      - key: CLERK_JWKS_URL
+        sync: false
+      - key: CLERK_AUDIENCE
+        sync: false
+      - key: CLERK_AUTHORIZED_PARTIES
+        value: https://pulse-ai.vercel.app
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: ADMIN_CLERK_USER_IDS
+        sync: false
+      - key: INTERNAL_JWT_SECRET
+        generateValue: true
+      - key: INTERNAL_JWT_ALGORITHM
+        value: HS256
+      - key: INTERNAL_JWT_EXPIRES_MINUTES
+        value: 15
+      - key: DOCUMENT_STORAGE_PROVIDER
+        value: metadata
+      - key: DOCUMENT_MAX_UPLOAD_SIZE_MB
+        value: 25
+      - key: DOCUMENT_PREVIEW_MAX_CHARS
+        value: 5000
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: pulse-ai/documents
+      - key: AI_DEFAULT_PROVIDER
+        value: mock
+      - key: AI_ENABLED_PROVIDERS
+        value: mock,openai,gemini,claude,groq,deepseek
+      - key: AI_DEFAULT_MODEL
+        value: pulse-ai-default
+      - key: AI_STREAM_PLACEHOLDER_DELAY_MS
+        value: 35
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLAUDE_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: LOG_LEVEL
+        value: INFO
+      - key: LOG_JSON
+        value: true
+      - key: LOG_DIR
+        value: /tmp/pulse-ai-logs
+      - key: LOG_ROTATION
+        value: 50 MB
+      - key: LOG_RETENTION
+        value: 7 days
+      - key: LOG_COMPRESSION
+        value: zip
+      - key: LOG_PERFORMANCE_THRESHOLD_MS
+        value: 1000
