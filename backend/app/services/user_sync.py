@@ -1,4 +1,5 @@
-from app.models.user import User, UserStatus
+from app.core.config import settings
+from app.models.user import User, UserRole, UserStatus
 from app.schemas.auth import AuthenticatedUserResponse, ClerkTokenClaims
 from app.services.clerk_users import clerk_users_client
 from app.utils.datetime import utc_now
@@ -11,6 +12,7 @@ class UserSyncService:
         full_name = (profile.full_name if profile and profile.full_name else claims.display_name)
         username = claims.username or (profile.username if profile else None)
         avatar_url = claims.avatar or (profile.image_url if profile else None)
+        role = self._resolve_bootstrap_role(clerk_user_id=claims.sub, email=email)
 
         user = await User.find_one({"clerk_user_id": claims.sub, "is_deleted": False})
 
@@ -28,6 +30,7 @@ class UserSyncService:
                 full_name=full_name,
                 username=username,
                 avatar_url=avatar_url,
+                role=role or UserRole.MEMBER,
                 status=UserStatus.ACTIVE,
                 last_login_at=utc_now(),
                 metadata={"clerk_session_id": claims.sid} if claims.sid else {},
@@ -39,6 +42,8 @@ class UserSyncService:
         user.last_login_at = utc_now()
         user.status = UserStatus.ACTIVE
 
+        if role:
+            user.role = role
         if email:
             user.email = email
         if full_name:
@@ -73,6 +78,16 @@ class UserSyncService:
     @staticmethod
     def _needs_profile_enrichment(claims: ClerkTokenClaims) -> bool:
         return not claims.primary_email or claims.display_name == "Pulse AI User" or not claims.avatar
+
+    @staticmethod
+    def _resolve_bootstrap_role(*, clerk_user_id: str, email: str | None) -> UserRole | None:
+        normalized_email = (email or "").lower()
+        admin_emails = {item.lower() for item in settings.ADMIN_EMAILS}
+        admin_clerk_ids = set(settings.ADMIN_CLERK_USER_IDS)
+
+        if clerk_user_id in admin_clerk_ids or normalized_email in admin_emails:
+            return UserRole.OWNER
+        return None
 
 
 user_sync_service = UserSyncService()
