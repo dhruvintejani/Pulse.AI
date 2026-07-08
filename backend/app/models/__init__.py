@@ -4,7 +4,9 @@ from app.models.feedback import Feedback
 from app.models.folder import Folder
 from app.models.message import Message
 from app.models.notification import Notification
+from app.models.role import RolePermission
 from app.models.settings import UserSettings
+from app.models.system_log import SystemLog
 from app.models.user import User
 
 DOCUMENT_MODELS = [
@@ -16,6 +18,8 @@ DOCUMENT_MODELS = [
     Notification,
     UserSettings,
     Feedback,
+    SystemLog,
+    RolePermission,
 ]
 
 __all__ = [
@@ -25,6 +29,8 @@ __all__ = [
     "Folder",
     "Message",
     "Notification",
+    "RolePermission",
+    "SystemLog",
     "User",
     "UserSettings",
     "DOCUMENT_MODELS",
