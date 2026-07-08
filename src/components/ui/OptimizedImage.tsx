@@ -39,7 +39,7 @@ const OptimizedImage = ({
   return (
     <img
       {...props}
-      alt={alt}
+      alt={alt ?? ''}
       src={resolvedSrc}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
@@ -48,7 +48,7 @@ const OptimizedImage = ({
       onError={handleError}
       onLoad={handleLoad}
       className={cn(
-        'transition-opacity duration-300',
+        'transition-opacity duration-300 motion-reduce:transition-none',
         loaded ? 'opacity-100' : 'opacity-0',
         !loaded && fallbackClassName,
         className
