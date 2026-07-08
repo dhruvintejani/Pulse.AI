@@ -1,5 +1,5 @@
 import { forwardRef, memo } from 'react';
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes, KeyboardEvent, ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -59,7 +59,7 @@ const CardRoot = forwardRef<HTMLDivElement, CardProps>(({
     ...(isInteractive && { whileHover: { y: -3, scale: 1.005 } }),
   } : {};
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event);
     if (!onClick || event.defaultPrevented) return;
     if (event.key === 'Enter' || event.key === ' ') {
