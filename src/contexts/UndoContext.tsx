@@ -1,4 +1,4 @@
-import { createContext, memo, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { RotateCcw, X } from 'lucide-react';
@@ -31,8 +31,14 @@ const createId = () => (
 );
 
 const UndoToast = memo(({ action, onUndo, onDismiss }: { action: UndoAction; onUndo: () => void; onDismiss: () => void }) => {
-  const elapsed = Math.min(Date.now() - action.createdAt, action.duration);
+  const [now, setNow] = useState(() => Date.now());
+  const elapsed = Math.min(now - action.createdAt, action.duration);
   const remaining = Math.max(0, 100 - Math.round((elapsed / action.duration) * 100));
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 160);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <motion.div
