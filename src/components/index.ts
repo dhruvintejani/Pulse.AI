@@ -5,6 +5,7 @@ export * from './common';
 export * from './dashboard';
 export * from './data';
 export * from './documents';
+export * from './experience';
 export * from './layout';
 export * from './profile';
 export * from './search';
