@@ -1,5 +1,5 @@
 import { cloneElement, isValidElement, memo, useId, useState } from 'react';
-import type { ReactElement, ReactNode } from 'react';
+import type { FocusEvent, KeyboardEvent, MouseEvent, ReactElement, ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -23,23 +23,23 @@ const Tooltip = ({ content, children, side = 'top', className }: TooltipProps) =
 
   const child = cloneElement(children, {
     'aria-describedby': open ? tooltipId : children.props['aria-describedby'],
-    onFocus: (event: React.FocusEvent<HTMLElement>) => {
+    onFocus: (event: FocusEvent<HTMLElement>) => {
       children.props.onFocus?.(event);
       setOpen(true);
     },
-    onBlur: (event: React.FocusEvent<HTMLElement>) => {
+    onBlur: (event: FocusEvent<HTMLElement>) => {
       children.props.onBlur?.(event);
       setOpen(false);
     },
-    onMouseEnter: (event: React.MouseEvent<HTMLElement>) => {
+    onMouseEnter: (event: MouseEvent<HTMLElement>) => {
       children.props.onMouseEnter?.(event);
       setOpen(true);
     },
-    onMouseLeave: (event: React.MouseEvent<HTMLElement>) => {
+    onMouseLeave: (event: MouseEvent<HTMLElement>) => {
       children.props.onMouseLeave?.(event);
       setOpen(false);
     },
-    onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
+    onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
       children.props.onKeyDown?.(event);
       if (event.key === 'Escape') setOpen(false);
     },
