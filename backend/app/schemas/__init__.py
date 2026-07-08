@@ -16,6 +16,16 @@ from app.schemas.chat import (
     TypingStatusUpdate,
 )
 from app.schemas.common import ErrorResponse, Page, PageMeta, PaginationParams, SuccessResponse
+from app.schemas.document import (
+    DocumentDetailResponse,
+    DocumentFacetResponse,
+    DocumentMove,
+    DocumentPreviewResponse,
+    DocumentRename,
+    DocumentResponse,
+    DocumentUpdate,
+    DocumentUploadResult,
+)
 from app.schemas.health import HealthResponse
 
 __all__ = [
@@ -28,6 +38,14 @@ __all__ = [
     "ConversationResponse",
     "ConversationToggleResponse",
     "ConversationUpdate",
+    "DocumentDetailResponse",
+    "DocumentFacetResponse",
+    "DocumentMove",
+    "DocumentPreviewResponse",
+    "DocumentRename",
+    "DocumentResponse",
+    "DocumentUpdate",
+    "DocumentUploadResult",
     "ErrorResponse",
     "HealthResponse",
     "MessageCreate",
