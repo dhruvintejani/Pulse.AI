@@ -39,6 +39,14 @@ class Settings(BaseSettings):
     RATE_LIMIT_DEFAULT: str = "120/minute"
     RATE_LIMIT_HEALTH: str = "60/minute"
 
+    DOCUMENT_STORAGE_PROVIDER: str = "metadata"
+    DOCUMENT_MAX_UPLOAD_SIZE_MB: int = 25
+    DOCUMENT_PREVIEW_MAX_CHARS: int = 5000
+    CLOUDINARY_CLOUD_NAME: str | None = None
+    CLOUDINARY_API_KEY: str | None = None
+    CLOUDINARY_API_SECRET: str | None = None
+    CLOUDINARY_FOLDER: str = "pulse-ai/documents"
+
     AI_DEFAULT_PROVIDER: str = "mock"
     AI_ENABLED_PROVIDERS: list[str] = Field(default_factory=lambda: ["mock"])
     AI_DEFAULT_MODEL: str = "pulse-ai-default"
@@ -64,6 +72,9 @@ class Settings(BaseSettings):
     @field_validator(
         "CLERK_AUDIENCE",
         "CLERK_SECRET_KEY",
+        "CLOUDINARY_CLOUD_NAME",
+        "CLOUDINARY_API_KEY",
+        "CLOUDINARY_API_SECRET",
         "OPENAI_API_KEY",
         "GEMINI_API_KEY",
         "CLAUDE_API_KEY",
@@ -80,6 +91,10 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT.lower() == "production"
+
+    @property
+    def document_max_upload_size_bytes(self) -> int:
+        return self.DOCUMENT_MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
     @property
     def ai_provider_api_keys(self) -> dict[str, str | None]:
