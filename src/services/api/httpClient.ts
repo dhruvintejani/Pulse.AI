@@ -32,7 +32,7 @@ const applyAuthHeader = async (config: InternalAxiosRequestConfig) => {
 };
 
 export const httpClient = axios.create({
-  baseURL: env.apiBaseUrl,
+  baseURL: env.apiRootUrl,
   timeout: env.apiTimeoutMs,
   withCredentials: env.apiWithCredentials,
   headers: {
