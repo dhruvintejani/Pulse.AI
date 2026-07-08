@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/constants/queryKeys';
 import { globalSearchService } from '@/services/search';
@@ -9,7 +9,7 @@ const defaultFilters: SearchEntityType[] = ['chat', 'message', 'document', 'user
 
 export const useGlobalSearch = () => {
   const queryClient = useQueryClient();
-  const [query, setQuery] = useState('');
+  const [query, setQueryState] = useState('');
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<SearchEntityType[]>(defaultFilters);
   const debouncedQuery = useDebouncedValue(query, 320);
@@ -27,30 +27,32 @@ export const useGlobalSearch = () => {
     staleTime: 60_000,
   });
 
-  const recentSearches = searchQuery.data?.recent_searches ?? recentSearchesQuery.data ?? [];
-  const items = searchQuery.data?.items ?? [];
+  const setQuery = useCallback((value: string) => {
+    setQueryState(value);
+    setPage(1);
+  }, []);
 
-  const toggleFilter = (filter: SearchEntityType) => {
+  const toggleFilter = useCallback((filter: SearchEntityType) => {
     setPage(1);
     setFilters((current) => (
       current.includes(filter)
         ? current.filter((item) => item !== filter)
         : [...current, filter]
     ));
-  };
+  }, []);
 
-  const clearRecentSearches = async () => {
+  const clearRecentSearches = useCallback(async () => {
     await globalSearchService.clearRecentSearches();
     await queryClient.invalidateQueries({ queryKey: queryKeys.recentSearches });
-  };
+  }, [queryClient]);
+
+  const recentSearches = searchQuery.data?.recent_searches ?? recentSearchesQuery.data ?? [];
+  const items = searchQuery.data?.items ?? [];
 
   return useMemo(() => ({
     query,
     debouncedQuery,
-    setQuery: (value: string) => {
-      setQuery(value);
-      setPage(1);
-    },
+    setQuery,
     page,
     setPage,
     filters,
@@ -63,5 +65,5 @@ export const useGlobalSearch = () => {
     hasNext: searchQuery.data?.has_next ?? false,
     isSearching: searchQuery.isFetching,
     isEmpty: debouncedQuery.trim().length > 0 && !searchQuery.isFetching && items.length === 0,
-  }), [debouncedQuery, filters, items, page, recentSearches, searchQuery.data?.has_next, searchQuery.data?.total, searchQuery.isFetching, query]);
+  }), [clearRecentSearches, debouncedQuery, filters, items, page, query, recentSearches, searchQuery.data?.has_next, searchQuery.data?.total, searchQuery.isFetching, setQuery, toggleFilter]);
 };
