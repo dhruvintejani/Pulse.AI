@@ -3,14 +3,15 @@ import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FileText, Home, MessageSquare, Settings, Zap } from 'lucide-react';
 import { AUTH_ROUTES, DASHBOARD_PATHS, ROUTES } from '@/constants/routes';
+import { routePreloaders } from '@/routes/lazyPages';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { id: 'home', label: 'Home', icon: Home, path: ROUTES.HOME },
-  { id: 'chat', label: 'Chat', icon: MessageSquare, path: DASHBOARD_PATHS.CHAT },
-  { id: 'pulse', label: 'Pulse', icon: Zap, path: DASHBOARD_PATHS.ROOT, center: true },
-  { id: 'docs', label: 'Docs', icon: FileText, path: DASHBOARD_PATHS.DOCUMENTS },
-  { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS },
+  { id: 'home', label: 'Home', icon: Home, path: ROUTES.HOME, preload: routePreloaders.landing },
+  { id: 'chat', label: 'Chat', icon: MessageSquare, path: DASHBOARD_PATHS.CHAT, preload: routePreloaders.chat },
+  { id: 'pulse', label: 'Pulse', icon: Zap, path: DASHBOARD_PATHS.ROOT, center: true, preload: routePreloaders.dashboard },
+  { id: 'docs', label: 'Docs', icon: FileText, path: DASHBOARD_PATHS.DOCUMENTS, preload: routePreloaders.documents },
+  { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS, preload: routePreloaders.settings },
 ];
 
 const BottomNav = () => {
@@ -44,6 +45,7 @@ const BottomNav = () => {
           {navItems.map((item) => {
             const active = isActive(item.path);
             const Icon = item.icon;
+            const handlePreload = () => void item.preload?.();
 
             if (item.center) {
               return (
@@ -52,6 +54,8 @@ const BottomNav = () => {
                   type="button"
                   aria-label="Open Pulse dashboard"
                   aria-current={active ? 'page' : undefined}
+                  onMouseEnter={handlePreload}
+                  onFocus={handlePreload}
                   onClick={() => handleNavigate(item.path)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.93 }}
@@ -71,6 +75,8 @@ const BottomNav = () => {
                 type="button"
                 aria-label={item.label}
                 aria-current={active ? 'page' : undefined}
+                onMouseEnter={handlePreload}
+                onFocus={handlePreload}
                 onClick={() => handleNavigate(item.path)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.93 }}
