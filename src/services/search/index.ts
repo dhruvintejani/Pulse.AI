@@ -1,0 +1,1 @@
+export { globalSearchService } from './searchService';
