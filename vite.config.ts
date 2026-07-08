@@ -6,6 +6,7 @@ import { defineConfig } from "vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const enableSourceMaps = process.env.VITE_ENABLE_SOURCEMAPS === "true";
 
 const getManualChunk = (id: string) => {
   if (!id.includes("node_modules")) return undefined;
@@ -31,15 +32,20 @@ export default defineConfig({
   },
   esbuild: {
     drop: process.env.NODE_ENV === "production" ? ["console", "debugger"] : [],
+    legalComments: "none",
   },
   build: {
     target: "es2020",
     cssCodeSplit: true,
+    cssMinify: "esbuild",
     minify: "esbuild",
-    sourcemap: false,
+    sourcemap: enableSourceMaps,
     assetsInlineLimit: 2048,
     chunkSizeWarningLimit: 750,
     reportCompressedSize: false,
+    modulePreload: {
+      polyfill: true,
+    },
     rollupOptions: {
       output: {
         manualChunks: getManualChunk,
