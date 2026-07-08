@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F8F4EC" />
+    <title>Pulse AI Offline</title>
+    <style>
+      :root { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1F1F1F; background: #F8F4EC; }
+      body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
+      main { max-width: 560px; border: 1px solid rgba(0,0,0,.08); border-radius: 32px; background: rgba(255,253,248,.92); padding: 36px; box-shadow: 0 24px 70px rgba(0,0,0,.10); text-align: center; }
+      .icon { width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 22px; display: grid; place-items: center; background: rgba(233,162,76,.14); color: #E9A24C; font-weight: 900; font-size: 24px; }
+      h1 { margin: 0; font-size: clamp(28px, 6vw, 44px); letter-spacing: -.04em; }
+      p { margin: 12px auto 0; color: #666; line-height: 1.7; }
+      button { margin-top: 24px; border: 0; border-radius: 14px; padding: 12px 18px; background: linear-gradient(135deg, #E9A24C, #D4853A); color: white; font-weight: 800; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="icon">AI</div>
+      <h1>You are offline</h1>
+      <p>Pulse AI has cached the app shell, so you can reopen available pages. Some live data and API actions will sync when your connection returns.</p>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+  </body>
+</html>
