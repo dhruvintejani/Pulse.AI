@@ -107,7 +107,11 @@ const DocumentUploadModal = ({ open, categories, onClose, onUpload }: DocumentUp
                   key={`${file.name}-${file.size}-${file.lastModified}`}
                   draggable={!uploading}
                   onDragStart={() => setDragIndex(index)}
-                  onDragEnter={() => dragIndex !== null && dragIndex !== index && moveFile(dragIndex, index)}
+                  onDragEnter={() => {
+                    if (dragIndex === null || dragIndex === index) return;
+                    moveFile(dragIndex, index);
+                    setDragIndex(index);
+                  }}
                   onDragEnd={() => setDragIndex(null)}
                   className={cn(
                     'flex items-center gap-3 rounded-xl border border-[var(--ds-color-border)] bg-[var(--ds-color-surface-muted)] p-3 transition-all',
