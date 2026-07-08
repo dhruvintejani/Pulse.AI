@@ -64,7 +64,12 @@ const SignupPage = () => {
         password,
       });
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-      navigate(ROUTES.VERIFY, { state: { email: email.trim() } });
+      navigate(ROUTES.VERIFY, {
+        state: {
+          email: email.trim(),
+          statusMessage: 'Verification code sent. Check your inbox to finish creating your account.',
+        },
+      });
     } catch (error) {
       setFieldErrors(getClerkFieldErrors(error));
       setAuthError(getClerkErrorMessage(error, 'Unable to create your account. Please try again.'));
@@ -178,7 +183,7 @@ const SignupPage = () => {
             <h2 className="text-2xl font-black text-[#1F1F1F] mb-2">Create your account</h2>
             <p className="text-sm text-[#666]">
               Already have an account?{' '}
-              <button onClick={() => navigate(ROUTES.LOGIN)} className="text-[#E9A24C] font-semibold hover:underline">
+              <button type="button" onClick={() => navigate(ROUTES.LOGIN)} className="text-[#E9A24C] font-semibold hover:underline">
                 Sign in
               </button>
             </p>
@@ -289,6 +294,7 @@ const SignupPage = () => {
               className="w-full mt-2"
               iconRight={<ArrowRight size={16} />}
               loading={isSubmitting}
+              disabled={busy || !isLoaded}
             >
               Create free account
             </Button>
