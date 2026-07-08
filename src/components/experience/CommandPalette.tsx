@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -19,8 +20,8 @@ import {
   Users,
   X,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
 import Dialog from '@/components/ui/Dialog';
 import EmptyState from '@/components/ui/EmptyState';
 import { DASHBOARD_PATHS, ROUTES } from '@/constants/routes';
@@ -34,7 +35,7 @@ interface CommandItem {
   description: string;
   keywords: string;
   shortcut?: string;
-  icon: typeof Search;
+  icon: LucideIcon;
   run: () => void;
 }
 
@@ -54,7 +55,7 @@ const CommandPalette = () => {
   );
 
   useKeyboardShortcut(
-    (event) => event.key === '?' && !event.shiftKey,
+    (event) => event.key === '?',
     () => setOpen(true)
   );
 
@@ -99,7 +100,7 @@ const CommandPalette = () => {
     setOpen(false);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       setActiveIndex((current) => (current + 1) % Math.max(filteredCommands.length, 1));
