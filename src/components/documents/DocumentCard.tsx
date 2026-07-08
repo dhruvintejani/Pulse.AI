@@ -1,13 +1,14 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Eye, MoreHorizontal, Star, Trash2 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import type { MockDocument } from '@/constants/mockData';
 
 interface DocumentCardProps {
   document: MockDocument;
-  icon: typeof Eye;
+  icon: LucideIcon;
   iconClassName: string;
   iconContainerClassName: string;
   hovered: boolean;
