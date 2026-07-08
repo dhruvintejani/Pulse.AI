@@ -1,0 +1,33 @@
+from enum import Enum
+from typing import Any
+from beanie import PydanticObjectId
+from pydantic import Field
+from pymongo import ASCENDING, IndexModel
+from app.models.base import BASE_INDEXES, BaseDocument
+
+
+class ThemeMode(str, Enum):
+    LIGHT = "light"
+    DARK = "dark"
+    SYSTEM = "system"
+
+
+class UserSettings(BaseDocument):
+    user_id: PydanticObjectId
+    theme: ThemeMode = ThemeMode.SYSTEM
+    language: str = Field(default="en", min_length=2, max_length=16)
+    timezone: str = Field(default="UTC", min_length=1, max_length=80)
+    notification_preferences: dict[str, Any] = Field(default_factory=dict)
+    ai_preferences: dict[str, Any] = Field(default_factory=dict)
+    privacy_preferences: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    class Settings:
+        name = "settings"
+        use_revision = True
+        validate_on_save = True
+        indexes = [
+            *BASE_INDEXES,
+            IndexModel([("user_id", ASCENDING)], unique=True, name="uq_settings_user_id", partialFilterExpression={"is_deleted": False}),
+            IndexModel([("theme", ASCENDING), ("language", ASCENDING)], name="idx_settings_theme_language"),
+        ]
