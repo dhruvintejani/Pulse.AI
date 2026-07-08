@@ -10,6 +10,9 @@ class UserSyncService:
         if user is None:
             user = await User.find_one({"external_auth_id": claims.sub, "is_deleted": False})
 
+        if user is None and claims.primary_email:
+            user = await User.find_one({"email": claims.primary_email, "is_deleted": False})
+
         if user is None:
             user = User(
                 clerk_user_id=claims.sub,
