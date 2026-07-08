@@ -10,9 +10,9 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const sizes = {
-  sm: 'w-8 h-8',
-  md: 'w-9 h-9',
-  lg: 'w-10 h-10',
+  sm: 'h-9 w-9',
+  md: 'h-10 w-10',
+  lg: 'h-11 w-11',
 };
 
 const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(({
@@ -32,9 +32,9 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(({
     aria-label={label}
     aria-pressed={active ?? undefined}
     className={cn(
-      'inline-flex shrink-0 items-center justify-center rounded-xl text-[#999] transition-all duration-200 hover:bg-[rgba(0,0,0,0.04)] hover:text-[#666] disabled:cursor-not-allowed disabled:opacity-50 focus-ring motion-reduce:transition-none',
+      'inline-flex shrink-0 items-center justify-center rounded-xl text-[var(--ds-color-subtle)] transition-all duration-200 hover:bg-[var(--ds-color-accent-soft)] hover:text-[var(--ds-color-muted)] disabled:cursor-not-allowed disabled:opacity-50 ds-focus-ring motion-reduce:transition-none',
       sizes[size],
-      active && 'text-[#E9A24C] bg-[rgba(233,162,76,0.08)]',
+      active && 'bg-[var(--ds-color-accent-soft)] text-[var(--ds-color-accent)]',
       className
     )}
     {...props}
