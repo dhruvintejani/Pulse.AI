@@ -49,15 +49,9 @@ const CardRoot = forwardRef<HTMLDivElement, CardProps>(({
   ...props
 }, ref) => {
   const prefersReducedMotion = useReducedMotion();
+  const shouldAnimate = animate && !prefersReducedMotion;
   const resolvedVariant = glass ? 'glass' : variant;
   const isInteractive = Boolean(interactive || hover || onClick);
-  const Component = animate && !prefersReducedMotion ? motion.div : 'div';
-  const motionProps = animate && !prefersReducedMotion ? {
-    initial: { opacity: 0, y: 14 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.32, delay, ease: [0.2, 0, 0, 1] },
-    ...(isInteractive && { whileHover: { y: -3, scale: 1.005 } }),
-  } : {};
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event);
@@ -69,18 +63,21 @@ const CardRoot = forwardRef<HTMLDivElement, CardProps>(({
   };
 
   return (
-    <Component
+    <motion.div
       ref={ref}
       role={role ?? (onClick ? 'button' : undefined)}
       tabIndex={tabIndex ?? (onClick ? 0 : undefined)}
+      initial={shouldAnimate ? { opacity: 0, y: 14 } : false}
+      animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
+      transition={shouldAnimate ? { duration: 0.32, delay, ease: [0.2, 0, 0, 1] } : undefined}
+      whileHover={shouldAnimate && isInteractive ? { y: -3, scale: 1.005 } : undefined}
       className={cn(cardVariants[resolvedVariant], cardPadding[padding], isInteractive && 'ds-card-interactive cursor-pointer ds-focus-ring', className)}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      {...motionProps}
       {...props}
     >
       {children}
-    </Component>
+    </motion.div>
   );
 });
 CardRoot.displayName = 'Card';
