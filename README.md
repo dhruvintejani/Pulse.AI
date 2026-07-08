@@ -15,6 +15,8 @@ Frontend:
 - Axios
 - Framer Motion
 - Recharts
+- Reusable design system primitives
+- WCAG-oriented accessibility patterns
 
 Backend:
 
@@ -66,6 +68,24 @@ venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env
 uvicorn app.main:app --reload
+```
+
+## Design system
+
+Reusable UI primitives live in `src/components/ui`, and design tokens live in `src/styles/design-system.css`.
+
+Core primitives include Button, Input, Card, Dialog, Dropdown, Badge, Avatar, Alert, Toast, Table, Tabs, Accordion, Tooltip, Progress, Skeleton, EmptyState, IconButton, VisuallyHidden, and OptimizedImage.
+
+Read the full design system guide:
+
+```text
+docs/DESIGN_SYSTEM.md
+```
+
+Read the accessibility audit checklist:
+
+```text
+docs/ACCESSIBILITY_AUDIT.md
 ```
 
 ## Frontend environment variables
@@ -202,6 +222,8 @@ npm run typecheck
 
 Frontend:
 
+- Design system tokens and reusable primitives.
+- Accessible dialogs, dropdowns, tabs, accordions, forms, toasts, progress bars, and tables.
 - SPA routing configured for Vercel.
 - Static asset caching for hashed files.
 - Vendor chunk splitting.
@@ -235,4 +257,6 @@ backend/.env.production.example
 backend/Dockerfile
 backend/docker-compose.yml
 docs/DEPLOYMENT.md
+docs/DESIGN_SYSTEM.md
+docs/ACCESSIBILITY_AUDIT.md
 ```
