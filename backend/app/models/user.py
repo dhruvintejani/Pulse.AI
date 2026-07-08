@@ -20,8 +20,9 @@ class UserStatus(str, Enum):
 
 
 class User(BaseDocument):
+    clerk_user_id: str | None = Field(default=None, max_length=128)
     external_auth_id: str | None = Field(default=None, max_length=128)
-    email: EmailStr
+    email: EmailStr | None = None
     full_name: str = Field(..., min_length=1, max_length=120)
     username: str | None = Field(default=None, min_length=2, max_length=60)
     avatar_url: str | None = Field(default=None, max_length=2000)
@@ -38,7 +39,8 @@ class User(BaseDocument):
         validate_on_save = True
         indexes = [
             *BASE_INDEXES,
-            IndexModel([("email", ASCENDING)], unique=True, name="uq_users_email", partialFilterExpression={"is_deleted": False}),
+            IndexModel([("clerk_user_id", ASCENDING)], unique=True, sparse=True, name="uq_users_clerk_user_id"),
+            IndexModel([("email", ASCENDING)], unique=True, sparse=True, name="uq_users_email"),
             IndexModel([("external_auth_id", ASCENDING)], unique=True, sparse=True, name="uq_users_external_auth_id"),
             IndexModel([("username", ASCENDING)], unique=True, sparse=True, name="uq_users_username"),
             IndexModel([("status", ASCENDING), ("role", ASCENDING)], name="idx_users_status_role"),
