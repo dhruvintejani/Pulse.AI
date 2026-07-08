@@ -71,6 +71,11 @@ a {
   isolation: isolate;
 }
 
+.btn-primary > * {
+  position: relative;
+  z-index: 1;
+}
+
 .btn-primary::after {
   content: '';
   position: absolute;
@@ -80,7 +85,7 @@ a {
   opacity: 0;
   transform: translateX(-85%);
   transition: opacity 240ms var(--pulse-ease), transform 520ms var(--pulse-ease);
-  z-index: -1;
+  z-index: 0;
 }
 
 @media (hover: hover) and (pointer: fine) {
