@@ -22,7 +22,7 @@ export const useMarkApiNotificationRead = () => {
 export const useMarkAllApiNotificationsRead = () => {
   const queryClient = useQueryClient();
   return useApiMutation(
-    notificationsApi.markAllRead,
+    () => notificationsApi.markAllRead(),
     { onSuccess: () => void queryClient.invalidateQueries({ queryKey: queryKeys.api.notifications }) }
   );
 };
@@ -38,7 +38,7 @@ export const useDeleteApiNotification = () => {
 export const useClearApiNotifications = () => {
   const queryClient = useQueryClient();
   return useApiMutation(
-    notificationsApi.clearAll,
+    () => notificationsApi.clearAll(),
     { onSuccess: () => void queryClient.invalidateQueries({ queryKey: queryKeys.api.notifications }) }
   );
 };
