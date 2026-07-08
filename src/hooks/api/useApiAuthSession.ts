@@ -24,5 +24,5 @@ export const useCreateApiSession = () => {
   );
 };
 
-export const useRefreshApiSession = () => useApiMutation(authApi.refreshSession);
-export const useLogoutApiSession = () => useApiMutation(authApi.logout);
+export const useRefreshApiSession = () => useApiMutation(() => authApi.refreshSession());
+export const useLogoutApiSession = () => useApiMutation(() => authApi.logout());
