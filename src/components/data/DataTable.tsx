@@ -16,8 +16,8 @@ export interface DataTableColumn<T> {
 }
 
 interface DataTableProps<T> {
-  data: T[];
-  columns: DataTableColumn<T>[];
+  data: readonly T[];
+  columns: readonly DataTableColumn<T>[];
   getRowId: (row: T) => string;
   searchPlaceholder?: string;
   loading?: boolean;
