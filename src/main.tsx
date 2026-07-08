@@ -4,6 +4,7 @@ import './index.css';
 import './styles/theme.css';
 import './styles/polish.css';
 import './styles/responsive.css';
+import './styles/product-polish.css';
 import App from './App';
 import { AppProviders } from './contexts';
 
