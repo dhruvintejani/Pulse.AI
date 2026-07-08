@@ -1,3 +1,4 @@
+from app.services.admin_service import admin_service
 from app.services.chat_service import chat_service
 from app.services.clerk_auth import clerk_auth_service
 from app.services.dashboard_service import dashboard_service
@@ -7,4 +8,4 @@ from app.services.notification_service import notification_service
 from app.services.typing_status import typing_status_service
 from app.services.user_sync import user_sync_service
 
-__all__ = ["chat_service", "clerk_auth_service", "dashboard_service", "document_service", "file_upload_service", "notification_service", "typing_status_service", "user_sync_service"]
+__all__ = ["admin_service", "chat_service", "clerk_auth_service", "dashboard_service", "document_service", "file_upload_service", "notification_service", "typing_status_service", "user_sync_service"]
