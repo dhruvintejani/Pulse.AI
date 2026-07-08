@@ -38,10 +38,10 @@ const Avatar = ({ src, name, size = 'md', className, online }: AvatarProps) => {
   const label = name ? `${name}${online === true ? ', online' : online === false ? ', offline' : ''}` : 'Pulse AI avatar';
 
   return (
-    <div className={cn('relative inline-flex shrink-0', className)} aria-label={label} title={name}>
+    <div className={cn('relative inline-flex shrink-0', className)} aria-label={label} role="img" title={name}>
       <div
         className={cn(
-          'rounded-full overflow-hidden flex items-center justify-center font-semibold',
+          'rounded-full overflow-hidden flex items-center justify-center font-semibold shadow-premium-sm',
           sizes[size],
           !src && 'bg-gradient-to-br from-[#E9A24C] to-[#D4853A] text-white'
         )}
