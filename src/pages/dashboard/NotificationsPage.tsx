@@ -1,9 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bell, Check, CheckCircle2, Filter, Inbox, Search, Settings, Sparkles, Trash2, X } from 'lucide-react';
 import Skeleton from '@/components/ui/Skeleton';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import ContextMenu from '@/components/ui/ContextMenu';
+import EmptyState from '@/components/ui/EmptyState';
+import { useConfirmation } from '@/contexts/ConfirmationContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
 import type { AppNotification, NotificationPriority, NotificationType } from '@/types/notification';
@@ -52,69 +55,89 @@ const NotificationCard = ({
   const Icon = notification.icon;
 
   return (
-    <motion.article
-      layout
-      initial={{ opacity: 0, x: -18, scale: 0.98 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 18, scale: 0.98 }}
-      transition={{ delay: index * 0.035, duration: 0.24 }}
-      whileHover={{ y: -2, x: 2 }}
-      className={cn(
-        'group relative overflow-hidden rounded-2xl border p-4 shadow-card transition-all duration-200',
-        notification.unread
-          ? 'border-[rgba(233,162,76,0.2)] bg-[rgba(233,162,76,0.06)]'
-          : 'border-[rgba(0,0,0,0.05)] bg-[#FFFDF8]'
-      )}
+    <ContextMenu
+      label={`${notification.title} actions`}
+      items={[
+        {
+          id: 'read',
+          label: notification.unread ? 'Mark as read' : 'Already read',
+          icon: <CheckCircle2 size={14} />,
+          disabled: !notification.unread,
+          onSelect: () => onMarkRead(notification.id),
+        },
+        {
+          id: 'delete',
+          label: 'Delete notification',
+          icon: <Trash2 size={14} />,
+          destructive: true,
+          onSelect: () => onDelete(notification.id),
+        },
+      ]}
     >
-      {notification.unread && <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#E9A24C] to-[#D4853A]" aria-hidden="true" />}
-      <div className="flex gap-3 sm:gap-4">
-        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', notification.iconBg)}>
-          <Icon size={19} className={notification.iconColor} aria-hidden="true" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-sm font-black leading-tight text-[#1F1F1F]">{notification.title}</h2>
-                {notification.unread && <span className="h-2 w-2 rounded-full bg-[#E9A24C] shadow-[0_0_0_4px_rgba(233,162,76,0.12)]" aria-label="Unread" />}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                <Badge variant="accent" size="sm">{notification.category}</Badge>
-                <Badge variant={priorityVariant[notification.priority]} size="sm">{notification.priority}</Badge>
-                <span className="text-[11px] text-[#BBB]">{notification.time}</span>
+      <motion.article
+        layout
+        initial={{ opacity: 0, x: -18, scale: 0.98 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
+        exit={{ opacity: 0, x: 18, scale: 0.98 }}
+        transition={{ delay: index * 0.035, duration: 0.24 }}
+        whileHover={{ y: -2, x: 2 }}
+        className={cn(
+          'group relative overflow-hidden rounded-2xl border p-4 shadow-card transition-all duration-200',
+          notification.unread
+            ? 'border-[rgba(233,162,76,0.2)] bg-[rgba(233,162,76,0.06)]'
+            : 'border-[rgba(0,0,0,0.05)] bg-[#FFFDF8]'
+        )}
+      >
+        {notification.unread && <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#E9A24C] to-[#D4853A]" aria-hidden="true" />}
+        <div className="flex gap-3 sm:gap-4">
+          <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', notification.iconBg)}>
+            <Icon size={19} className={notification.iconColor} aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-sm font-black leading-tight text-[#1F1F1F]">{notification.title}</h2>
+                  {notification.unread && <span className="h-2 w-2 rounded-full bg-[#E9A24C] shadow-[0_0_0_4px_rgba(233,162,76,0.12)]" aria-label="Unread" />}
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <Badge variant="accent" size="sm">{notification.category}</Badge>
+                  <Badge variant={priorityVariant[notification.priority]} size="sm">{notification.priority}</Badge>
+                  <span className="text-[11px] text-[#BBB]">{notification.time}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <p className="mt-2 text-sm leading-relaxed text-[#666]">{notification.desc}</p>
+            <p className="mt-2 text-sm leading-relaxed text-[#666]">{notification.desc}</p>
 
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <button type="button" className="text-xs font-bold text-[#E9A24C] transition-colors hover:text-[#D4853A] hover:underline focus-ring rounded-md">
-              {notification.action}
-            </button>
-            <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
-              {notification.unread && (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+              <button type="button" className="rounded-md text-xs font-bold text-[#E9A24C] transition-colors hover:text-[#D4853A] hover:underline focus-ring">
+                {notification.action}
+              </button>
+              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+                {notification.unread && (
+                  <button
+                    type="button"
+                    onClick={() => onMarkRead(notification.id)}
+                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-[#666] transition-colors hover:bg-[rgba(233,162,76,0.08)] hover:text-[#E9A24C] focus-ring"
+                  >
+                    <CheckCircle2 size={12} aria-hidden="true" /> Mark read
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => onMarkRead(notification.id)}
-                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-[#666] transition-colors hover:bg-[rgba(233,162,76,0.08)] hover:text-[#E9A24C] focus-ring"
+                  onClick={() => onDelete(notification.id)}
+                  aria-label={`Delete ${notification.title}`}
+                  className="rounded-lg p-1.5 text-[#CCC] transition-colors hover:bg-red-50 hover:text-red-400 focus-ring"
                 >
-                  <CheckCircle2 size={12} aria-hidden="true" /> Mark read
+                  <Trash2 size={13} aria-hidden="true" />
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={() => onDelete(notification.id)}
-                aria-label={`Delete ${notification.title}`}
-                className="rounded-lg p-1.5 text-[#CCC] transition-colors hover:bg-red-50 hover:text-red-400 focus-ring"
-              >
-                <Trash2 size={13} aria-hidden="true" />
-              </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </motion.article>
+      </motion.article>
+    </ContextMenu>
   );
 };
 
@@ -122,6 +145,7 @@ const NotificationsPage = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<NotificationFilter>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | NotificationPriority>('all');
+  const { confirm } = useConfirmation();
   const {
     notifications,
     unreadCount,
@@ -167,6 +191,27 @@ const NotificationsPage = () => {
 
   const hasNotifications = notifications.length > 0;
 
+  const confirmDelete = useCallback(async (notificationId: string) => {
+    const target = notifications.find((notification) => notification.id === notificationId);
+    const confirmed = await confirm({
+      title: 'Delete notification?',
+      description: target ? `Delete “${target.title}”? You can undo immediately after deletion.` : 'Delete this notification? You can undo immediately after deletion.',
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    });
+    if (confirmed) deleteNotification(notificationId);
+  }, [confirm, deleteNotification, notifications]);
+
+  const confirmClearAll = useCallback(async () => {
+    const confirmed = await confirm({
+      title: 'Clear all notifications?',
+      description: 'This removes every notification from the center. You will have a short undo window.',
+      confirmLabel: 'Clear all',
+      tone: 'danger',
+    });
+    if (confirmed) clearAll();
+  }, [clearAll, confirm]);
+
   return (
     <div className="h-full overflow-y-auto no-scrollbar">
       <div className="mx-auto max-w-5xl p-4 pb-32 sm:p-6">
@@ -180,11 +225,11 @@ const NotificationsPage = () => {
                 </span>
               )}
             </div>
-            <p className="text-sm text-[#999]">Search, filter, read, and manage workspace alerts.</p>
+            <p className="text-sm text-[#999]">Search, filter, read, and manage workspace alerts with optimistic updates and undo.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="secondary" size="sm" icon={<Check size={14} />} loading={isMarkingAllRead} disabled={!unreadCount} onClick={() => markAllRead()}>Mark all read</Button>
-            <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} loading={isClearingAll} disabled={!hasNotifications} onClick={() => clearAll()}>Clear all</Button>
+            <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} loading={isClearingAll} disabled={!hasNotifications} onClick={() => void confirmClearAll()}>Clear all</Button>
             <Button variant="ghost" size="sm" icon={<Settings size={14} />}>Preferences</Button>
           </div>
         </motion.div>
@@ -230,6 +275,7 @@ const NotificationsPage = () => {
                 <button
                   key={item.value}
                   type="button"
+                  aria-pressed={active}
                   onClick={() => setFilter(item.value)}
                   className={cn(
                     'inline-flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-all focus-ring',
@@ -267,7 +313,7 @@ const NotificationsPage = () => {
         </div>
 
         {isLoading && (
-          <div className="space-y-3">
+          <div className="space-y-3" aria-label="Loading notifications">
             {Array.from({ length: 6 }).map((_, index) => <Skeleton key={index} className="h-32 rounded-2xl" />)}
           </div>
         )}
@@ -283,7 +329,7 @@ const NotificationsPage = () => {
                   notification={notification}
                   index={index}
                   onMarkRead={(notificationId) => markRead(notificationId)}
-                  onDelete={(notificationId) => deleteNotification(notificationId)}
+                  onDelete={(notificationId) => void confirmDelete(notificationId)}
                 />
               ))}
             </AnimatePresence>
@@ -292,11 +338,7 @@ const NotificationsPage = () => {
 
         {!isLoading && !isError && filteredNotifications.length === 0 && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-[rgba(0,0,0,0.05)] bg-[#FFFDF8] px-6 py-14 text-center shadow-card">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(233,162,76,0.1)]">
-              <Inbox size={24} className="text-[#E9A24C]" aria-hidden="true" />
-            </div>
-            <p className="text-base font-black text-[#1F1F1F]">You're all caught up</p>
-            <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-[#999]">No notifications match the current search, category, or priority filter.</p>
+            <EmptyState title="You're all caught up" description="No notifications match the current search, category, or priority filter." icon={<Inbox size={24} />} />
           </motion.div>
         )}
       </div>
