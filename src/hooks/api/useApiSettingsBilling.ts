@@ -7,7 +7,7 @@ import type { SettingsSectionRequest } from '@/types/api';
 
 export const useApiSettings = (enabled = false) => useApiQuery(
   queryKeys.api.settings,
-  settingsApi.getAll,
+  () => settingsApi.getAll(),
   { enabled }
 );
 
@@ -21,12 +21,12 @@ export const useUpdateApiSettingsSection = <TSettings extends Record<string, unk
 
 export const useApiBillingPlans = (enabled = false) => useApiQuery(
   [...queryKeys.api.billing, 'plans'] as const,
-  billingApi.listPlans,
+  () => billingApi.listPlans(),
   { enabled }
 );
 
 export const useApiBillingSubscription = (enabled = false) => useApiQuery(
   [...queryKeys.api.billing, 'subscription'] as const,
-  billingApi.getSubscription,
+  () => billingApi.getSubscription(),
   { enabled }
 );
