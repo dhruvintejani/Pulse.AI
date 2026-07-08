@@ -1,8 +1,8 @@
 import { useSignIn } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, Lock, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -13,18 +13,27 @@ import { ROUTES } from '@/constants/routes';
 import { useAuthFormErrors } from '@/hooks/useAuthFormErrors';
 import { useOAuthLoading } from '@/hooks/useOAuthLoading';
 import { startOAuthRedirect } from '@/services/auth/oauthService';
-import type { FieldErrors, OAuthStrategy } from '@/types/auth';
+import type { AuthRedirectState, FieldErrors, OAuthStrategy } from '@/types/auth';
 import { getClerkErrorMessage, getClerkFieldErrors } from '@/utils/clerkErrors';
 import { hasErrors, validateEmail } from '@/utils/validation';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isLoaded, signIn, setActive } = useSignIn();
   const [email, setEmail] = useState(LOGIN_DEFAULTS.email);
   const [password, setPassword] = useState(LOGIN_DEFAULTS.password);
   const { fieldErrors, setFieldErrors, authError, setAuthError, clearFieldError } = useAuthFormErrors();
   const { oauthLoading, setOauthLoading, isOAuthLoading } = useOAuthLoading();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const redirectAfterSignIn = useMemo(() => {
+    const redirectState = location.state as AuthRedirectState | null;
+    const pathname = redirectState?.from?.pathname;
+    const search = redirectState?.from?.search ?? '';
+
+    return pathname?.startsWith(ROUTES.DASHBOARD) ? `${pathname}${search}` : ROUTES.DASHBOARD;
+  }, [location.state]);
 
   const validate = () => {
     const errors: FieldErrors = {};
@@ -49,7 +58,7 @@ const LoginPage = () => {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        navigate(ROUTES.DASHBOARD, { replace: true });
+        navigate(redirectAfterSignIn, { replace: true });
         return;
       }
 
@@ -172,7 +181,7 @@ const LoginPage = () => {
             <h2 className="text-2xl font-black text-[#1F1F1F] mb-2">Sign in</h2>
             <p className="text-sm text-[#666]">
               Don't have an account?{' '}
-              <button onClick={() => navigate(ROUTES.SIGNUP)} className="text-[#E9A24C] font-semibold hover:underline">
+              <button type="button" onClick={() => navigate(ROUTES.SIGNUP)} className="text-[#E9A24C] font-semibold hover:underline">
                 Sign up free
               </button>
             </p>
@@ -269,6 +278,7 @@ const LoginPage = () => {
               className="w-full mt-2"
               iconRight={<ArrowRight size={16} />}
               loading={isSubmitting}
+              disabled={busy || !isLoaded}
             >
               Sign in to workspace
             </Button>
