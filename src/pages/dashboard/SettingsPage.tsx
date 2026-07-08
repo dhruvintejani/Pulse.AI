@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -9,7 +9,6 @@ import {
   CreditCard,
   Globe,
   Languages,
-  Loader2,
   Lock,
   Monitor,
   Moon,
@@ -27,7 +26,9 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { profileDetails } from '@/constants/profile';
 import { useTheme } from '@/hooks/useTheme';
+import { useUserSettings } from '@/hooks/useUserSettings';
 import { cn } from '@/lib/utils';
+import type { UserSettingsPayload, UserSettingsResponse } from '@/types/settings';
 import type { ThemeMode } from '@/types/theme';
 
 type SettingsSectionId = 'general' | 'appearance' | 'notifications' | 'security' | 'account' | 'billing' | 'language' | 'profile' | 'theme';
@@ -49,7 +50,7 @@ const settingsSections: Array<{ id: SettingsSectionId; label: string; icon: Luci
   { id: 'general', label: 'General', icon: Settings, description: 'Workspace defaults' },
   { id: 'appearance', label: 'Appearance', icon: Palette, description: 'Layout and motion' },
   { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alerts and digests' },
-  { id: 'security', label: 'Security', icon: Shield, description: 'Password and access' },
+  { id: 'security', label: 'Security', icon: Shield, description: 'Clerk and sessions' },
   { id: 'account', label: 'Account', icon: User, description: 'Identity and data' },
   { id: 'billing', label: 'Billing', icon: CreditCard, description: 'Plan and invoices' },
   { id: 'language', label: 'Language', icon: Languages, description: 'Region settings' },
@@ -88,6 +89,115 @@ const initialSaveState: Record<SettingsSectionId, SaveStatus> = {
 };
 
 const isValidEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value.trim());
+const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+const getRecord = (value: unknown) => (isRecord(value) ? value : {});
+const getString = (record: Record<string, unknown>, key: string, fallback: string) => (typeof record[key] === 'string' ? record[key] : fallback);
+const getBoolean = (record: Record<string, unknown>, key: string, fallback: boolean) => (typeof record[key] === 'boolean' ? record[key] : fallback);
+
+const mergeSettingsIntoForms = (settings: UserSettingsResponse, current: SettingsForms): SettingsForms => {
+  const metadata = getRecord(settings.metadata);
+  const general = getRecord(metadata.general);
+  const billing = getRecord(metadata.billing);
+  const languageMeta = getRecord(metadata.language);
+  const appearance = getRecord(settings.appearance_settings);
+  const notifications = getRecord(settings.notification_preferences);
+  const profile = getRecord(settings.profile_settings);
+  const privacy = getRecord(settings.privacy_settings);
+  const security = getRecord(settings.security_settings);
+  const themeSettings = getRecord(metadata.theme);
+
+  return {
+    general: {
+      workspaceName: getString(general, 'workspaceName', current.general.workspaceName),
+      defaultHome: getString(general, 'defaultHome', current.general.defaultHome),
+      timezone: settings.timezone || getString(general, 'timezone', current.general.timezone),
+      dateFormat: getString(general, 'dateFormat', current.general.dateFormat),
+    },
+    appearance: {
+      density: getString(appearance, 'density', current.appearance.density),
+      sidebarBehavior: getString(appearance, 'sidebarBehavior', current.appearance.sidebarBehavior),
+      fontSize: getString(appearance, 'fontSize', current.appearance.fontSize),
+      animations: getBoolean(appearance, 'animations', current.appearance.animations),
+      glassEffects: getBoolean(appearance, 'glassEffects', current.appearance.glassEffects),
+    },
+    notifications: {
+      email: getBoolean(notifications, 'email', current.notifications.email),
+      push: getBoolean(notifications, 'push', current.notifications.push),
+      weeklyDigest: getBoolean(notifications, 'weeklyDigest', current.notifications.weeklyDigest),
+      productUpdates: getBoolean(notifications, 'productUpdates', current.notifications.productUpdates),
+      teamMentions: getBoolean(notifications, 'teamMentions', current.notifications.teamMentions),
+      billingAlerts: getBoolean(notifications, 'billingAlerts', current.notifications.billingAlerts),
+    },
+    security: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+      twoFactor: getBoolean(security, 'twoFactor', current.security.twoFactor),
+      sessionAlerts: getBoolean(security, 'sessionAlerts', current.security.sessionAlerts),
+      deviceReview: getBoolean(security, 'deviceReview', current.security.deviceReview),
+    },
+    account: {
+      username: getString(privacy, 'username', current.account.username),
+      recoveryEmail: getString(privacy, 'recoveryEmail', current.account.recoveryEmail),
+      dataSharing: getBoolean(privacy, 'dataSharing', current.account.dataSharing),
+      betaAccess: getBoolean(privacy, 'betaAccess', current.account.betaAccess),
+    },
+    billing: {
+      plan: getString(billing, 'plan', current.billing.plan),
+      billingEmail: getString(billing, 'billingEmail', current.billing.billingEmail),
+      taxId: getString(billing, 'taxId', current.billing.taxId),
+      autoRenew: getBoolean(billing, 'autoRenew', current.billing.autoRenew),
+      invoiceEmails: getBoolean(billing, 'invoiceEmails', current.billing.invoiceEmails),
+    },
+    language: {
+      language: settings.language || getString(languageMeta, 'language', current.language.language),
+      region: getString(languageMeta, 'region', current.language.region),
+      timezone: settings.timezone || getString(languageMeta, 'timezone', current.language.timezone),
+      currency: getString(languageMeta, 'currency', current.language.currency),
+      autoTranslate: getBoolean(languageMeta, 'autoTranslate', current.language.autoTranslate),
+    },
+    profile: {
+      name: getString(profile, 'name', current.profile.name),
+      email: getString(profile, 'email', current.profile.email),
+      company: getString(profile, 'company', current.profile.company),
+      role: getString(profile, 'role', current.profile.role),
+      location: getString(profile, 'location', current.profile.location),
+      biography: getString(profile, 'biography', current.profile.biography),
+    },
+    theme: {
+      accentColor: getString(themeSettings, 'accentColor', current.theme.accentColor),
+      cornerRadius: getString(themeSettings, 'cornerRadius', current.theme.cornerRadius),
+      contrast: getString(themeSettings, 'contrast', current.theme.contrast),
+    },
+  };
+};
+
+const buildSettingsPayload = (section: SettingsSectionId, forms: SettingsForms, theme: ThemeMode): UserSettingsPayload => {
+  const sharedMetadata = {
+    general: forms.general,
+    billing: forms.billing,
+    language: forms.language,
+    theme: forms.theme,
+  };
+
+  if (section === 'notifications') return { notification_preferences: forms.notifications };
+  if (section === 'appearance') return { appearance_settings: forms.appearance };
+  if (section === 'security') {
+    return {
+      security_settings: {
+        twoFactor: forms.security.twoFactor,
+        sessionAlerts: forms.security.sessionAlerts,
+        deviceReview: forms.security.deviceReview,
+      },
+    };
+  }
+  if (section === 'account') return { privacy_settings: forms.account };
+  if (section === 'profile') return { profile_settings: forms.profile };
+  if (section === 'language') return { language: forms.language.language, timezone: forms.language.timezone, metadata: sharedMetadata };
+  if (section === 'theme') return { theme, appearance_settings: forms.appearance, metadata: sharedMetadata };
+
+  return { metadata: sharedMetadata };
+};
 
 const Toggle = ({ checked, label, onChange }: { checked: boolean; label: string; onChange: () => void }) => (
   <button type="button" onClick={onChange} aria-label={label} aria-pressed={checked} className={cn('relative h-[22px] w-10 rounded-full transition-all duration-300 focus-ring', checked ? 'bg-[#E9A24C]' : 'bg-[rgba(0,0,0,0.12)]')}>
@@ -137,18 +247,20 @@ const ToggleRow = ({ title, description, checked, onChange }: { title: string; d
   </div>
 );
 
-const SaveFooter = ({ status, onSave }: { status: SaveStatus; onSave: () => void }) => (
+const SaveFooter = ({ status, error, onSave }: { status: SaveStatus; error?: string; onSave: () => void }) => (
   <div className="mt-6 flex flex-col justify-between gap-3 border-t border-[rgba(0,0,0,0.05)] pt-4 sm:flex-row sm:items-center">
     <AnimatePresence mode="wait">
       {status === 'success' ? (
         <motion.div key="success" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
-          <Check size={15} aria-hidden="true" /> Changes saved successfully
+          <Check size={15} aria-hidden="true" /> Saved to your account
         </motion.div>
+      ) : error ? (
+        <motion.p key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs font-semibold text-red-500">{error}</motion.p>
       ) : (
-        <motion.p key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-[#999]">Frontend-only save state. Backend can be connected later.</motion.p>
+        <motion.p key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-[#999]">Changes persist to MongoDB through the settings API with local fallback.</motion.p>
       )}
     </AnimatePresence>
-    <Button variant="primary" size="md" loading={status === 'loading'} icon={status === 'success' ? <Check size={15} /> : <Loader2 size={15} />} onClick={onSave}>
+    <Button variant="primary" size="md" loading={status === 'loading'} icon={status === 'success' ? <Check size={15} /> : undefined} onClick={onSave}>
       {status === 'success' ? 'Saved' : 'Save changes'}
     </Button>
   </div>
@@ -156,20 +268,30 @@ const SaveFooter = ({ status, onSave }: { status: SaveStatus; onSave: () => void
 
 const SettingsPage = () => {
   const { theme, resolvedTheme, setTheme } = useTheme();
+  const { settings, isLoadingSettings, isUpdatingSettings, updateSettings } = useUserSettings();
+  const hydratedRef = useRef(false);
   const [activeSection, setActiveSection] = useState<SettingsSectionId>('general');
   const [forms, setForms] = useState<SettingsForms>(initialForms);
   const [saveState, setSaveState] = useState<Record<SettingsSectionId, SaveStatus>>(initialSaveState);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    if (!settings || hydratedRef.current) return;
+    hydratedRef.current = true;
+    setForms((current) => mergeSettingsIntoForms(settings, current));
+    if (settings.theme && settings.theme !== theme) setTheme(settings.theme);
+  }, [settings, setTheme, theme]);
+
   const activeSectionMeta = useMemo(() => settingsSections.find((section) => section.id === activeSection) ?? settingsSections[0], [activeSection]);
   const ActiveSectionIcon = activeSectionMeta.icon;
 
-  const updateForm = <Section extends keyof SettingsForms>(section: Section, patch: Partial<SettingsForms[Section]>) => {
+  const updateForm = useCallback(<Section extends keyof SettingsForms>(section: Section, patch: Partial<SettingsForms[Section]>) => {
     setForms((current) => ({ ...current, [section]: { ...current[section], ...patch } }));
     setSaveState((current) => ({ ...current, [section]: 'idle' }));
-  };
+    setErrors({});
+  }, []);
 
-  const validateSection = (section: SettingsSectionId) => {
+  const validateSection = useCallback((section: SettingsSectionId) => {
     const nextErrors: Record<string, string> = {};
 
     if (section === 'general' && !forms.general.workspaceName.trim()) nextErrors.workspaceName = 'Workspace name is required.';
@@ -203,16 +325,23 @@ const SettingsPage = () => {
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
-  };
+  }, [forms]);
 
-  const handleSave = (section: SettingsSectionId) => {
+  const handleSave = useCallback(async (section: SettingsSectionId) => {
     if (!validateSection(section)) return;
     setSaveState((current) => ({ ...current, [section]: 'loading' }));
-    window.setTimeout(() => {
+
+    try {
+      await updateSettings(buildSettingsPayload(section, forms, theme));
       setSaveState((current) => ({ ...current, [section]: 'success' }));
       window.setTimeout(() => setSaveState((current) => ({ ...current, [section]: 'idle' })), 1800);
-    }, 650);
-  };
+    } catch {
+      setErrors({ save: 'Unable to save right now. Please try again.' });
+      setSaveState((current) => ({ ...current, [section]: 'idle' }));
+    }
+  }, [forms, theme, updateSettings, validateSection]);
+
+  const renderSaveFooter = (section: SettingsSectionId) => <SaveFooter status={saveState[section]} error={errors.save} onSave={() => void handleSave(section)} />;
 
   const renderGeneral = () => (
     <Panel title="General" description="Configure workspace defaults and product behavior." icon={Settings}>
@@ -222,7 +351,7 @@ const SettingsPage = () => {
         <SelectField label="Timezone" value={forms.general.timezone} options={['Pacific Time', 'Eastern Time', 'UTC', 'India Standard Time', 'Central European Time']} onChange={(value) => updateForm('general', { timezone: value })} />
         <SelectField label="Date format" value={forms.general.dateFormat} options={['MMM DD, YYYY', 'DD MMM YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY']} onChange={(value) => updateForm('general', { dateFormat: value })} />
       </div>
-      <SaveFooter status={saveState.general} onSave={() => handleSave('general')} />
+      {renderSaveFooter('general')}
     </Panel>
   );
 
@@ -244,7 +373,7 @@ const SettingsPage = () => {
         <ToggleRow title="Beautiful animations" description="Enable smooth transitions and micro-interactions." checked={forms.appearance.animations} onChange={() => updateForm('appearance', { animations: !forms.appearance.animations })} />
         <ToggleRow title="Glass effects" description="Use premium translucent surfaces and blur." checked={forms.appearance.glassEffects} onChange={() => updateForm('appearance', { glassEffects: !forms.appearance.glassEffects })} />
       </div>
-      <SaveFooter status={saveState.appearance} onSave={() => handleSave('appearance')} />
+      {renderSaveFooter('appearance')}
     </Panel>
   );
 
@@ -258,12 +387,12 @@ const SettingsPage = () => {
         <ToggleRow title="Team mentions" description="When teammates mention you in workspaces." checked={forms.notifications.teamMentions} onChange={() => updateForm('notifications', { teamMentions: !forms.notifications.teamMentions })} />
         <ToggleRow title="Billing alerts" description="Invoices, plan changes, and usage warnings." checked={forms.notifications.billingAlerts} onChange={() => updateForm('notifications', { billingAlerts: !forms.notifications.billingAlerts })} />
       </div>
-      <SaveFooter status={saveState.notifications} onSave={() => handleSave('notifications')} />
+      {renderSaveFooter('notifications')}
     </Panel>
   );
 
   const renderSecurity = () => (
-    <Panel title="Security" description="Manage password, sessions, and secure access." icon={Shield}>
+    <Panel title="Security" description="Clerk manages passwordless authentication; Pulse AI stores security preferences only." icon={Shield}>
       <div className="grid gap-4 sm:grid-cols-2">
         <Input label="Current password" type="password" showPasswordToggle value={forms.security.currentPassword} onChange={(event) => updateForm('security', { currentPassword: event.target.value })} error={errors.currentPassword} icon={<Lock size={16} />} />
         <div className="hidden sm:block" />
@@ -271,11 +400,11 @@ const SettingsPage = () => {
         <Input label="Confirm password" type="password" showPasswordToggle value={forms.security.confirmPassword} onChange={(event) => updateForm('security', { confirmPassword: event.target.value })} error={errors.confirmPassword} />
       </div>
       <div className="mt-5 rounded-2xl border border-[rgba(0,0,0,0.05)] p-4">
-        <ToggleRow title="Two-factor authentication" description="Require a second step when signing in." checked={forms.security.twoFactor} onChange={() => updateForm('security', { twoFactor: !forms.security.twoFactor })} />
+        <ToggleRow title="Two-factor authentication" description="Preference flag synced with the user settings API." checked={forms.security.twoFactor} onChange={() => updateForm('security', { twoFactor: !forms.security.twoFactor })} />
         <ToggleRow title="Session alerts" description="Notify me when a new device signs in." checked={forms.security.sessionAlerts} onChange={() => updateForm('security', { sessionAlerts: !forms.security.sessionAlerts })} />
         <ToggleRow title="Monthly device review" description="Remind me to review active sessions." checked={forms.security.deviceReview} onChange={() => updateForm('security', { deviceReview: !forms.security.deviceReview })} />
       </div>
-      <SaveFooter status={saveState.security} onSave={() => handleSave('security')} />
+      {renderSaveFooter('security')}
     </Panel>
   );
 
@@ -289,7 +418,7 @@ const SettingsPage = () => {
         <ToggleRow title="Data sharing" description="Share anonymized usage data to improve Pulse AI." checked={forms.account.dataSharing} onChange={() => updateForm('account', { dataSharing: !forms.account.dataSharing })} />
         <ToggleRow title="Beta access" description="Enable early access to experimental features." checked={forms.account.betaAccess} onChange={() => updateForm('account', { betaAccess: !forms.account.betaAccess })} />
       </div>
-      <SaveFooter status={saveState.account} onSave={() => handleSave('account')} />
+      {renderSaveFooter('account')}
     </Panel>
   );
 
@@ -311,7 +440,7 @@ const SettingsPage = () => {
         <ToggleRow title="Auto renew" description="Renew the current plan automatically." checked={forms.billing.autoRenew} onChange={() => updateForm('billing', { autoRenew: !forms.billing.autoRenew })} />
         <ToggleRow title="Invoice emails" description="Email invoices to the billing contact." checked={forms.billing.invoiceEmails} onChange={() => updateForm('billing', { invoiceEmails: !forms.billing.invoiceEmails })} />
       </div>
-      <SaveFooter status={saveState.billing} onSave={() => handleSave('billing')} />
+      {renderSaveFooter('billing')}
     </Panel>
   );
 
@@ -326,7 +455,7 @@ const SettingsPage = () => {
       <div className="mt-5 rounded-2xl border border-[rgba(0,0,0,0.05)] p-4">
         <ToggleRow title="Auto translate" description="Translate shared content into my preferred language." checked={forms.language.autoTranslate} onChange={() => updateForm('language', { autoTranslate: !forms.language.autoTranslate })} />
       </div>
-      <SaveFooter status={saveState.language} onSave={() => handleSave('language')} />
+      {renderSaveFooter('language')}
     </Panel>
   );
 
@@ -336,7 +465,7 @@ const SettingsPage = () => {
         <Avatar name={forms.profile.name} size="xl" online />
         <div>
           <p className="text-sm font-bold text-[#1F1F1F]">Profile picture</p>
-          <p className="mt-1 text-xs text-[#999]">Image upload is frontend-only for now. Backend storage can be added later.</p>
+          <p className="mt-1 text-xs text-[#999]">Avatar metadata is ready for future upload storage.</p>
           <Button variant="secondary" size="sm" className="mt-3">Change photo</Button>
         </div>
       </div>
@@ -350,7 +479,7 @@ const SettingsPage = () => {
       <div className="mt-4">
         <TextAreaField label="Biography" value={forms.profile.biography} error={errors.biography} rows={5} onChange={(value) => updateForm('profile', { biography: value })} />
       </div>
-      <SaveFooter status={saveState.profile} onSave={() => handleSave('profile')} />
+      {renderSaveFooter('profile')}
     </Panel>
   );
 
@@ -387,23 +516,20 @@ const SettingsPage = () => {
         <SelectField label="Corner radius" value={forms.theme.cornerRadius} options={['Soft', 'Rounded', 'Pill']} onChange={(value) => updateForm('theme', { cornerRadius: value })} />
         <SelectField label="Contrast" value={forms.theme.contrast} options={['Balanced', 'High', 'Soft']} onChange={(value) => updateForm('theme', { contrast: value })} />
       </div>
-      <SaveFooter status={saveState.theme} onSave={() => handleSave('theme')} />
+      {renderSaveFooter('theme')}
     </Panel>
   );
 
   const renderSection = () => {
-    const sections: Record<SettingsSectionId, ReactNode> = {
-      general: renderGeneral(),
-      appearance: renderAppearance(),
-      notifications: renderNotifications(),
-      security: renderSecurity(),
-      account: renderAccount(),
-      billing: renderBilling(),
-      language: renderLanguage(),
-      profile: renderProfile(),
-      theme: renderTheme(),
-    };
-    return sections[activeSection];
+    if (activeSection === 'general') return renderGeneral();
+    if (activeSection === 'appearance') return renderAppearance();
+    if (activeSection === 'notifications') return renderNotifications();
+    if (activeSection === 'security') return renderSecurity();
+    if (activeSection === 'account') return renderAccount();
+    if (activeSection === 'billing') return renderBilling();
+    if (activeSection === 'language') return renderLanguage();
+    if (activeSection === 'profile') return renderProfile();
+    return renderTheme();
   };
 
   return (
@@ -416,7 +542,7 @@ const SettingsPage = () => {
           </div>
           <div className="flex items-center gap-2 rounded-2xl border border-[rgba(0,0,0,0.05)] bg-[#FFFDF8] px-3 py-2 shadow-card">
             <Sparkles size={15} className="text-[#E9A24C]" aria-hidden="true" />
-            <span className="text-xs font-semibold text-[#666]">Frontend only</span>
+            <span className="text-xs font-semibold text-[#666]">{isLoadingSettings ? 'Loading settings' : isUpdatingSettings ? 'Syncing' : 'MongoDB ready'}</span>
           </div>
         </motion.div>
 
