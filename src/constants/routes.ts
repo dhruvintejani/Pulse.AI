@@ -20,6 +20,7 @@ export const DASHBOARD_SEGMENTS = {
   BILLING: 'billing',
   PROFILE: 'profile',
   TEAM: 'team',
+  ADMIN: 'admin',
 } as const;
 
 export const DASHBOARD_PATHS = {
@@ -34,6 +35,7 @@ export const DASHBOARD_PATHS = {
   BILLING: `${ROUTES.DASHBOARD}/${DASHBOARD_SEGMENTS.BILLING}`,
   PROFILE: `${ROUTES.DASHBOARD}/${DASHBOARD_SEGMENTS.PROFILE}`,
   TEAM: `${ROUTES.DASHBOARD}/${DASHBOARD_SEGMENTS.TEAM}`,
+  ADMIN: `${ROUTES.DASHBOARD}/${DASHBOARD_SEGMENTS.ADMIN}`,
 } as const;
 
 export const AUTH_ROUTES = [
