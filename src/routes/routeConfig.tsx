@@ -2,7 +2,7 @@ import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 import type { ReactElement } from 'react';
 import { Navigate } from 'react-router-dom';
 import { ProtectedRoute, PublicRoute } from '@/components/auth';
-import { DASHBOARD_SEGMENTS, ROUTES } from '@/constants';
+import { DASHBOARD_SEGMENTS, ROUTES } from '@/constants/routes';
 import RouteTransition from '@/routes/RouteTransition';
 import {
   AnalyticsPage,
