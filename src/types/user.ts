@@ -6,4 +6,6 @@ export interface CurrentUser {
   email: string;
   imageUrl: string;
   initials: string;
+  role?: 'owner' | 'admin' | 'member' | 'viewer';
+  isAdmin?: boolean;
 }
