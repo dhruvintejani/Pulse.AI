@@ -81,6 +81,10 @@ POST /api/v1/conversations/{conversation_id}/stream
 GET /api/v1/conversations/{conversation_id}/typing
 POST /api/v1/conversations/{conversation_id}/typing
 
+POST /api/v1/uploads
+POST /api/v1/uploads/validate
+GET /api/v1/uploads/{upload_id}/progress
+
 GET /api/v1/documents
 POST /api/v1/documents/upload
 GET /api/v1/documents/recent
@@ -92,7 +96,21 @@ PATCH /api/v1/documents/{document_id}
 DELETE /api/v1/documents/{document_id}
 PATCH /api/v1/documents/{document_id}/rename
 PATCH /api/v1/documents/{document_id}/move
+
+GET /api/v1/dashboard/overview
+GET /api/v1/dashboard/recent-chats
+GET /api/v1/dashboard/recent-documents
+GET /api/v1/dashboard/user-statistics
+GET /api/v1/dashboard/ai-usage
+GET /api/v1/dashboard/notifications
+GET /api/v1/dashboard/activity-timeline
+GET /api/v1/dashboard/charts
+GET /api/v1/dashboard/search
 ```
+
+## Upload module
+
+The secure upload module supports PDF, DOCX, TXT, CSV, JPG, JPEG, PNG, GIF, and WEBP. It validates extension, MIME type, file signature, UTF-8 text compatibility, maximum size, unsafe file names, and blocked executable extensions. Upload responses return metadata only and include fields needed by the frontend for upload progress UI.
 
 ## Document storage
 
@@ -144,4 +162,4 @@ app/
   utils
 ```
 
-The backend now includes architecture, MongoDB setup, ODM models, validation, indexes, soft delete, pagination/search utilities, middleware, Clerk auth integration, protected route dependencies, AI chat CRUD, document CRUD/upload/preview/search, streaming response scaffolding, typing status, provider abstraction, document storage abstraction, error handling, rate limiting, logging, CORS, and Docker support.
+The backend now includes architecture, MongoDB setup, ODM models, validation, indexes, soft delete, pagination/search utilities, middleware, Clerk auth integration, protected route dependencies, AI chat CRUD, document CRUD/upload/preview/search, secure metadata-only upload module, dashboard overview/statistics/charts APIs, streaming response scaffolding, typing status, provider abstraction, document storage abstraction, error handling, rate limiting, logging, CORS, and Docker support.
