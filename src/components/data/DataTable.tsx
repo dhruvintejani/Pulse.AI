@@ -123,10 +123,10 @@ const DataTableComponent = <T,>({
   }, [totalPages]);
 
   return (
-    <div className={cn('w-full min-w-0 overflow-hidden rounded-2xl border border-[rgba(0,0,0,0.05)] bg-[#FFFDF8] shadow-card', className)}>
-      <div className="flex flex-col gap-3 border-b border-[rgba(0,0,0,0.05)] p-3 sm:flex-row sm:flex-wrap sm:items-center sm:p-4">
+    <div className={cn('ds-card w-full min-w-0 overflow-hidden p-0', className)}>
+      <div className="flex flex-col gap-3 border-b border-[var(--ds-color-border)] p-3 sm:flex-row sm:flex-wrap sm:items-center sm:p-4">
         <div className="relative min-w-0 flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#CCC]" aria-hidden="true" />
+          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ds-color-subtle)]" aria-hidden="true" />
           <label className="sr-only" htmlFor={searchId}>Search table</label>
           <input
             id={searchId}
@@ -135,7 +135,7 @@ const DataTableComponent = <T,>({
             onChange={handleSearchChange}
             placeholder={searchPlaceholder}
             aria-label="Search table"
-            className="w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] py-2.5 pl-9 pr-4 text-sm text-[#1F1F1F] outline-none placeholder:text-[#CCC] transition-[border-color,box-shadow,background-color] focus:border-[rgba(233,162,76,0.4)]"
+            className="ds-control w-full py-2.5 pl-9 pr-4 text-sm placeholder:text-[var(--ds-color-subtle)]"
           />
         </div>
         <div className="flex min-w-0 flex-wrap gap-2">
@@ -145,28 +145,29 @@ const DataTableComponent = <T,>({
                 value={filters[column.id] ?? ''}
                 onChange={(event) => updateFilter(column.id, event.target.value)}
                 aria-label={`Filter by ${column.header}`}
-                className="w-full appearance-none rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] py-2.5 pl-3 pr-8 text-xs font-semibold text-[#666] outline-none transition-[border-color,box-shadow,background-color] focus:border-[rgba(233,162,76,0.4)] sm:min-w-36"
+                className="ds-control w-full appearance-none py-2.5 pl-3 pr-8 text-xs font-semibold text-[var(--ds-color-muted)] sm:min-w-36"
               >
                 <option value="">All {column.header}</option>
                 {column.filterOptions?.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
-              <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#CCC]" aria-hidden="true" />
+              <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ds-color-subtle)]" aria-hidden="true" />
             </div>
           ))}
         </div>
       </div>
 
-      <div className="max-w-full overflow-x-auto overscroll-x-contain no-scrollbar">
+      <div className="max-w-full overflow-x-auto overscroll-x-contain ds-scrollbar">
         <table className="w-full min-w-[680px] table-auto" aria-label={ariaLabel} aria-busy={loading || undefined}>
+          <caption className="sr-only">{ariaLabel}</caption>
           <thead>
-            <tr className="border-b border-[rgba(0,0,0,0.05)]">
+            <tr className="border-b border-[var(--ds-color-border)]">
               {columns.map((column) => {
                 const activeSort = sortBy === column.id;
                 return (
-                  <th key={column.id} scope="col" aria-sort={activeSort ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'} className={cn('whitespace-nowrap px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-[#999]', column.className)}>
-                    <button type="button" onClick={() => toggleSort(column)} disabled={!column.sortable} aria-label={column.sortable ? `Sort by ${column.header}` : column.header} className={cn('inline-flex items-center gap-1.5 rounded-md focus-ring', column.sortable && 'transition-colors hover:text-[#E9A24C]', !column.sortable && 'cursor-default')}>
+                  <th key={column.id} scope="col" aria-sort={activeSort ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'} className={cn('whitespace-nowrap px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-[var(--ds-color-subtle)]', column.className)}>
+                    <button type="button" onClick={() => toggleSort(column)} disabled={!column.sortable} aria-label={column.sortable ? `Sort by ${column.header}` : column.header} className={cn('inline-flex items-center gap-1.5 rounded-md ds-focus-ring', column.sortable && 'transition-colors hover:text-[var(--ds-color-accent)]', !column.sortable && 'cursor-default')}>
                       {column.header}
-                      {column.sortable && <ChevronsUpDown size={11} className={activeSort ? 'text-[#E9A24C]' : 'text-[#CCC]'} aria-hidden="true" />}
+                      {column.sortable && <ChevronsUpDown size={11} className={activeSort ? 'text-[var(--ds-color-accent)]' : 'text-[var(--ds-color-subtle)]'} aria-hidden="true" />}
                     </button>
                   </th>
                 );
@@ -175,15 +176,15 @@ const DataTableComponent = <T,>({
           </thead>
           <tbody>
             {loading && skeletonRows.map((_, rowIndex) => (
-              <tr key={rowIndex} className="border-b border-[rgba(0,0,0,0.04)] last:border-0">
+              <tr key={rowIndex} className="border-b border-[var(--ds-color-border)] last:border-0">
                 {columns.map((column) => <td key={column.id} className="px-4 py-4"><Skeleton className="h-4 w-28" /></td>)}
               </tr>
             ))}
 
             {!loading && paginatedData.map((row) => (
-              <tr key={getRowId(row)} className="border-b border-[rgba(0,0,0,0.04)] transition-colors last:border-0 hover:bg-[rgba(233,162,76,0.03)]">
+              <tr key={getRowId(row)} className="border-b border-[var(--ds-color-border)] transition-colors last:border-0 hover:bg-[var(--ds-color-accent-soft)] motion-reduce:transition-none">
                 {columns.map((column) => (
-                  <td key={column.id} className={cn('px-4 py-3 text-sm text-[#666]', column.className)}>
+                  <td key={column.id} className={cn('px-4 py-3 text-sm text-[var(--ds-color-muted)]', column.className)}>
                     {column.render ? column.render(row) : column.accessor(row)}
                   </td>
                 ))}
@@ -201,16 +202,16 @@ const DataTableComponent = <T,>({
         </table>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-[rgba(0,0,0,0.05)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-[#999]" aria-live="polite">
+      <div className="flex flex-col gap-3 border-t border-[var(--ds-color-border)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-[var(--ds-color-subtle)]" aria-live="polite">
           Showing {sortedData.length ? (safePage - 1) * pageSize + 1 : 0}-{Math.min(safePage * pageSize, sortedData.length)} of {sortedData.length}
         </p>
         <div className="flex items-center justify-between gap-2 sm:justify-end">
-          <button type="button" onClick={goToPreviousPage} disabled={safePage === 1} aria-label="Go to previous page" className="rounded-lg border border-[rgba(0,0,0,0.06)] p-2 text-[#999] transition-colors hover:text-[#E9A24C] disabled:opacity-40 focus-ring">
+          <button type="button" onClick={goToPreviousPage} disabled={safePage === 1} aria-label="Go to previous page" className="rounded-lg border border-[var(--ds-color-border)] p-2 text-[var(--ds-color-subtle)] transition-colors hover:text-[var(--ds-color-accent)] disabled:opacity-40 ds-focus-ring">
             <ChevronLeft size={14} aria-hidden="true" />
           </button>
-          <span className="text-xs font-semibold text-[#666]" aria-label={`Page ${safePage} of ${totalPages}`}>{safePage} / {totalPages}</span>
-          <button type="button" onClick={goToNextPage} disabled={safePage === totalPages} aria-label="Go to next page" className="rounded-lg border border-[rgba(0,0,0,0.06)] p-2 text-[#999] transition-colors hover:text-[#E9A24C] disabled:opacity-40 focus-ring">
+          <span className="text-xs font-semibold text-[var(--ds-color-muted)]" aria-label={`Page ${safePage} of ${totalPages}`}>{safePage} / {totalPages}</span>
+          <button type="button" onClick={goToNextPage} disabled={safePage === totalPages} aria-label="Go to next page" className="rounded-lg border border-[var(--ds-color-border)] p-2 text-[var(--ds-color-subtle)] transition-colors hover:text-[var(--ds-color-accent)] disabled:opacity-40 ds-focus-ring">
             <ChevronRight size={14} aria-hidden="true" />
           </button>
         </div>
