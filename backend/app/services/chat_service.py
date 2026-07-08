@@ -2,7 +2,6 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any
 from beanie import PydanticObjectId
-from pymongo import ASCENDING, DESCENDING
 from app.core.config import settings
 from app.core.errors import AppError
 from app.models.chat import Chat, ChatStatus
@@ -42,10 +41,10 @@ class ChatService:
     ) -> Page[ConversationResponse]:
         query = self._conversation_query(current_user, search=params.search, pinned=pinned, favorite=favorite, status=status)
         sort_field = params.sort_by if params.sort_by in {"created_at", "updated_at", "last_message_at", "title"} else "updated_at"
-        sort_direction = DESCENDING if params.sort_direction == "desc" else ASCENDING
+        sort_clause = f"-{sort_field}" if params.sort_direction == "desc" else sort_field
 
         total = await Chat.find(query).count()
-        items = await Chat.find(query).sort((sort_field, sort_direction)).skip(params.skip).limit(params.size).to_list()
+        items = await Chat.find(query).sort(sort_clause).skip(params.skip).limit(params.size).to_list()
 
         return Page[ConversationResponse](
             items=[self.to_conversation_response(chat) for chat in items],
