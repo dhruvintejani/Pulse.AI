@@ -137,7 +137,7 @@ const ModelsPage = () => {
                 <br />
                 <span className="text-[#E9A24C]">in your workspace</span>
               </h2>
-              <p className="max-w-2xl text-sm leading-relaxed text-white/55">
+              <p className="max-w-2xl text-sm leading-relaxed text-white/50">
                 GPT-4o combines text, vision, and audio understanding with industry-leading reasoning capabilities.
               </p>
             </div>
