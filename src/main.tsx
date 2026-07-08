@@ -8,6 +8,9 @@ import './styles/responsive.css';
 import './styles/product-polish.css';
 import App from './App';
 import { AppProviders } from './contexts';
+import { registerServiceWorker } from './utils';
+
+registerServiceWorker();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
