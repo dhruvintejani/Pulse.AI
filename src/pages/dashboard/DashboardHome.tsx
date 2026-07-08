@@ -8,7 +8,6 @@ import {
   BarChart3,
   Bell,
   Brain,
-  CheckCircle2,
   Clock,
   FileText,
   Layers,
@@ -22,8 +21,6 @@ import {
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Cell,
   Pie,
@@ -59,7 +56,6 @@ import { useTheme } from '@/hooks/useTheme';
 type BadgeVariant = 'default' | 'accent' | 'success' | 'warning' | 'error' | 'neutral';
 type RecentChat = (typeof dashboardRecentChats)[number];
 type RecentDocument = (typeof dashboardRecentDocuments)[number];
-
 type TimelineType = (typeof dashboardActivityTimeline)[number]['type'];
 
 const dashboardMockData = {
@@ -294,29 +290,35 @@ const DashboardHome = () => {
 
           <FadeIn delay={0.16}>
             <DashboardPanel title="AI Usage" description="Current monthly allocation." className="h-full">
-              <div className="space-y-4">
-                {dashboardData.aiUsage.map((usage) => {
-                  const percent = Math.round((usage.used / usage.total) * 100);
-                  return (
-                    <div key={usage.label}>
-                      <div className="flex justify-between text-xs mb-1.5"><span className="text-[#666] font-medium">{usage.label}</span><span className="text-[#999]">{usage.used}{usage.unit} / {usage.total}{usage.unit}</span></div>
-                      <div className="h-1.5 rounded-full bg-[rgba(0,0,0,0.06)]" role="progressbar" aria-label={`${usage.label} usage`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${percent}%` }} transition={{ duration: 1 }} className="h-full rounded-full" style={{ background: usage.color }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="h-52 mt-6" role="img" aria-label="AI model usage chart">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={dashboardData.modelUsage} dataKey="value" nameKey="name" innerRadius={52} outerRadius={76} paddingAngle={4} stroke="none">
-                      {dashboardData.modelUsage.map((entry, index) => <Cell key={entry.name} fill={modelColors[index % modelColors.length]} />)}
-                    </Pie>
-                    <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: isDark ? '#F7EBDD' : '#1F1F1F' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              {dashboardQuery.isLoading ? (
+                <div className="space-y-4"><Skeleton className="h-10 rounded-xl" /><Skeleton className="h-10 rounded-xl" /><Skeleton className="h-10 rounded-xl" /><Skeleton className="h-52 rounded-2xl" /></div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {dashboardData.aiUsage.map((usage) => {
+                      const percent = Math.round((usage.used / usage.total) * 100);
+                      return (
+                        <div key={usage.label}>
+                          <div className="flex justify-between text-xs mb-1.5"><span className="text-[#666] font-medium">{usage.label}</span><span className="text-[#999]">{usage.used}{usage.unit} / {usage.total}{usage.unit}</span></div>
+                          <div className="h-1.5 rounded-full bg-[rgba(0,0,0,0.06)]" role="progressbar" aria-label={`${usage.label} usage`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${percent}%` }} transition={{ duration: 1 }} className="h-full rounded-full" style={{ background: usage.color }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="h-52 mt-6" role="img" aria-label="AI model usage chart">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={dashboardData.modelUsage} dataKey="value" nameKey="name" innerRadius={52} outerRadius={76} paddingAngle={4} stroke="none">
+                          {dashboardData.modelUsage.map((entry, index) => <Cell key={entry.name} fill={modelColors[index % modelColors.length]} />)}
+                        </Pie>
+                        <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: isDark ? '#F7EBDD' : '#1F1F1F' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              )}
             </DashboardPanel>
           </FadeIn>
         </div>
@@ -367,8 +369,8 @@ const DashboardHome = () => {
 
         <div className="grid xl:grid-cols-3 gap-5">
           <FadeIn delay={0.22}>
-            <DashboardPanel title="Active Model" description="Choose the model used for new chats." className="h-full bg-[#1F1F1F] text-white border-transparent">
-              <div className="flex items-center gap-2 mb-4"><Brain size={16} className="text-[#E9A24C]" aria-hidden="true" /><h2 className="text-sm font-bold">Model routing</h2></div>
+            <DashboardPanel title="Active Model" description="Choose the model used for new chats." className="h-full bg-[#1F1F1F] text-white border-transparent" titleClassName="text-white" descriptionClassName="text-white/50">
+              <div className="flex items-center gap-2 mb-4"><Brain size={16} className="text-[#E9A24C]" aria-hidden="true" /><h2 className="text-sm font-bold text-white">Model routing</h2></div>
               <div className="space-y-2" role="radiogroup" aria-label="Active model">
                 {dashboardData.modelUsage.map((model) => (
                   <button key={model.name} type="button" role="radio" aria-checked={activeModel === model.name} onClick={() => setActiveModel(model.name)} className={`w-full flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all focus-ring ${activeModel === model.name ? 'bg-[rgba(233,162,76,0.15)] border border-[rgba(233,162,76,0.3)]' : 'hover:bg-white/5'}`}>
