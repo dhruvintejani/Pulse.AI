@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     CLERK_AUDIENCE: str | None = None
     CLERK_AUTHORIZED_PARTIES: list[str] = Field(default_factory=list)
     CLERK_JWKS_CACHE_SECONDS: int = 300
+    CLERK_SECRET_KEY: str | None = None
+    CLERK_API_BASE_URL: str = "https://api.clerk.com/v1"
 
     INTERNAL_JWT_SECRET: str = "change-this-in-production"
     INTERNAL_JWT_ALGORITHM: str = "HS256"
@@ -59,7 +61,16 @@ class Settings(BaseSettings):
             return [item.strip() for item in value.split(",") if item.strip()]
         return value
 
-    @field_validator("CLERK_AUDIENCE", "OPENAI_API_KEY", "GEMINI_API_KEY", "CLAUDE_API_KEY", "GROQ_API_KEY", "DEEPSEEK_API_KEY", mode="before")
+    @field_validator(
+        "CLERK_AUDIENCE",
+        "CLERK_SECRET_KEY",
+        "OPENAI_API_KEY",
+        "GEMINI_API_KEY",
+        "CLAUDE_API_KEY",
+        "GROQ_API_KEY",
+        "DEEPSEEK_API_KEY",
+        mode="before",
+    )
     @classmethod
     def empty_string_to_none(cls, value: str | None) -> str | None:
         if value == "":
