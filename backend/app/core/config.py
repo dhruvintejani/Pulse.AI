@@ -62,6 +62,11 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
     LOG_JSON: bool = False
+    LOG_DIR: str = "logs"
+    LOG_ROTATION: str = "50 MB"
+    LOG_RETENTION: str = "30 days"
+    LOG_COMPRESSION: str = "zip"
+    LOG_PERFORMANCE_THRESHOLD_MS: int = 1000
 
     @field_validator(
         "BACKEND_CORS_ORIGINS",
