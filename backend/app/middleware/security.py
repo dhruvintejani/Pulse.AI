@@ -71,7 +71,7 @@ class InputSanitizationMiddleware:
             if is_sanitizable_content_type(content_type):
                 body = await self._read_body(receive)
                 if len(body) > settings.SECURITY_MAX_REQUEST_SIZE_BYTES:
-                    await self._send_error(send, status_code=413, error_code="REQUEST_TOO_LARGE", message="Request body is too large")
+                    await self._send_error(scope, send, status_code=413, error_code="REQUEST_TOO_LARGE", message="Request body is too large")
                     return
 
                 if body:
@@ -86,7 +86,7 @@ class InputSanitizationMiddleware:
 
             await self.app(scope, receive, send)
         except AppError as exc:
-            await self._send_error(send, status_code=exc.status_code, error_code=exc.error_code, message=exc.message, details=exc.details)
+            await self._send_error(scope, send, status_code=exc.status_code, error_code=exc.error_code, message=exc.message, details=exc.details)
 
     async def _read_body(self, receive: Receive) -> bytes:
         body = b""
@@ -114,6 +114,7 @@ class InputSanitizationMiddleware:
 
     @staticmethod
     async def _send_error(
+        scope: Scope,
         send: Send,
         *,
         status_code: int,
@@ -131,4 +132,6 @@ class InputSanitizationMiddleware:
                 "request_id": None,
             },
         )
-        await response({}, None, send)  # type: ignore[arg-type]
+        async def receive() -> Message:
+            return {"type": "http.request", "body": b"", "more_body": False}
+        await response(scope, receive, send)
