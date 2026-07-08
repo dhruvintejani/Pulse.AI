@@ -9,10 +9,18 @@ const booleanFromEnv = (value: string | undefined, fallback: boolean) => {
 };
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
+const trimSlashes = (value: string) => value.replace(/^\/+|\/+$/g, '');
+
+const apiBaseUrl = trimTrailingSlash(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
+const apiVersion = import.meta.env.VITE_API_VERSION || 'v1';
+const apiPrefix = import.meta.env.VITE_API_PREFIX ?? `/api/${apiVersion}`;
+const normalizedApiPrefix = trimSlashes(apiPrefix);
 
 export const env = {
-  apiBaseUrl: trimTrailingSlash(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'),
-  apiVersion: import.meta.env.VITE_API_VERSION || 'v1',
+  apiBaseUrl,
+  apiVersion,
+  apiPrefix,
+  apiRootUrl: normalizedApiPrefix ? `${apiBaseUrl}/${normalizedApiPrefix}` : apiBaseUrl,
   apiTimeoutMs: numberFromEnv(import.meta.env.VITE_API_TIMEOUT_MS, 30000),
   apiRetryCount: numberFromEnv(import.meta.env.VITE_API_RETRY_COUNT, 1),
   apiWithCredentials: booleanFromEnv(import.meta.env.VITE_API_WITH_CREDENTIALS, false),
