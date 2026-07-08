@@ -1,0 +1,18 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#F8F4EC"/>
+  <circle cx="1010" cy="80" r="260" fill="#E9A24C" fill-opacity="0.12"/>
+  <circle cx="160" cy="580" r="260" fill="#D7B98E" fill-opacity="0.18"/>
+  <rect x="84" y="82" width="1032" height="466" rx="56" fill="#FFFDF8" stroke="rgba(31,31,31,0.08)" stroke-width="2"/>
+  <rect x="132" y="138" width="80" height="80" rx="24" fill="#E9A24C" fill-opacity="0.14"/>
+  <path d="M156 197v-40h27c13 0 22 8 22 20s-9 20-22 20h-12v16h-15Zm15-28v15h11c6 0 9-3 9-8s-3-7-9-7h-11Z" fill="#1F1F1F"/>
+  <text x="132" y="292" fill="#1F1F1F" font-family="Inter, Arial, sans-serif" font-size="74" font-weight="900" letter-spacing="-3">Pulse AI</text>
+  <text x="132" y="356" fill="#666666" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="600">Your intelligent workspace for AI chat, documents, analytics, and teams.</text>
+  <g transform="translate(132 420)">
+    <rect width="176" height="46" rx="23" fill="#E9A24C"/>
+    <text x="24" y="31" fill="white" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="800">AI Workspace</text>
+  </g>
+  <g transform="translate(332 420)">
+    <rect width="168" height="46" rx="23" fill="rgba(233,162,76,0.12)"/>
+    <text x="24" y="31" fill="#A56018" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="800">Production UI</text>
+  </g>
+</svg>
