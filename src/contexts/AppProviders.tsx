@@ -5,9 +5,11 @@ import { memo, type ReactNode } from 'react';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AUTH_REDIRECTS } from '@/constants/auth';
 import { ROUTES } from '@/constants/routes';
+import { ConfirmationProvider } from '@/contexts/ConfirmationContext';
 import { CurrentUserProvider } from '@/contexts/CurrentUserContext';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { UndoProvider } from '@/contexts/UndoContext';
 import { ApiAuthProvider } from '@/hooks/useApiAuth';
 import { queryClient } from '@/lib/queryClient';
 
@@ -34,7 +36,11 @@ const AppProviders = ({ children }: AppProvidersProps) => (
           <MotionConfig reducedMotion="user">
             <CurrentUserProvider>
               <SidebarProvider>
-                <ToastProvider>{children}</ToastProvider>
+                <ToastProvider>
+                  <ConfirmationProvider>
+                    <UndoProvider>{children}</UndoProvider>
+                  </ConfirmationProvider>
+                </ToastProvider>
               </SidebarProvider>
             </CurrentUserProvider>
           </MotionConfig>
