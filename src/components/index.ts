@@ -7,4 +7,5 @@ export * from './data';
 export * from './documents';
 export * from './layout';
 export * from './profile';
+export * from './search';
 export * from './ui';
