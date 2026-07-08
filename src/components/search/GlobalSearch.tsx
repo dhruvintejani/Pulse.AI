@@ -95,7 +95,7 @@ const GlobalSearch = () => {
   };
 
   return (
-    <section className="rounded-2xl border border-[rgba(0,0,0,0.05)] bg-[#FFFDF8]/85 p-3 shadow-card backdrop-blur-xl" aria-label="Global search">
+    <section role="search" className="rounded-2xl border border-[rgba(0,0,0,0.05)] bg-[#FFFDF8]/85 p-3 shadow-card backdrop-blur-xl" aria-label="Global search">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <label className="relative min-w-0 flex-1">
           <span className="sr-only">Search chats, messages, documents, users, and settings</span>
@@ -112,8 +112,8 @@ const GlobalSearch = () => {
             </button>
           )}
         </label>
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar" aria-label="Search filters">
-          <span className="hidden items-center gap-1 text-xs font-semibold text-[#999] sm:flex"><Filter size={13} /> Filters</span>
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar" role="group" aria-label="Search filters">
+          <span className="hidden items-center gap-1 text-xs font-semibold text-[#999] sm:flex"><Filter size={13} aria-hidden="true" /> Filters</span>
           {searchState.availableFilters.map((filter) => {
             const active = searchState.filters.includes(filter);
             return (
@@ -135,10 +135,10 @@ const GlobalSearch = () => {
         {searchState.query.trim() ? (
           <motion.div key="results" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mt-3 space-y-2">
             <div className="flex items-center justify-between gap-3 px-1">
-              <p className="text-xs font-semibold text-[#999]">
+              <p className="text-xs font-semibold text-[#999]" aria-live="polite">
                 {searchState.isSearching ? 'Searching...' : `${searchState.total} results`}
               </p>
-              {searchState.isSearching && <Loader2 size={14} className="animate-spin text-[#E9A24C]" aria-hidden="true" />}
+              {searchState.isSearching && <Loader2 size={14} className="animate-spin text-[#E9A24C] motion-reduce:animate-none" aria-hidden="true" />}
             </div>
 
             {searchState.isEmpty ? (
@@ -146,13 +146,13 @@ const GlobalSearch = () => {
                 <EmptyState title="No matches found" description="Try another keyword or enable more filters." />
               </div>
             ) : (
-              <div className="grid gap-2">
+              <div className="grid gap-2" aria-label="Search results">
                 {searchState.items.map((result) => <SearchResultCard key={`${result.type}-${result.id}`} result={result} query={searchState.debouncedQuery} onOpen={handleOpen} />)}
               </div>
             )}
 
             {(searchState.page > 1 || searchState.hasNext) && (
-              <div className="flex items-center justify-end gap-2 pt-1">
+              <div className="flex items-center justify-end gap-2 pt-1" aria-label="Search pagination">
                 <button type="button" disabled={searchState.page === 1} onClick={() => searchState.setPage(Math.max(1, searchState.page - 1))} className="rounded-lg px-3 py-1.5 text-xs font-bold text-[#666] transition-colors hover:bg-[rgba(233,162,76,0.08)] disabled:cursor-not-allowed disabled:opacity-40 focus-ring">Previous</button>
                 <button type="button" disabled={!searchState.hasNext} onClick={() => searchState.setPage(searchState.page + 1)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-[#666] transition-colors hover:bg-[rgba(233,162,76,0.08)] disabled:cursor-not-allowed disabled:opacity-40 focus-ring">Next</button>
               </div>
@@ -161,10 +161,10 @@ const GlobalSearch = () => {
         ) : searchState.recentSearches.length ? (
           <motion.div key="recent" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mt-3 rounded-2xl border border-[rgba(0,0,0,0.05)] bg-white/50 p-3">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-[#999]"><Clock size={13} /> Recent searches</p>
-              <button type="button" onClick={() => void searchState.clearRecentSearches()} className="text-xs font-bold text-[#999] transition-colors hover:text-[#E9A24C] focus-ring rounded-md">Clear</button>
+              <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-[#999]"><Clock size={13} aria-hidden="true" /> Recent searches</p>
+              <button type="button" onClick={() => void searchState.clearRecentSearches()} className="rounded-md text-xs font-bold text-[#999] transition-colors hover:text-[#E9A24C] focus-ring">Clear</button>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" aria-label="Recent searches">
               {searchState.recentSearches.map((item) => (
                 <button key={item} type="button" onClick={() => searchState.setQuery(item)} className="rounded-full border border-[rgba(0,0,0,0.06)] px-3 py-1.5 text-xs font-semibold text-[#666] transition-colors hover:border-[rgba(233,162,76,0.3)] hover:bg-[rgba(233,162,76,0.08)] focus-ring">{item}</button>
               ))}
