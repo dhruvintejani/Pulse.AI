@@ -1,5 +1,12 @@
 import { DEFAULT_ASSISTANT_REPLY, INITIAL_CONVERSATIONS, REGENERATED_ASSISTANT_REPLY } from '@/constants/chat';
-import type { ChatConversation, ChatMessage, ConversationMessagePayload, RecentChat, RenameConversationPayload } from '@/types/chat';
+import type {
+  ChatConversation,
+  ChatMessage,
+  ConversationMessagePayload,
+  MessageReactionPayload,
+  RecentChat,
+  RenameConversationPayload,
+} from '@/types/chat';
 
 let conversationsStore: ChatConversation[] = [...INITIAL_CONVERSATIONS];
 let activeConversationId = conversationsStore[0]?.id ?? '';
@@ -61,7 +68,7 @@ export const chatService = {
         {
           id: `${Date.now()}-welcome`,
           role: 'assistant',
-          content: "New conversation started. What would you like to work on?",
+          content: 'New conversation started. What would you like to work on?',
           timestamp: new Date(),
         },
       ],
@@ -146,5 +153,21 @@ export const chatService = {
     });
     touchConversation(conversationId);
     return message;
+  },
+  updateMessageReaction: async ({ conversationId, messageId, reaction }: MessageReactionPayload) => {
+    conversationsStore = conversationsStore.map((conversation) => {
+      if (conversation.id !== conversationId) return conversation;
+
+      return {
+        ...conversation,
+        messages: conversation.messages.map((message) => (
+          message.id === messageId ? { ...message, reaction } : message
+        )),
+      };
+    });
+
+    return conversationsStore
+      .find((conversation) => conversation.id === conversationId)
+      ?.messages.find((message) => message.id === messageId) ?? null;
   },
 };
