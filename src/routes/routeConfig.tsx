@@ -5,6 +5,7 @@ import { ProtectedRoute, PublicRoute } from '@/components/auth';
 import { DASHBOARD_SEGMENTS, ROUTES } from '@/constants/routes';
 import RouteTransition from '@/routes/RouteTransition';
 import {
+  AdminPage,
   AnalyticsPage,
   BillingPage,
   ChatPage,
@@ -87,6 +88,7 @@ export const dashboardRoutes = [
   { key: 'dashboard-billing', path: DASHBOARD_SEGMENTS.BILLING, element: withTransition(<BillingPage />) },
   { key: 'dashboard-profile', path: DASHBOARD_SEGMENTS.PROFILE, element: withTransition(<ProfilePage />) },
   { key: 'dashboard-team', path: DASHBOARD_SEGMENTS.TEAM, element: withTransition(<TeamPage />) },
+  { key: 'dashboard-admin', path: DASHBOARD_SEGMENTS.ADMIN, element: withTransition(<AdminPage />) },
 ] satisfies AppRouteConfig[];
 
 export const fallbackRoute = {
