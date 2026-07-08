@@ -8,7 +8,7 @@ interface SkeletonProps {
 const Skeleton = memo(({ className }: SkeletonProps) => (
   <div
     className={cn(
-      'relative overflow-hidden rounded-xl bg-[rgba(0,0,0,0.06)] before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.6s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/45 before:to-transparent motion-reduce:before:animate-none',
+      'skeleton-premium relative overflow-hidden rounded-xl bg-[rgba(0,0,0,0.06)] before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.6s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/45 before:to-transparent motion-reduce:before:animate-none',
       className
     )}
     aria-hidden="true"
