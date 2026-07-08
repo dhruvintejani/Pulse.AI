@@ -3,9 +3,18 @@ import type { FocusEvent, KeyboardEvent, MouseEvent, ReactElement, ReactNode } f
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
+interface TooltipTriggerProps {
+  'aria-describedby'?: string;
+  onFocus?: (event: FocusEvent<HTMLElement>) => void;
+  onBlur?: (event: FocusEvent<HTMLElement>) => void;
+  onMouseEnter?: (event: MouseEvent<HTMLElement>) => void;
+  onMouseLeave?: (event: MouseEvent<HTMLElement>) => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
+}
+
 interface TooltipProps {
   content: ReactNode;
-  children: ReactElement;
+  children: ReactElement<TooltipTriggerProps>;
   side?: 'top' | 'bottom';
   className?: string;
 }
@@ -19,7 +28,7 @@ const Tooltip = ({ content, children, side = 'top', className }: TooltipProps) =
   const tooltipId = useId();
   const [open, setOpen] = useState(false);
 
-  if (!isValidElement(children)) return children;
+  if (!isValidElement<TooltipTriggerProps>(children)) return children;
 
   const child = cloneElement(children, {
     'aria-describedby': open ? tooltipId : children.props['aria-describedby'],
