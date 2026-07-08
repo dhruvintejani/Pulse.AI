@@ -7,6 +7,7 @@ export * from './useAuthFormErrors';
 export * from './useChatHistory';
 export * from './useCurrentUser';
 export * from './useDebouncedValue';
+export * from './useGlobalSearch';
 export * from './useLoadingState';
 export * from './useMockResource';
 export * from './useNotifications';
