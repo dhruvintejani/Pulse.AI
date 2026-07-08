@@ -16,6 +16,17 @@ from app.schemas.chat import (
     TypingStatusUpdate,
 )
 from app.schemas.common import ErrorResponse, Page, PageMeta, PaginationParams, SuccessResponse
+from app.schemas.dashboard import (
+    AIUsageResponse,
+    ActivityTimelineItem,
+    ChartSeriesResponse,
+    DashboardChartsResponse,
+    DashboardMetric,
+    DashboardNotificationResponse,
+    DashboardOverviewResponse,
+    DashboardSearchResponse,
+    UserStatisticsResponse,
+)
 from app.schemas.document import (
     DocumentDetailResponse,
     DocumentFacetResponse,
@@ -27,9 +38,13 @@ from app.schemas.document import (
     DocumentUploadResult,
 )
 from app.schemas.health import HealthResponse
+from app.schemas.upload import UploadMetadataResponse, UploadProgressResponse, UploadValidationResponse
 
 __all__ = [
+    "AIUsageResponse",
+    "ActivityTimelineItem",
     "AuthenticatedUserResponse",
+    "ChartSeriesResponse",
     "ChatStreamRequest",
     "ClerkTokenClaims",
     "ConversationCreate",
@@ -38,6 +53,11 @@ __all__ = [
     "ConversationResponse",
     "ConversationToggleResponse",
     "ConversationUpdate",
+    "DashboardChartsResponse",
+    "DashboardMetric",
+    "DashboardNotificationResponse",
+    "DashboardOverviewResponse",
+    "DashboardSearchResponse",
     "DocumentDetailResponse",
     "DocumentFacetResponse",
     "DocumentMove",
@@ -59,4 +79,8 @@ __all__ = [
     "SuccessResponse",
     "TypingStatusResponse",
     "TypingStatusUpdate",
+    "UploadMetadataResponse",
+    "UploadProgressResponse",
+    "UploadValidationResponse",
+    "UserStatisticsResponse",
 ]
