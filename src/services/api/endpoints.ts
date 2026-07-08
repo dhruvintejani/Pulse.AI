@@ -12,6 +12,9 @@ export const API_ENDPOINTS = {
     avatar: '/users/me/avatar',
     settings: '/users/me/settings',
   },
+  dashboard: {
+    overview: '/dashboard/overview',
+  },
   conversations: {
     root: '/conversations',
     byId: (conversationId: string) => `/conversations/${conversationId}`,
