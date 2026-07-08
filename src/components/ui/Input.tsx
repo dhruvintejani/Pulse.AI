@@ -20,11 +20,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
   className,
   type,
   id,
+  disabled,
   ...props
 }, ref) => {
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const errorId = `${inputId}-error`;
+  const describedBy = [props['aria-describedby'], error ? errorId : undefined].filter(Boolean).join(' ') || undefined;
   const [showPassword, setShowPassword] = useState(false);
   const inputType = showPasswordToggle && type === 'password'
     ? (showPassword ? 'text' : 'password')
@@ -54,10 +56,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
           ref={ref}
           id={inputId}
           type={inputType}
+          disabled={disabled}
           aria-invalid={Boolean(error)}
-          aria-describedby={error ? errorId : props['aria-describedby']}
+          aria-describedby={describedBy}
           className={cn(
-            'input-premium w-full rounded-xl px-4 py-3 text-sm text-[#1F1F1F] placeholder:text-[#999]',
+            'input-premium w-full rounded-xl px-4 py-3 text-sm text-[#1F1F1F] placeholder:text-[#999] transition-[border-color,box-shadow,background-color,color] duration-200 disabled:cursor-not-allowed disabled:opacity-60',
             icon && 'pl-10',
             (iconRight || showPasswordToggle) && 'pr-10',
             error && 'border-red-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]',
@@ -71,7 +74,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
             onClick={togglePasswordVisibility}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
             aria-pressed={showPassword}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] transition-colors focus-ring rounded-md"
+            disabled={disabled}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-md text-[#999] transition-colors hover:text-[#666] disabled:cursor-not-allowed disabled:opacity-50 focus-ring"
           >
             {showPassword ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
           </button>
@@ -83,7 +87,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
         )}
       </div>
       {error && (
-        <p id={errorId} className="text-xs text-red-500 flex items-center gap-1.5">
+        <p id={errorId} className="text-xs text-red-500 flex items-center gap-1.5" role="alert">
           <span className="w-3.5 h-3.5 rounded-full bg-red-100 flex items-center justify-center text-red-500 shrink-0" aria-hidden="true">!</span>
           {error}
         </p>
