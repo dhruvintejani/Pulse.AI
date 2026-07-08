@@ -25,6 +25,9 @@ const routeSeo: Record<string, SeoConfig> = {
   [ROUTES.HOME]: defaultSeo,
   [ROUTES.LOGIN]: { title: 'Sign in — Pulse AI', description: 'Sign in to your Pulse AI workspace.', image: defaultSeo.image, noIndex: true },
   [ROUTES.SIGNUP]: { title: 'Create account — Pulse AI', description: 'Create your Pulse AI account and start building with your intelligent workspace.', image: defaultSeo.image },
+  [ROUTES.FORGOT_PASSWORD]: { title: 'Recover account — Pulse AI', description: 'Recover access to your Pulse AI account.', image: defaultSeo.image, noIndex: true },
+  [ROUTES.RESET_PASSWORD]: { title: 'Reset password — Pulse AI', description: 'Reset your Pulse AI account password.', image: defaultSeo.image, noIndex: true },
+  [ROUTES.VERIFY]: { title: 'Verify account — Pulse AI', description: 'Verify your Pulse AI account email.', image: defaultSeo.image, noIndex: true },
   [DASHBOARD_PATHS.ROOT]: { title: 'Dashboard — Pulse AI', description: 'Your Pulse AI dashboard with recent chats, documents, analytics, activity, and notifications.', image: defaultSeo.image, noIndex: true },
   [DASHBOARD_PATHS.CHAT]: { title: 'AI Chat — Pulse AI', description: 'Chat with Pulse AI using beautiful streaming responses, history, shortcuts, and document context.', image: defaultSeo.image, noIndex: true },
   [DASHBOARD_PATHS.DOCUMENTS]: { title: 'Documents — Pulse AI', description: 'Upload, organize, preview, search, and analyze your documents with Pulse AI.', image: defaultSeo.image, noIndex: true },
@@ -33,6 +36,9 @@ const routeSeo: Record<string, SeoConfig> = {
   [DASHBOARD_PATHS.SETTINGS]: { title: 'Settings — Pulse AI', description: 'Manage profile, theme, billing, language, security, privacy, and account settings.', image: defaultSeo.image, noIndex: true },
   [DASHBOARD_PATHS.PROFILE]: { title: 'Profile — Pulse AI', description: 'View profile details, activity, statistics, skills, and workspace achievements.', image: defaultSeo.image, noIndex: true },
   [DASHBOARD_PATHS.BILLING]: { title: 'Billing — Pulse AI', description: 'Manage Pulse AI plans, invoices, usage, and billing preferences.', image: defaultSeo.image, noIndex: true },
+  [DASHBOARD_PATHS.MODELS]: { title: 'Models — Pulse AI', description: 'Explore AI models, providers, usage, and model preferences.', image: defaultSeo.image, noIndex: true },
+  [DASHBOARD_PATHS.TEAM]: { title: 'Team — Pulse AI', description: 'Manage team members, collaborators, roles, and workspace access.', image: defaultSeo.image, noIndex: true },
+  [DASHBOARD_PATHS.ADMIN]: { title: 'Admin — Pulse AI', description: 'Admin controls for users, documents, chats, logs, analytics, and settings.', image: defaultSeo.image, noIndex: true },
 };
 
 const upsertMeta = (selector: string, attributes: Record<string, string>) => {
@@ -68,7 +74,10 @@ const upsertStructuredData = (json: object) => {
 
 const Seo = () => {
   const location = useLocation();
-  const seo = routeSeo[location.pathname] ?? defaultSeo;
+  const routeConfig = routeSeo[location.pathname] ?? defaultSeo;
+  const seo = location.pathname.startsWith(ROUTES.DASHBOARD)
+    ? { ...routeConfig, noIndex: true }
+    : routeConfig;
   const canonicalUrl = `${siteUrl}${location.pathname === '/' ? '' : location.pathname}`;
 
   const structuredData = useMemo(() => ({
