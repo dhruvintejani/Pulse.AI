@@ -1,5 +1,5 @@
 from functools import lru_cache
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +23,9 @@ class Settings(BaseSettings):
 
     BACKEND_CORS_ORIGINS: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
     BACKEND_CORS_ALLOW_CREDENTIALS: bool = True
+    BACKEND_CORS_ALLOW_METHODS: list[str] = Field(default_factory=lambda: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
+    BACKEND_CORS_ALLOW_HEADERS: list[str] = Field(default_factory=lambda: ["Authorization", "Content-Type", "X-Request-ID", "X-CSRF-Token"])
+    BACKEND_CORS_EXPOSE_HEADERS: list[str] = Field(default_factory=lambda: ["X-Request-ID", "X-Process-Time-Ms"])
 
     CLERK_ISSUER: str = ""
     CLERK_JWKS_URL: str = ""
@@ -41,6 +44,16 @@ class Settings(BaseSettings):
 
     RATE_LIMIT_DEFAULT: str = "120/minute"
     RATE_LIMIT_HEALTH: str = "60/minute"
+    RATE_LIMIT_STORAGE_URI: str = "memory://"
+
+    SECURITY_ALLOWED_HOSTS: list[str] = Field(default_factory=lambda: ["*"])
+    SECURITY_HEADERS_ENABLED: bool = True
+    SECURITY_ENABLE_HSTS: bool = False
+    SECURITY_HSTS_MAX_AGE_SECONDS: int = 31536000
+    SECURITY_CONTENT_SECURITY_POLICY: str = "default-src 'self'; frame-ancestors 'none'; base-uri 'self'"
+    SECURITY_MAX_REQUEST_SIZE_BYTES: int = 2_097_152
+    SECURITY_INPUT_SANITIZATION_ENABLED: bool = True
+    SECURITY_BLOCK_SUSPICIOUS_INPUT: bool = True
 
     DOCUMENT_STORAGE_PROVIDER: str = "metadata"
     DOCUMENT_MAX_UPLOAD_SIZE_MB: int = 25
@@ -70,10 +83,14 @@ class Settings(BaseSettings):
 
     @field_validator(
         "BACKEND_CORS_ORIGINS",
+        "BACKEND_CORS_ALLOW_METHODS",
+        "BACKEND_CORS_ALLOW_HEADERS",
+        "BACKEND_CORS_EXPOSE_HEADERS",
         "CLERK_AUTHORIZED_PARTIES",
         "AI_ENABLED_PROVIDERS",
         "ADMIN_EMAILS",
         "ADMIN_CLERK_USER_IDS",
+        "SECURITY_ALLOWED_HOSTS",
         mode="before",
     )
     @classmethod
@@ -102,6 +119,17 @@ class Settings(BaseSettings):
         if value == "":
             return None
         return value
+
+    @model_validator(mode="after")
+    def validate_security_settings(self) -> "Settings":
+        if self.is_production:
+            if "*" in self.BACKEND_CORS_ORIGINS and self.BACKEND_CORS_ALLOW_CREDENTIALS:
+                raise ValueError("Wildcard CORS origins cannot be used with credentials in production")
+            if self.SECURITY_ALLOWED_HOSTS == ["*"]:
+                raise ValueError("SECURITY_ALLOWED_HOSTS must be configured in production")
+            if not self.CLERK_ISSUER or not self.CLERK_JWKS_URL:
+                raise ValueError("Clerk issuer and JWKS URL are required in production")
+        return self
 
     @property
     def is_production(self) -> bool:
