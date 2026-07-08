@@ -20,6 +20,7 @@ import {
   ResetPasswordPage,
   SettingsPage,
   SignupPage,
+  TeamPage,
   VerifyPage,
   WorkspacePage,
 } from '@/routes/lazyPages';
@@ -85,6 +86,7 @@ export const dashboardRoutes = [
   { key: 'dashboard-settings', path: DASHBOARD_SEGMENTS.SETTINGS, element: withTransition(<SettingsPage />) },
   { key: 'dashboard-billing', path: DASHBOARD_SEGMENTS.BILLING, element: withTransition(<BillingPage />) },
   { key: 'dashboard-profile', path: DASHBOARD_SEGMENTS.PROFILE, element: withTransition(<ProfilePage />) },
+  { key: 'dashboard-team', path: DASHBOARD_SEGMENTS.TEAM, element: withTransition(<TeamPage />) },
 ] satisfies AppRouteConfig[];
 
 export const fallbackRoute = {
