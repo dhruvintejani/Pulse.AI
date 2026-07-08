@@ -41,6 +41,7 @@ const DashboardLayout = () => {
               className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm focus:outline-none md:hidden"
             />
             <motion.div
+              id="dashboard-mobile-navigation"
               initial={{ x: -288 }}
               animate={{ x: 0 }}
               exit={{ x: -288 }}
