@@ -42,6 +42,7 @@ export interface NavItem {
   path: string;
 }
 
+export * from './api';
 export * from './auth';
 export * from './chat';
 export * from './notification';
