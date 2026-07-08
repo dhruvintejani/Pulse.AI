@@ -5,7 +5,8 @@ from app.services.dashboard_service import dashboard_service
 from app.services.document_service import document_service
 from app.services.file_upload_service import file_upload_service
 from app.services.notification_service import notification_service
+from app.services.settings_service import settings_service
 from app.services.typing_status import typing_status_service
 from app.services.user_sync import user_sync_service
 
-__all__ = ["admin_service", "chat_service", "clerk_auth_service", "dashboard_service", "document_service", "file_upload_service", "notification_service", "typing_status_service", "user_sync_service"]
+__all__ = ["admin_service", "chat_service", "clerk_auth_service", "dashboard_service", "document_service", "file_upload_service", "notification_service", "settings_service", "typing_status_service", "user_sync_service"]
