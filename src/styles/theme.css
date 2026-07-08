@@ -1,6 +1,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  color-scheme: light;
   --pulse-bg: #F8F4EC;
   --pulse-surface: #FFFDF8;
   --pulse-surface-soft: rgba(255, 253, 248, 0.82);
@@ -12,6 +13,7 @@
 }
 
 html.dark {
+  color-scheme: dark;
   --pulse-bg: #0F0D0A;
   --pulse-surface: #17130F;
   --pulse-surface-soft: rgba(23, 19, 15, 0.84);
@@ -124,6 +126,10 @@ html.dark [class~="bg-[#FFFDF8]"] {
   background-color: var(--pulse-surface) !important;
 }
 
+html.dark [class~="bg-[#1F1F1F]"] {
+  background-color: #080706 !important;
+}
+
 html.dark [class~="bg-[#FFFDF8]/50"],
 html.dark [class~="bg-[#FFFDF8]/80"] {
   background-color: var(--pulse-surface-soft) !important;
@@ -201,6 +207,10 @@ html.dark [class~="border-[rgba(0,0,0,0.12)]"] {
   border-color: var(--pulse-border) !important;
 }
 
+html.dark [class~="border-transparent"] {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
 html.dark [class~="border-white/70"],
 html.dark [class~="border-white/80"] {
   border-color: rgba(255, 255, 255, 0.1) !important;
@@ -212,6 +222,27 @@ html.dark [class~="divide-[rgba(0,0,0,0.05)]"] > :not([hidden]) ~ :not([hidden])
 
 html.dark table tr:hover {
   background-color: rgba(233, 162, 76, 0.06) !important;
+}
+
+html.dark .recharts-wrapper text {
+  fill: var(--pulse-subtle);
+}
+
+html.dark .recharts-default-tooltip {
+  background: rgba(23, 19, 15, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: var(--pulse-text) !important;
+  box-shadow: var(--pulse-shadow) !important;
+}
+
+html.dark .recharts-tooltip-label,
+html.dark .recharts-tooltip-item {
+  color: var(--pulse-text) !important;
+}
+
+html.dark option {
+  background-color: var(--pulse-surface);
+  color: var(--pulse-text);
 }
 
 html.dark select,
