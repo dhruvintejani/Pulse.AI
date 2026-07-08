@@ -1,7 +1,8 @@
 import { memo, useCallback, useDeferredValue, useId, useMemo, useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronsUpDown, Search } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronsUpDown, Inbox, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 
 export interface DataTableColumn<T> {
@@ -134,7 +135,7 @@ const DataTableComponent = <T,>({
             onChange={handleSearchChange}
             placeholder={searchPlaceholder}
             aria-label="Search table"
-            className="w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] py-2.5 pl-9 pr-4 text-sm text-[#1F1F1F] outline-none placeholder:text-[#CCC] focus:border-[rgba(233,162,76,0.4)]"
+            className="w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] py-2.5 pl-9 pr-4 text-sm text-[#1F1F1F] outline-none placeholder:text-[#CCC] transition-[border-color,box-shadow,background-color] focus:border-[rgba(233,162,76,0.4)]"
           />
         </div>
         <div className="flex min-w-0 flex-wrap gap-2">
@@ -144,7 +145,7 @@ const DataTableComponent = <T,>({
                 value={filters[column.id] ?? ''}
                 onChange={(event) => updateFilter(column.id, event.target.value)}
                 aria-label={`Filter by ${column.header}`}
-                className="w-full appearance-none rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] py-2.5 pl-3 pr-8 text-xs font-medium text-[#666] outline-none focus:border-[rgba(233,162,76,0.4)] sm:min-w-36"
+                className="w-full appearance-none rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] py-2.5 pl-3 pr-8 text-xs font-semibold text-[#666] outline-none transition-[border-color,box-shadow,background-color] focus:border-[rgba(233,162,76,0.4)] sm:min-w-36"
               >
                 <option value="">All {column.header}</option>
                 {column.filterOptions?.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -162,7 +163,7 @@ const DataTableComponent = <T,>({
               {columns.map((column) => {
                 const activeSort = sortBy === column.id;
                 return (
-                  <th key={column.id} scope="col" aria-sort={activeSort ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'} className={cn('whitespace-nowrap px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-[#999]', column.className)}>
+                  <th key={column.id} scope="col" aria-sort={activeSort ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'} className={cn('whitespace-nowrap px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-[#999]', column.className)}>
                     <button type="button" onClick={() => toggleSort(column)} disabled={!column.sortable} aria-label={column.sortable ? `Sort by ${column.header}` : column.header} className={cn('inline-flex items-center gap-1.5 rounded-md focus-ring', column.sortable && 'transition-colors hover:text-[#E9A24C]', !column.sortable && 'cursor-default')}>
                       {column.header}
                       {column.sortable && <ChevronsUpDown size={11} className={activeSort ? 'text-[#E9A24C]' : 'text-[#CCC]'} aria-hidden="true" />}
@@ -191,11 +192,8 @@ const DataTableComponent = <T,>({
 
             {!loading && paginatedData.length === 0 && (
               <tr>
-                <td colSpan={totalColumns} className="px-4 py-12 text-center">
-                  <div role="status">
-                    <p className="text-sm font-bold text-[#1F1F1F]">{emptyTitle}</p>
-                    <p className="mt-1 text-xs text-[#999]">{emptyDescription}</p>
-                  </div>
+                <td colSpan={totalColumns} className="px-4 py-4 text-center">
+                  <EmptyState title={emptyTitle} description={emptyDescription} icon={<Inbox size={19} />} className="py-12" />
                 </td>
               </tr>
             )}
