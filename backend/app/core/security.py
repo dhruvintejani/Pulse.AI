@@ -79,7 +79,7 @@ def has_suspicious_input(value: str) -> bool:
 
 def ensure_safe_input(value: Any, *, location: str = "body") -> None:
     if isinstance(value, str):
-        if has_suspicious_input(value):
+        if settings.SECURITY_BLOCK_SUSPICIOUS_INPUT and has_suspicious_input(value):
             raise AppError(
                 "Suspicious input was rejected",
                 status_code=400,
