@@ -17,6 +17,8 @@ Frontend:
 - Recharts
 - Reusable design system primitives
 - WCAG-oriented accessibility patterns
+- PWA offline/install support
+- Dynamic SEO metadata
 
 Backend:
 
@@ -74,7 +76,7 @@ uvicorn app.main:app --reload
 
 Reusable UI primitives live in `src/components/ui`, and design tokens live in `src/styles/design-system.css`.
 
-Core primitives include Button, Input, Card, Dialog, Dropdown, Badge, Avatar, Alert, Toast, Table, Tabs, Accordion, Tooltip, Progress, Skeleton, EmptyState, IconButton, VisuallyHidden, and OptimizedImage.
+Core primitives include Button, Input, Card, Dialog, Dropdown, ContextMenu, DropZone, Badge, Avatar, Alert, Toast, Table, Tabs, Accordion, Tooltip, Progress, Skeleton, EmptyState, IconButton, VisuallyHidden, and OptimizedImage.
 
 Read the full design system guide:
 
@@ -86,6 +88,12 @@ Read the accessibility audit checklist:
 
 ```text
 docs/ACCESSIBILITY_AUDIT.md
+```
+
+Read the PWA, SEO, and premium UX guide:
+
+```text
+docs/PWA_SEO_UX.md
 ```
 
 ## Frontend environment variables
@@ -104,6 +112,7 @@ VITE_API_WITH_CREDENTIALS=false
 VITE_ADMIN_EMAILS=admin@example.com
 VITE_APP_ENV=development
 VITE_ENABLE_SOURCEMAPS=false
+VITE_SITE_URL=http://localhost:5173
 ```
 
 ## Backend environment variables
@@ -224,6 +233,9 @@ Frontend:
 
 - Design system tokens and reusable primitives.
 - Accessible dialogs, dropdowns, tabs, accordions, forms, toasts, progress bars, and tables.
+- Undo actions, confirmation dialogs, context menus, command palette, keyboard shortcuts, optimistic UI, drag/drop, and progress indicators.
+- PWA manifest, service worker, offline fallback, install prompt, app icons, and app screenshots.
+- Dynamic meta tags, Open Graph, Twitter Cards, Schema.org structured data, canonical URLs, sitemap, and robots file.
 - SPA routing configured for Vercel.
 - Static asset caching for hashed files.
 - Vendor chunk splitting.
@@ -259,4 +271,10 @@ backend/docker-compose.yml
 docs/DEPLOYMENT.md
 docs/DESIGN_SYSTEM.md
 docs/ACCESSIBILITY_AUDIT.md
+docs/PWA_SEO_UX.md
+public/manifest.webmanifest
+public/sw.js
+public/offline.html
+public/robots.txt
+public/sitemap.xml
 ```
