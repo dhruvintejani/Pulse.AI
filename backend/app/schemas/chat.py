@@ -9,7 +9,6 @@ class ConversationCreate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     initial_message: str | None = Field(default=None, max_length=50000)
     model: str | None = Field(default=None, max_length=80)
-    provider: str | None = Field(default=None, max_length=60)
     folder_id: str | None = None
     tags: list[str] = Field(default_factory=list, max_length=20)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -95,14 +94,12 @@ class ConversationDetailResponse(ConversationResponse):
 
 class ChatStreamRequest(BaseModel):
     content: str = Field(..., min_length=1, max_length=50000)
-    provider: str | None = Field(default=None, max_length=60)
     model: str | None = Field(default=None, max_length=80)
     attachments: list[MessageAttachment] = Field(default_factory=list, max_length=10)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class RegenerateMessageRequest(BaseModel):
-    provider: str | None = Field(default=None, max_length=60)
     model: str | None = Field(default=None, max_length=80)
     instructions: str | None = Field(default=None, max_length=5000)
 
