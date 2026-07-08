@@ -36,14 +36,14 @@ const dotColors = {
 const Badge = ({ children, variant = 'default', size = 'md', className, dot }: BadgeProps) => (
   <span
     className={cn(
-      'inline-flex items-center rounded-full border font-medium',
+      'inline-flex max-w-full items-center rounded-full border font-semibold leading-none whitespace-nowrap align-middle transition-colors duration-200',
       variants[variant],
       sizes[size],
       className
     )}
   >
-    {dot && <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', dotColors[variant])} />}
-    {children}
+    {dot && <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', dotColors[variant])} aria-hidden="true" />}
+    <span className="min-w-0 truncate">{children}</span>
   </span>
 );
 
