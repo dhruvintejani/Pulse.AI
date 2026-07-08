@@ -1,3 +1,4 @@
+export { default as AdminPage } from './AdminPage';
 export { default as AnalyticsPage } from './AnalyticsPage';
 export { default as BillingPage } from './BillingPage';
 export { default as ChatPage } from './ChatPage';
