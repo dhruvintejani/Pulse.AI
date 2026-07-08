@@ -17,6 +17,7 @@ import {
   Clock,
   Layers,
   Cpu,
+  ShieldCheck,
 } from 'lucide-react';
 import { DASHBOARD_PATHS } from '@/constants/routes';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -44,12 +45,20 @@ const DashboardSidebar = () => {
   const { recentChats } = useRecentChats();
   const { createConversation, setActiveConversation } = useConversations();
 
-  const secondaryNav = useMemo(() => [
-    { id: 'notifications', label: 'Notifications', icon: Bell, path: DASHBOARD_PATHS.NOTIFICATIONS, badge: unreadCount ? String(unreadCount) : '' },
-    { id: 'billing', label: 'Billing', icon: CreditCard, path: DASHBOARD_PATHS.BILLING, badge: '' },
-    { id: 'team', label: 'Team', icon: Users, path: DASHBOARD_PATHS.TEAM, badge: '' },
-    { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS, badge: '' },
-  ], [unreadCount]);
+  const secondaryNav = useMemo(() => {
+    const items = [
+      { id: 'notifications', label: 'Notifications', icon: Bell, path: DASHBOARD_PATHS.NOTIFICATIONS, badge: unreadCount ? String(unreadCount) : '' },
+      { id: 'billing', label: 'Billing', icon: CreditCard, path: DASHBOARD_PATHS.BILLING, badge: '' },
+      { id: 'team', label: 'Team', icon: Users, path: DASHBOARD_PATHS.TEAM, badge: '' },
+      { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS, badge: '' },
+    ];
+
+    if (currentUser?.isAdmin) {
+      items.splice(3, 0, { id: 'admin', label: 'Admin', icon: ShieldCheck, path: DASHBOARD_PATHS.ADMIN, badge: 'Admin' });
+    }
+
+    return items;
+  }, [currentUser?.isAdmin, unreadCount]);
 
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
   const displayName = useMemo(() => currentUser?.fullName || 'Alex Morgan', [currentUser?.fullName]);
@@ -186,7 +195,7 @@ const DashboardSidebar = () => {
             <motion.button
               key={item.id}
               type="button"
-              aria-label={item.badge ? `${item.label}, ${item.badge} unread` : item.label}
+              aria-label={item.badge && item.id === 'notifications' ? `${item.label}, ${item.badge} unread` : item.label}
               aria-current={active ? 'page' : undefined}
               title={collapsed ? item.label : undefined}
               onClick={() => handleNavigate(item.path)}
@@ -198,7 +207,7 @@ const DashboardSidebar = () => {
             >
               <div className="relative shrink-0">
                 <Icon size={17} className={cn(active ? 'text-[#E9A24C]' : 'text-[#999]')} aria-hidden="true" />
-                {item.badge && (
+                {item.badge && item.id === 'notifications' && (
                   <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-[#E9A24C] text-white text-[9px] font-bold flex items-center justify-center" aria-hidden="true">
                     {item.badge}
                   </span>
@@ -207,7 +216,7 @@ const DashboardSidebar = () => {
               {!collapsed && (
                 <>
                   <span className={cn('text-sm flex-1 truncate', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>{item.label}</span>
-                  <ChevronRight size={14} className="text-[#CCC]" aria-hidden="true" />
+                  {item.id === 'admin' ? <Badge variant="accent" size="sm">Admin</Badge> : <ChevronRight size={14} className="text-[#CCC]" aria-hidden="true" />}
                 </>
               )}
             </motion.button>
