@@ -1,0 +1,53 @@
+{
+  "name": "Pulse AI — Intelligent Workspace",
+  "short_name": "Pulse AI",
+  "description": "A premium AI workspace for chat, documents, analytics, notifications, and productivity.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#F8F4EC",
+  "theme_color": "#E9A24C",
+  "categories": ["productivity", "business", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open AI Chat",
+      "short_name": "Chat",
+      "description": "Start a Pulse AI conversation.",
+      "url": "/dashboard/chat?source=pwa-shortcut",
+      "icons": [{ "src": "/pwa-icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Open Documents",
+      "short_name": "Documents",
+      "description": "Upload and search your documents.",
+      "url": "/dashboard/documents?source=pwa-shortcut",
+      "icons": [{ "src": "/pwa-icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Open Analytics",
+      "short_name": "Analytics",
+      "description": "Review AI usage and workspace analytics.",
+      "url": "/dashboard/analytics?source=pwa-shortcut",
+      "icons": [{ "src": "/pwa-icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}
