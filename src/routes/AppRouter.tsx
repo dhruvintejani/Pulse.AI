@@ -1,7 +1,7 @@
 import { memo, Suspense } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { AuthLoadingScreen } from '@/components/auth';
+import { RouteLoadingFallback } from '@/components/common';
 import BottomNav from '@/layouts/BottomNav';
 import {
   dashboardLayoutRoute,
@@ -10,13 +10,15 @@ import {
   publicRoutes,
   ssoCallbackRoute,
 } from '@/routes/routeConfig';
+import RouteFocusManager from '@/routes/RouteFocusManager';
 
 const AppRouter = () => {
   const location = useLocation();
 
   return (
-    <Suspense fallback={<AuthLoadingScreen />}>
-      <AnimatePresence mode="wait">
+    <Suspense fallback={<RouteLoadingFallback />}>
+      <RouteFocusManager />
+      <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
           {publicRoutes.map((route) => (
             <Route key={route.key} path={route.path} element={route.element} />
