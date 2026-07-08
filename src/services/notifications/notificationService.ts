@@ -92,24 +92,24 @@ const mapApiNotification = (notification: ApiNotification): AppNotification => {
   };
 };
 
-const fallback = async <T>(request: () => Promise<T>, fallbackValue: T) => {
+const withLocalFallback = async <T>(request: () => Promise<T>, fallbackValue: () => T) => {
   try {
     return await request();
   } catch {
-    return fallbackValue;
+    return fallbackValue();
   }
 };
 
 export const notificationService = {
-  getNotifications: async () => fallback(
+  getNotifications: async () => withLocalFallback(
     async () => {
       const response = await apiClient.get<ApiPage<ApiNotification>>('/notifications?size=100');
       notificationStore = response.items.map(mapApiNotification);
       return notificationStore;
     },
-    notificationStore
+    () => notificationStore
   ),
-  markRead: async (notificationId: string) => fallback(
+  markRead: async (notificationId: string) => withLocalFallback(
     async () => {
       const response = await apiClient.patch<ApiNotification>(`/notifications/${notificationId}/read`);
       notificationStore = notificationStore.map((notification) => (
@@ -117,32 +117,44 @@ export const notificationService = {
       ));
       return notificationStore;
     },
-    notificationStore = notificationStore.map((notification) => (
-      notification.id === notificationId ? { ...notification, unread: false } : notification
-    ))
+    () => {
+      notificationStore = notificationStore.map((notification) => (
+        notification.id === notificationId ? { ...notification, unread: false } : notification
+      ));
+      return notificationStore;
+    }
   ),
-  markAllRead: async () => fallback(
+  markAllRead: async () => withLocalFallback(
     async () => {
       await apiClient.post('/notifications/mark-all-read');
       notificationStore = notificationStore.map((notification) => ({ ...notification, unread: false }));
       return notificationStore;
     },
-    notificationStore = notificationStore.map((notification) => ({ ...notification, unread: false }))
+    () => {
+      notificationStore = notificationStore.map((notification) => ({ ...notification, unread: false }));
+      return notificationStore;
+    }
   ),
-  deleteNotification: async (notificationId: string) => fallback(
+  deleteNotification: async (notificationId: string) => withLocalFallback(
     async () => {
       await apiClient.delete(`/notifications/${notificationId}`);
       notificationStore = notificationStore.filter((notification) => notification.id !== notificationId);
       return notificationStore;
     },
-    notificationStore = notificationStore.filter((notification) => notification.id !== notificationId)
+    () => {
+      notificationStore = notificationStore.filter((notification) => notification.id !== notificationId);
+      return notificationStore;
+    }
   ),
-  clearAll: async () => fallback(
+  clearAll: async () => withLocalFallback(
     async () => {
       await apiClient.delete('/notifications/clear-all');
       notificationStore = [];
       return notificationStore;
     },
-    notificationStore = []
+    () => {
+      notificationStore = [];
+      return notificationStore;
+    }
   ),
 };
