@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { forwardRef, memo } from 'react';
 import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
@@ -22,10 +22,10 @@ const variants = {
 };
 
 const sizes = {
-  sm: 'px-3 py-1.5 text-xs font-medium gap-1.5',
-  md: 'px-4 py-2.5 text-sm font-medium gap-2',
-  lg: 'px-6 py-3 text-base font-semibold gap-2',
-  xl: 'px-8 py-4 text-lg font-semibold gap-3',
+  sm: 'px-3 py-1.5 text-xs font-medium gap-1.5 min-h-8',
+  md: 'px-4 py-2.5 text-sm font-medium gap-2 min-h-10',
+  lg: 'px-6 py-3 text-base font-semibold gap-2 min-h-11',
+  xl: 'px-8 py-4 text-lg font-semibold gap-3 min-h-12',
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
@@ -38,20 +38,25 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   children,
   className,
   disabled,
+  type = 'button',
   ...props
 }, ref) => {
+  const prefersReducedMotion = useReducedMotion();
   const isDisabled = disabled || loading;
+  const hoverState = prefersReducedMotion ? undefined : { scale: isDisabled ? 1 : 1.02 };
+  const tapState = prefersReducedMotion ? undefined : { scale: isDisabled ? 1 : 0.97 };
 
   return (
     <motion.button
       ref={ref}
-      whileHover={{ scale: isDisabled ? 1 : 1.02 }}
-      whileTap={{ scale: isDisabled ? 1 : 0.97 }}
+      type={type}
+      whileHover={hoverState}
+      whileTap={tapState}
       className={cn(
-        'inline-flex items-center justify-center select-none cursor-pointer focus-ring',
+        'inline-flex min-w-0 items-center justify-center select-none cursor-pointer whitespace-nowrap focus-ring transition-[transform,box-shadow,background-color,border-color,color] duration-200 motion-reduce:transition-none',
         variants[variant],
         sizes[size],
-        isDisabled && 'opacity-50 cursor-not-allowed',
+        isDisabled && 'opacity-50 cursor-not-allowed hover:translate-y-0',
         className
       )}
       disabled={isDisabled}
@@ -60,11 +65,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       {...(props as ComponentProps<typeof motion.button>)}
     >
       {loading ? (
-        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none" aria-hidden="true" />
       ) : icon ? (
         <span className="shrink-0" aria-hidden="true">{icon}</span>
       ) : null}
-      {children && <span>{children}</span>}
+      {children && <span className="min-w-0 truncate">{children}</span>}
       {loading && <span className="sr-only">{loadingLabel}</span>}
       {iconRight && !loading && <span className="shrink-0 ml-auto" aria-hidden="true">{iconRight}</span>}
     </motion.button>
