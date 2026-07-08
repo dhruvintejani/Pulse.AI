@@ -12,6 +12,7 @@ interface ImportMetaEnv {
   readonly VITE_ADMIN_EMAILS?: string;
   readonly VITE_APP_ENV?: string;
   readonly VITE_ENABLE_SOURCEMAPS?: string;
+  readonly VITE_SITE_URL?: string;
 }
 
 interface ImportMeta {
