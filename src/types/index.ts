@@ -45,6 +45,7 @@ export interface NavItem {
 export * from './auth';
 export * from './chat';
 export * from './notification';
+export * from './profile';
 export * from './sidebar';
 export * from './theme';
 export * from './user';
