@@ -5,3 +5,4 @@ export * from './useApiDocuments';
 export * from './useApiHealth';
 export * from './useApiNotifications';
 export * from './useApiSettingsBilling';
+export * from './useApiUsers';
