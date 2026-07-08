@@ -15,7 +15,7 @@ const RouteFocusManager = () => {
   const pageLabel = useMemo(() => formatPathname(location.pathname), [location.pathname]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 
     window.requestAnimationFrame(() => {
       const main = document.getElementById('main-content');
