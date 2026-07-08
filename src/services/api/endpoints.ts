@@ -10,7 +10,11 @@ export const API_ENDPOINTS = {
     current: '/users/me',
     profile: '/users/me/profile',
     avatar: '/users/me/avatar',
-    settings: '/users/me/settings',
+    settings: '/settings/me',
+  },
+  search: {
+    root: '/search',
+    filters: '/search/filters',
   },
   dashboard: {
     overview: '/dashboard/overview',
@@ -52,12 +56,16 @@ export const API_ENDPOINTS = {
     root: '/notifications',
     byId: (notificationId: string) => `/notifications/${notificationId}`,
     markRead: (notificationId: string) => `/notifications/${notificationId}/read`,
-    markAllRead: '/notifications/read-all',
-    clearAll: '/notifications/clear',
+    markUnread: (notificationId: string) => `/notifications/${notificationId}/unread`,
+    markAllRead: '/notifications/mark-all-read',
+    clearAll: '/notifications/clear-all',
+    preferences: '/notifications/preferences',
+    categories: '/notifications/categories',
+    unreadCount: '/notifications/unread-count',
   },
   settings: {
-    root: '/settings',
-    section: (section: string) => `/settings/${section}`,
+    root: '/settings/me',
+    recentSearches: '/settings/me/recent-searches',
   },
   billing: {
     plans: '/billing/plans',
