@@ -15,7 +15,7 @@ class ThemeMode(str, Enum):
 class UserSettings(BaseDocument):
     user_id: PydanticObjectId
     theme: ThemeMode = ThemeMode.SYSTEM
-    language: str = Field(default="en", min_length=2, max_length=16)
+    language: str = Field(default="English", min_length=2, max_length=16)
     timezone: str = Field(default="UTC", min_length=1, max_length=80)
     notification_preferences: dict[str, Any] = Field(default_factory=dict)
     profile_settings: dict[str, Any] = Field(default_factory=dict)
