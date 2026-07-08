@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_API_RETRY_COUNT?: string;
   readonly VITE_API_WITH_CREDENTIALS?: string;
   readonly VITE_ADMIN_EMAILS?: string;
+  readonly VITE_APP_ENV?: string;
+  readonly VITE_ENABLE_SOURCEMAPS?: string;
 }
 
 interface ImportMeta {
