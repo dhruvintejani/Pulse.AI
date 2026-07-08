@@ -1,4 +1,4 @@
-import { createContext, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { ResolvedThemeMode, ThemeContextValue, ThemeMode } from '@/types/theme';
 
 const THEME_STORAGE_KEY = 'pulse-theme';
@@ -17,13 +17,30 @@ const getSystemTheme = (): ResolvedThemeMode => {
 
 const resolveTheme = (theme: ThemeMode): ResolvedThemeMode => (theme === 'system' ? getSystemTheme() : theme);
 
+const getStoredTheme = () => {
+  try {
+    return window.localStorage.getItem(THEME_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const persistTheme = (theme: ThemeMode) => {
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {
+    return undefined;
+  }
+};
+
 const getInitialTheme = (): ThemeMode => {
   if (typeof window === 'undefined') return 'system';
-  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  const storedTheme = getStoredTheme();
   return isThemeMode(storedTheme) ? storedTheme : 'system';
 };
 
 const applyThemeToDocument = (theme: ThemeMode, resolvedTheme: ResolvedThemeMode) => {
+  if (typeof document === 'undefined') return;
   const root = document.documentElement;
   root.dataset.theme = theme;
   root.dataset.resolvedTheme = resolvedTheme;
@@ -38,17 +55,28 @@ interface ThemeProviderProps {
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [theme, setThemeState] = useState<ThemeMode>(getInitialTheme);
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedThemeMode>(() => resolveTheme(getInitialTheme()));
+  const themeSwitchTimeoutRef = useRef<number | null>(null);
 
-  const setTheme = (nextTheme: ThemeMode) => {
+  const setTheme = useCallback((nextTheme: ThemeMode) => {
+    if (typeof window === 'undefined') return;
+
     document.documentElement.classList.add(THEME_SWITCH_CLASS);
-    window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    persistTheme(nextTheme);
     setThemeState(nextTheme);
-    window.setTimeout(() => document.documentElement.classList.remove(THEME_SWITCH_CLASS), THEME_SWITCH_DURATION);
-  };
 
-  const toggleTheme = () => {
+    if (themeSwitchTimeoutRef.current) {
+      window.clearTimeout(themeSwitchTimeoutRef.current);
+    }
+
+    themeSwitchTimeoutRef.current = window.setTimeout(() => {
+      document.documentElement.classList.remove(THEME_SWITCH_CLASS);
+      themeSwitchTimeoutRef.current = null;
+    }, THEME_SWITCH_DURATION);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-  };
+  }, [resolvedTheme, setTheme]);
 
   useLayoutEffect(() => {
     const nextResolvedTheme = resolveTheme(theme);
@@ -70,13 +98,19 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
 
-  const value = useMemo(() => ({
+  useEffect(() => () => {
+    if (themeSwitchTimeoutRef.current) {
+      window.clearTimeout(themeSwitchTimeoutRef.current);
+    }
+  }, []);
+
+  const value = useMemo<ThemeContextValue>(() => ({
     theme,
     resolvedTheme,
     isDark: resolvedTheme === 'dark',
     setTheme,
     toggleTheme,
-  }), [resolvedTheme, theme]);
+  }), [resolvedTheme, setTheme, theme, toggleTheme]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
