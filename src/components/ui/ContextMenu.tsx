@@ -75,7 +75,7 @@ const ContextMenu = ({ children, items, label = 'Context menu', className }: Con
     setActiveIndex(indexes[(currentPosition + direction + indexes.length) % indexes.length]);
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, item: ContextMenuItem) => {
+  const handleItemKeyDown = (event: KeyboardEvent<HTMLButtonElement>, item: ContextMenuItem) => {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       moveActive(1);
@@ -97,9 +97,17 @@ const ContextMenu = ({ children, items, label = 'Context menu', className }: Con
     }
   };
 
+  const handleContainerKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return;
+    event.preventDefault();
+    const target = event.currentTarget.getBoundingClientRect();
+    openAt(target.left + Math.min(target.width / 2, 240), target.top + Math.min(target.height / 2, 160));
+  };
+
   return (
     <div
       className={className}
+      onKeyDown={handleContainerKeyDown}
       onContextMenu={(event) => {
         event.preventDefault();
         openAt(event.clientX, event.clientY);
@@ -131,7 +139,7 @@ const ContextMenu = ({ children, items, label = 'Context menu', className }: Con
                   item.onSelect();
                   close();
                 }}
-                onKeyDown={(event) => handleKeyDown(event, item)}
+                onKeyDown={(event) => handleItemKeyDown(event, item)}
                 onMouseEnter={() => !item.disabled && setActiveIndex(index)}
                 className={cn(
                   'flex w-full min-w-0 items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ds-focus-ring',
