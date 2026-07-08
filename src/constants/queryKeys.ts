@@ -13,6 +13,8 @@ export const queryKeys = {
   profile: ['profile'] as const,
   settings: ['settings'] as const,
   billing: ['billing'] as const,
+  search: ['global-search'] as const,
+  recentSearches: ['recent-searches'] as const,
   api: {
     health: ['api', 'health'] as const,
     authUser: ['api', 'auth', 'user'] as const,
@@ -23,6 +25,7 @@ export const queryKeys = {
     documents: ['api', 'documents'] as const,
     document: (documentId: string) => ['api', 'documents', documentId] as const,
     notifications: ['api', 'notifications'] as const,
+    search: ['api', 'search'] as const,
     analytics: ['api', 'analytics'] as const,
     workspace: ['api', 'workspace'] as const,
     settings: ['api', 'settings'] as const,
