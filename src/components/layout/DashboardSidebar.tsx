@@ -38,7 +38,7 @@ const mainNav = [
 const DashboardSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { collapsed } = useSidebar();
+  const { collapsed, closeMobileSidebar } = useSidebar();
   const { currentUser } = useCurrentUser();
   const { unreadCount } = useNotifications();
   const { recentChats } = useRecentChats();
@@ -56,19 +56,27 @@ const DashboardSidebar = () => {
 
   const handleNavigate = useCallback((path: string) => {
     navigate(path);
-  }, [navigate]);
+    closeMobileSidebar();
+  }, [closeMobileSidebar, navigate]);
 
   const handleNewConversation = useCallback(() => {
-    void createConversation().then(() => navigate(DASHBOARD_PATHS.CHAT));
-  }, [createConversation, navigate]);
+    void createConversation().then(() => {
+      navigate(DASHBOARD_PATHS.CHAT);
+      closeMobileSidebar();
+    });
+  }, [closeMobileSidebar, createConversation, navigate]);
 
   const handleRecentChatClick = useCallback((chatId: string) => {
-    void setActiveConversation(chatId).then(() => navigate(DASHBOARD_PATHS.CHAT));
-  }, [navigate, setActiveConversation]);
+    void setActiveConversation(chatId).then(() => {
+      navigate(DASHBOARD_PATHS.CHAT);
+      closeMobileSidebar();
+    });
+  }, [closeMobileSidebar, navigate, setActiveConversation]);
 
   const handleProfileClick = useCallback(() => {
     navigate(DASHBOARD_PATHS.PROFILE);
-  }, [navigate]);
+    closeMobileSidebar();
+  }, [closeMobileSidebar, navigate]);
 
   return (
     <motion.aside
@@ -81,24 +89,18 @@ const DashboardSidebar = () => {
         collapsed ? 'w-16' : 'w-64'
       )}
     >
-      {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-[rgba(0,0,0,0.05)]">
         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E9A24C] to-[#D4853A] flex items-center justify-center shadow-premium-sm shrink-0">
           <Sparkles size={16} className="text-white" aria-hidden="true" />
         </div>
         {!collapsed && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col"
-          >
-            <span className="text-sm font-bold text-[#1F1F1F] tracking-tight">Pulse AI</span>
-            <span className="text-[10px] text-[#999] font-medium">Workspace</span>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col min-w-0">
+            <span className="text-sm font-bold text-[#1F1F1F] tracking-tight truncate">Pulse AI</span>
+            <span className="text-[10px] text-[#999] font-medium truncate">Workspace</span>
           </motion.div>
         )}
       </div>
 
-      {/* New Chat button */}
       {!collapsed && (
         <div className="px-3 pt-4 pb-2">
           <button
@@ -112,7 +114,6 @@ const DashboardSidebar = () => {
         </div>
       )}
 
-      {/* Main Nav */}
       <nav className="flex-1 overflow-y-auto no-scrollbar px-3 py-2 space-y-0.5" aria-label="Dashboard sections">
         {mainNav.map((item) => {
           const active = isActive(item.path);
@@ -134,7 +135,7 @@ const DashboardSidebar = () => {
               <Icon size={17} className={cn('shrink-0', active ? 'text-[#E9A24C]' : 'text-[#999]')} aria-hidden="true" />
               {!collapsed && (
                 <>
-                  <span className={cn('text-sm flex-1', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>{item.label}</span>
+                  <span className={cn('text-sm flex-1 truncate', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>{item.label}</span>
                   {item.badge && (
                     <Badge variant={item.badge === 'New' ? 'accent' : 'neutral'} size="sm">
                       {item.badge}
@@ -146,7 +147,6 @@ const DashboardSidebar = () => {
           );
         })}
 
-        {/* Recent Chats */}
         {!collapsed && (
           <div className="pt-4" aria-label="Recent chats">
             <div className="flex items-center justify-between px-3 mb-2">
@@ -177,10 +177,8 @@ const DashboardSidebar = () => {
           </div>
         )}
 
-        {/* Divider */}
         <div className="my-3 mx-3 border-t border-[rgba(0,0,0,0.05)]" />
 
-        {/* Secondary Nav */}
         {secondaryNav.map((item) => {
           const active = isActive(item.path);
           const Icon = item.icon;
@@ -208,7 +206,7 @@ const DashboardSidebar = () => {
               </div>
               {!collapsed && (
                 <>
-                  <span className={cn('text-sm flex-1', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>{item.label}</span>
+                  <span className={cn('text-sm flex-1 truncate', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>{item.label}</span>
                   <ChevronRight size={14} className="text-[#CCC]" aria-hidden="true" />
                 </>
               )}
@@ -217,15 +215,12 @@ const DashboardSidebar = () => {
         })}
       </nav>
 
-      {/* User Profile */}
       <div className="p-3 border-t border-[rgba(0,0,0,0.05)]">
         <button
           type="button"
           onClick={handleProfileClick}
           aria-label={`Open profile for ${displayName}`}
-          className={cn(
-            'w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-[rgba(233,162,76,0.06)] transition-all duration-200 focus-ring',
-          )}
+          className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-[rgba(233,162,76,0.06)] transition-all duration-200 focus-ring"
         >
           <Avatar src={currentUser?.imageUrl} name={displayName} size="sm" online={true} />
           {!collapsed && (
