@@ -1,6 +1,8 @@
 import { apiClient } from '@/services/api';
 import type { GlobalSearchRequest, GlobalSearchResponse, GlobalSearchResult, SearchEntityType } from '@/types/search';
 
+const defaultSearchFilters: SearchEntityType[] = ['chat', 'message', 'document', 'user', 'setting'];
+
 const mockResults: GlobalSearchResult[] = [
   {
     id: 'mock-chat-1',
@@ -61,7 +63,7 @@ const setLocalRecentSearch = (query: string) => {
 
 const filterMockResults = (query: string, filters?: SearchEntityType[]) => {
   const normalized = query.toLowerCase();
-  const activeFilters = filters?.length ? filters : ['chat', 'message', 'document', 'user', 'setting'];
+  const activeFilters = filters?.length ? filters : defaultSearchFilters;
   return mockResults.filter((item) => (
     activeFilters.includes(item.type) && `${item.title} ${item.description ?? ''}`.toLowerCase().includes(normalized)
   ));
@@ -84,7 +86,7 @@ export const globalSearchService = {
       const end = start + size;
       return {
         query,
-        filters: filters?.length ? filters : ['chat', 'message', 'document', 'user', 'setting'],
+        filters: filters?.length ? filters : defaultSearchFilters,
         items: items.slice(start, end),
         page,
         size,
