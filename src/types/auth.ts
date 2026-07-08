@@ -4,4 +4,12 @@ export type FieldErrors = Record<string, string>;
 
 export interface AuthEmailState {
   email?: string;
+  statusMessage?: string;
+}
+
+export interface AuthRedirectState {
+  from?: {
+    pathname?: string;
+    search?: string;
+  };
 }
