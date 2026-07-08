@@ -2,11 +2,13 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scrollbar-color: rgba(233, 162, 76, 0.45) transparent;
+  scrollbar-gutter: stable both-edges;
 }
 
 body {
   min-width: 320px;
   text-rendering: optimizeLegibility;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 ::selection {
@@ -32,6 +34,15 @@ button:disabled,
   cursor: not-allowed;
 }
 
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+[tabindex]:focus:not(:focus-visible) {
+  outline: none;
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -40,6 +51,10 @@ select:focus-visible,
 [tabindex]:focus-visible {
   outline: 2px solid rgba(233, 162, 76, 0.78);
   outline-offset: 3px;
+}
+
+.focus-ring:focus {
+  outline: none;
 }
 
 .focus-ring:focus-visible {
