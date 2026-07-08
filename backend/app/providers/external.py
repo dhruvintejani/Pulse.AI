@@ -25,3 +25,4 @@ class ConfigurableExternalProvider(AIProvider):
             error_code="AI_PROVIDER_TRANSPORT_NOT_IMPLEMENTED",
             details={"provider": self.name},
         )
+        yield ""
