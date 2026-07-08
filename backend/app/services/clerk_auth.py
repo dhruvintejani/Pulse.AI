@@ -67,9 +67,16 @@ class ClerkAuthService:
         if not force_refresh and self._jwks and now < self._jwks_expires_at:
             return self._jwks
 
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(settings.CLERK_JWKS_URL)
-            response.raise_for_status()
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.get(settings.CLERK_JWKS_URL)
+                response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise AppError(
+                "Unable to fetch Clerk signing keys",
+                status_code=503,
+                error_code="CLERK_JWKS_UNAVAILABLE",
+            ) from exc
 
         self._jwks = response.json()
         self._jwks_expires_at = now + settings.CLERK_JWKS_CACHE_SECONDS
