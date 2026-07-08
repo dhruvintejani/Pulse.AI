@@ -18,11 +18,12 @@ const ResetPasswordPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoaded, signIn, setActive } = useSignIn();
-  const stateEmail = (location.state as AuthEmailState | null)?.email ?? '';
-  const [email, setEmail] = useState(stateEmail);
+  const routeState = location.state as AuthEmailState | null;
+  const [email, setEmail] = useState(routeState?.email ?? '');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [statusMessage, setStatusMessage] = useState(routeState?.statusMessage ?? '');
   const { fieldErrors, setFieldErrors, authError, setAuthError, clearFieldError } = useAuthFormErrors();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -47,6 +48,7 @@ const ResetPasswordPage = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError('');
+    setStatusMessage('');
 
     if (!validate() || !isLoaded || !signIn) return;
 
@@ -75,6 +77,7 @@ const ResetPasswordPage = () => {
 
   const handleResendCode = async () => {
     setAuthError('');
+    setStatusMessage('');
 
     if (!email.trim()) {
       setFieldErrors({ email: 'Enter your email address before requesting a new code.' });
@@ -89,6 +92,7 @@ const ResetPasswordPage = () => {
         strategy: 'reset_password_email_code',
         identifier: email.trim(),
       });
+      setStatusMessage('A new reset code has been sent to your email.');
     } catch (error) {
       setFieldErrors(getClerkFieldErrors(error));
       setAuthError(getClerkErrorMessage(error, 'Unable to resend the reset code. Please try again.'));
@@ -126,7 +130,8 @@ const ResetPasswordPage = () => {
             </p>
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 space-y-3">
+            <AuthAlert message={statusMessage} variant="success" />
             <AuthAlert message={authError} />
           </div>
 
@@ -140,6 +145,7 @@ const ResetPasswordPage = () => {
               onChange={(event) => {
                 setEmail(event.target.value);
                 clearFieldError('email');
+                setStatusMessage('');
               }}
               error={fieldErrors.email}
             />
@@ -153,6 +159,7 @@ const ResetPasswordPage = () => {
               onChange={(event) => {
                 setCode(event.target.value);
                 clearFieldError('code');
+                setStatusMessage('');
               }}
               error={fieldErrors.code}
             />
@@ -189,6 +196,7 @@ const ResetPasswordPage = () => {
               className="w-full"
               iconRight={<ArrowRight size={16} />}
               loading={isSubmitting}
+              disabled={!isLoaded || isSubmitting || isResending}
             >
               Reset Password
             </Button>
@@ -198,13 +206,14 @@ const ResetPasswordPage = () => {
             type="button"
             disabled={isResending}
             onClick={handleResendCode}
-            className="flex items-center justify-center gap-2 text-sm text-[#999] hover:text-[#E9A24C] transition-colors mt-5 mx-auto"
+            className="flex items-center justify-center gap-2 text-sm text-[#999] hover:text-[#E9A24C] transition-colors mt-5 mx-auto disabled:opacity-60"
           >
             <RefreshCw size={14} className={isResending ? 'animate-spin' : ''} />
             {isResending ? 'Sending code...' : 'Resend reset code'}
           </button>
 
           <button
+            type="button"
             onClick={() => navigate(ROUTES.LOGIN)}
             className="flex items-center gap-2 text-sm text-[#999] hover:text-[#666] transition-colors mt-4 mx-auto"
           >
