@@ -3,7 +3,8 @@ import { useLocation } from 'react-router-dom';
 
 const formatPathname = (pathname: string) => {
   if (pathname === '/') return 'Home';
-  const lastSegment = pathname.split('/').filter(Boolean).at(-1) ?? 'Dashboard';
+  const segments = pathname.split('/').filter(Boolean);
+  const lastSegment = segments[segments.length - 1] ?? 'Dashboard';
   return lastSegment
     .split('-')
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
