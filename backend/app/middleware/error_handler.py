@@ -13,6 +13,15 @@ def _request_id(request: Request) -> str | None:
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def app_error_handler(request: Request, exc: AppError) -> ORJSONResponse:
+        log_method = logger.bind(category="request").warning if exc.status_code < 500 else logger.bind(category="request").error
+        log_method(
+            "Application error",
+            error_code=exc.error_code,
+            status_code=exc.status_code,
+            path=request.url.path,
+            method=request.method,
+            details=exc.details,
+        )
         return ORJSONResponse(
             status_code=exc.status_code,
             content={
@@ -26,6 +35,13 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(StarletteHTTPException)
     async def http_error_handler(request: Request, exc: StarletteHTTPException) -> ORJSONResponse:
+        logger.bind(category="request").warning(
+            "HTTP error",
+            status_code=exc.status_code,
+            path=request.url.path,
+            method=request.method,
+            detail=str(exc.detail),
+        )
         return ORJSONResponse(
             status_code=exc.status_code,
             content={
@@ -39,6 +55,12 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def validation_error_handler(request: Request, exc: RequestValidationError) -> ORJSONResponse:
+        logger.bind(category="request").warning(
+            "Request validation failed",
+            path=request.url.path,
+            method=request.method,
+            errors=exc.errors(),
+        )
         return ORJSONResponse(
             status_code=422,
             content={
@@ -52,7 +74,7 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception) -> ORJSONResponse:
-        logger.exception("Unhandled exception", path=request.url.path, method=request.method)
+        logger.bind(category="request").exception("Unhandled exception", path=request.url.path, method=request.method)
         return ORJSONResponse(
             status_code=500,
             content={
