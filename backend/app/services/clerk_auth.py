@@ -7,6 +7,8 @@ from app.core.config import settings
 from app.core.errors import AppError
 from app.schemas.auth import ClerkTokenClaims
 
+MAX_AUTH_TOKEN_LENGTH = 8192
+
 
 class ClerkAuthService:
     def __init__(self) -> None:
@@ -21,10 +23,16 @@ class ClerkAuthService:
                 error_code="CLERK_NOT_CONFIGURED",
             )
 
+        if not token or len(token) > MAX_AUTH_TOKEN_LENGTH or token.count(".") != 2:
+            raise AppError("Invalid authorization token", status_code=401, error_code="INVALID_AUTH_TOKEN")
+
         try:
             header = jwt.get_unverified_header(token)
         except JWTError as exc:
             raise AppError("Invalid authorization token", status_code=401, error_code="INVALID_AUTH_TOKEN") from exc
+
+        if header.get("alg") != "RS256" or header.get("typ") not in {None, "JWT"}:
+            raise AppError("Unsupported authorization token", status_code=401, error_code="UNSUPPORTED_AUTH_TOKEN")
 
         key = await self._get_signing_key(header.get("kid"))
 
@@ -87,7 +95,7 @@ class ClerkAuthService:
 
         self._jwks = response.json()
         self._jwks_expires_at = now + settings.CLERK_JWKS_CACHE_SECONDS
-        logger.info("Clerk JWKS refreshed")
+        logger.bind(category="auth").info("Clerk JWKS refreshed")
         return self._jwks
 
     def _validate_authorized_party(self, claims: ClerkTokenClaims) -> None:
