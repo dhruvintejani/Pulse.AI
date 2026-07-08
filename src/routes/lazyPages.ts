@@ -20,6 +20,7 @@ export const SettingsPage = lazyWithPreload(() => import('@/pages/dashboard/Sett
 export const BillingPage = lazyWithPreload(() => import('@/pages/dashboard/BillingPage'));
 export const ModelsPage = lazyWithPreload(() => import('@/pages/dashboard/ModelsPage'));
 export const ProfilePage = lazyWithPreload(() => import('@/pages/dashboard/ProfilePage'));
+export const TeamPage = lazyWithPreload(() => import('@/pages/dashboard/TeamPage'));
 
 export const routePreloaders = {
   landing: LandingPage.preload,
@@ -32,4 +33,6 @@ export const routePreloaders = {
   settings: SettingsPage.preload,
   billing: BillingPage.preload,
   profile: ProfilePage.preload,
+  models: ModelsPage.preload,
+  team: TeamPage.preload,
 };
