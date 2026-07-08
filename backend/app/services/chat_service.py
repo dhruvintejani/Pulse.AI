@@ -59,7 +59,7 @@ class ChatService:
             title=title,
             model=request.model or settings.AI_DEFAULT_MODEL,
             tags=request.tags,
-            metadata={**request.metadata, "provider": request.provider} if request.provider else request.metadata,
+            metadata=request.metadata,
         )
         chat = await chat.insert()
 
@@ -218,7 +218,7 @@ class ChatService:
         if request.instructions:
             history.append(ProviderMessage(role="user", content=request.instructions))
 
-        provider = provider_registry.get(request.provider)
+        provider = provider_registry.get()
         content = ""
         async for chunk in provider.stream(ProviderRequest(messages=history, model=request.model or chat.model, metadata={"regenerate": True})):
             content += chunk
@@ -247,6 +247,7 @@ class ChatService:
         request: ChatStreamRequest,
     ) -> AsyncIterator[str]:
         chat = await self.get_owned_chat(current_user=current_user, conversation_id=conversation_id)
+        provider = provider_registry.get()
         user_message = Message(
             chat_id=chat.id,
             user_id=current_user.id,
@@ -270,14 +271,13 @@ class ChatService:
             content_preview="",
             model=request.model or chat.model,
             token_count=0,
-            metadata={"provider": request.provider or settings.AI_DEFAULT_PROVIDER},
+            metadata={"provider": provider.name},
         )
         assistant_message = await assistant_message.insert()
         await self._touch_chat_after_message(chat)
 
         yield self._sse("message", {"type": "message_created", "user_message_id": str(user_message.id), "assistant_message_id": str(assistant_message.id)})
 
-        provider = provider_registry.get(request.provider)
         history = await self._provider_history(chat)
         history.append(ProviderMessage(role="user", content=request.content))
 
