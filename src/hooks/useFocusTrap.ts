@@ -20,7 +20,7 @@ export const getFocusableElements = (element: HTMLElement | null) => {
   });
 };
 
-export const useFocusTrap = (containerRef: RefObject<HTMLElement>, enabled: boolean) => {
+export const useFocusTrap = <T extends HTMLElement>(containerRef: RefObject<T | null>, enabled: boolean) => {
   useEffect(() => {
     if (!enabled) return undefined;
 
