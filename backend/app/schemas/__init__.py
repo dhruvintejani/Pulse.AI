@@ -66,6 +66,8 @@ from app.schemas.notification import (
     NotificationUnreadCountResponse,
     NotificationUpdate,
 )
+from app.schemas.search import GlobalSearchFiltersResponse, GlobalSearchResponse, GlobalSearchResult, SearchHighlight
+from app.schemas.settings import RecentSearchesResponse, RecentSearchesUpdate, UserSettingsResponse, UserSettingsUpdate
 from app.schemas.upload import UploadMetadataResponse, UploadProgressResponse, UploadValidationResponse
 
 __all__ = [
@@ -111,6 +113,9 @@ __all__ = [
     "DocumentUpdate",
     "DocumentUploadResult",
     "ErrorResponse",
+    "GlobalSearchFiltersResponse",
+    "GlobalSearchResponse",
+    "GlobalSearchResult",
     "HealthResponse",
     "MessageCreate",
     "MessageReactionUpdate",
@@ -127,12 +132,17 @@ __all__ = [
     "Page",
     "PageMeta",
     "PaginationParams",
+    "RecentSearchesResponse",
+    "RecentSearchesUpdate",
     "RegenerateMessageRequest",
+    "SearchHighlight",
     "SuccessResponse",
     "TypingStatusResponse",
     "TypingStatusUpdate",
     "UploadMetadataResponse",
     "UploadProgressResponse",
     "UploadValidationResponse",
+    "UserSettingsResponse",
+    "UserSettingsUpdate",
     "UserStatisticsResponse",
 ]
