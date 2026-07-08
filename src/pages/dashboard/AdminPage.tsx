@@ -1,4 +1,5 @@
 import { memo, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -117,7 +118,7 @@ const settingsRows = [
   { label: 'Real-time', value: 'SSE ready' },
 ];
 
-const AdminCard = memo(({ children, className }: { children: React.ReactNode; className?: string }) => (
+const AdminCard = memo(({ children, className }: { children: ReactNode; className?: string }) => (
   <motion.section
     initial={{ opacity: 0, y: 14 }}
     animate={{ opacity: 1, y: 0 }}
@@ -163,7 +164,7 @@ const MetricGrid = memo(() => (
 ));
 MetricGrid.displayName = 'MetricGrid';
 
-const SimpleTable = memo(({ headers, rows }: { headers: string[]; rows: Array<Array<React.ReactNode>> }) => (
+const SimpleTable = memo(({ headers, rows }: { headers: string[]; rows: Array<Array<ReactNode>> }) => (
   <div className="overflow-x-auto rounded-2xl border border-[rgba(0,0,0,0.05)]">
     <table className="min-w-full text-left text-sm">
       <thead>
