@@ -17,13 +17,15 @@ const VerifyPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoaded, signUp, setActive } = useSignUp();
+  const routeState = location.state as AuthEmailState | null;
   const [code, setCode] = useState(EMPTY_CODE);
   const [authError, setAuthError] = useState('');
+  const [statusMessage, setStatusMessage] = useState(routeState?.statusMessage ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
-  const stateEmail = (location.state as AuthEmailState | null)?.email;
-  const verificationEmail = stateEmail || signUp?.emailAddress || 'your email address';
+  const verificationEmail = routeState?.email || signUp?.emailAddress || 'your email address';
+  const allFilled = code.every(d => d !== '');
 
   const handleChange = (index: number, value: string) => {
     if (!/^[0-9]*$/.test(value)) return;
@@ -31,6 +33,7 @@ const VerifyPage = () => {
     newCode[index] = value.slice(-1);
     setCode(newCode);
     setAuthError('');
+    setStatusMessage('');
     if (value && index < 5) {
       inputsRef.current[index + 1]?.focus();
     }
@@ -47,6 +50,7 @@ const VerifyPage = () => {
 
     try {
       setAuthError('');
+      setStatusMessage('');
       setIsSubmitting(true);
       const result = await signUp.attemptEmailAddressVerification({ code: code.join('') });
 
@@ -69,9 +73,11 @@ const VerifyPage = () => {
 
     try {
       setAuthError('');
+      setStatusMessage('');
       setIsResending(true);
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
       setCode(EMPTY_CODE);
+      setStatusMessage('A new verification code has been sent to your email.');
       inputsRef.current[0]?.focus();
     } catch (error) {
       setAuthError(getClerkErrorMessage(error, 'Unable to resend the code. Please try again.'));
@@ -79,8 +85,6 @@ const VerifyPage = () => {
       setIsResending(false);
     }
   };
-
-  const allFilled = code.every(d => d !== '');
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-6">
@@ -116,7 +120,8 @@ const VerifyPage = () => {
             <span className="font-semibold text-[#1F1F1F]">{verificationEmail}</span>
           </p>
 
-          <div className="mb-6 text-left">
+          <div className="mb-6 text-left space-y-3">
+            <AuthAlert message={statusMessage} variant="success" />
             <AuthAlert message={authError} />
           </div>
 
@@ -132,6 +137,7 @@ const VerifyPage = () => {
                 value={digit}
                 onChange={(e) => handleChange(i, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(i, e)}
+                aria-label={`Verification code digit ${i + 1}`}
                 className={`w-12 h-14 text-center text-lg font-bold rounded-xl border-2 outline-none transition-all duration-200 bg-white
                   ${digit
                     ? 'border-[#E9A24C] shadow-[0_0_0_3px_rgba(233,162,76,0.12)] text-[#E9A24C]'
@@ -145,7 +151,7 @@ const VerifyPage = () => {
             variant="primary"
             size="lg"
             className="w-full mb-4"
-            disabled={!allFilled || isSubmitting}
+            disabled={!allFilled || isSubmitting || isResending || !isLoaded}
             onClick={handleVerify}
             iconRight={<ArrowRight size={16} />}
             loading={isSubmitting}
@@ -157,10 +163,10 @@ const VerifyPage = () => {
             type="button"
             disabled={isResending}
             onClick={handleResend}
-            className="flex items-center justify-center gap-2 text-sm text-[#999] hover:text-[#E9A24C] transition-colors w-full mt-2"
+            className="flex items-center justify-center gap-2 text-sm text-[#999] hover:text-[#E9A24C] transition-colors w-full mt-2 disabled:opacity-60"
           >
             <RefreshCw size={14} className={isResending ? 'animate-spin' : ''} />
-            {isResending ? 'Resending code...' : 'Resend code in 0:45'}
+            {isResending ? 'Resending code...' : 'Resend code'}
           </button>
         </div>
       </motion.div>
