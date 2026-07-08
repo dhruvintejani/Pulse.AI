@@ -24,6 +24,15 @@ copy .env.example .env
 uvicorn app.main:app --reload
 ```
 
+## Tests
+
+```bash
+cd backend
+pytest
+```
+
+The test suite uses Pytest, FastAPI TestClient, dependency overrides, and mocked services so backend API behavior can be tested without a live MongoDB instance.
+
 ## Docker
 
 ```bash
@@ -53,6 +62,23 @@ Authorization: Bearer <clerk_jwt>
 ```
 
 The API verifies the Clerk JWT, resolves the Clerk user ID, creates the MongoDB user profile on first authenticated request, keeps `clerk_user_id` synchronized with MongoDB, and promotes users listed in `ADMIN_EMAILS` or `ADMIN_CLERK_USER_IDS` to owner role.
+
+## Security
+
+Pulse AI includes rate limiting, strict CORS configuration, trusted host protection, request body size limits, security headers, suspicious input rejection, Pydantic request validation, Clerk passwordless authentication, and protected API dependencies.
+
+```env
+RATE_LIMIT_DEFAULT=120/minute
+RATE_LIMIT_STORAGE_URI=memory://
+BACKEND_CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+SECURITY_ALLOWED_HOSTS=*
+SECURITY_HEADERS_ENABLED=true
+SECURITY_ENABLE_HSTS=false
+SECURITY_MAX_REQUEST_SIZE_BYTES=2097152
+SECURITY_INPUT_SANITIZATION_ENABLED=true
+```
+
+In production, configure explicit CORS origins, explicit trusted hosts, Clerk issuer/JWKS values, and HSTS after HTTPS is enabled.
 
 ## Endpoints
 
@@ -233,6 +259,7 @@ app/
   services
   storage
   utils
+tests/
 ```
 
-The backend now includes architecture, MongoDB setup, ODM models, validation, indexes, soft delete, pagination/search utilities, middleware, Clerk auth integration, protected route dependencies, global search, user settings persistence, AI chat CRUD, document CRUD/upload/preview/search, secure metadata-only upload module, dashboard APIs, admin APIs, notification system, streaming response scaffolding, typing status, provider abstraction, document storage abstraction, production Loguru file logging, rate limiting, CORS, and Docker support.
+The backend now includes architecture, MongoDB setup, ODM models, validation, indexes, soft delete, pagination/search utilities, middleware, Clerk auth integration, protected route dependencies, global search, user settings persistence, AI chat CRUD, document CRUD/upload/preview/search, secure metadata-only upload module, dashboard APIs, admin APIs, notification system, streaming response scaffolding, typing status, provider abstraction, document storage abstraction, production Loguru file logging, rate limiting, CORS, OWASP-style security protections, and Docker support.
