@@ -1,17 +1,34 @@
-import { useState, useRef, useEffect } from 'react';
-import type { KeyboardEvent, MouseEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Sparkles, Copy, RefreshCw, ThumbsUp, ThumbsDown,
   Paperclip, Mic, Code2, MoreHorizontal, ChevronDown,
   Hash, Plus, Search, Zap, Brain, Pin, Star, Trash2, Pencil, Check, X
 } from 'lucide-react';
-import CodeBlock from '@/components/chat/CodeBlock';
-import MarkdownRenderer from '@/components/chat/MarkdownRenderer';
-import { CODE_EXAMPLE, MODELS, SUGGESTIONS } from '@/constants/chat';
+import { ChatAttachmentPreview, CodeBlock, MarkdownRenderer, StreamingMessage } from '@/components/chat';
+import { CODE_EXAMPLE, DEFAULT_ASSISTANT_REPLY, MODELS, REGENERATED_ASSISTANT_REPLY, SUGGESTIONS } from '@/constants/chat';
 import { useChatMessages, useConversations } from '@/hooks/useChatHistory';
 import { cn } from '@/lib/utils';
-import type { ChatConversation, ChatMessage } from '@/types/chat';
+import type { ChatAttachment, ChatConversation, ChatMessage, MessageReaction } from '@/types/chat';
+
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const readImagePreview = (file: File) => new Promise<string | undefined>((resolve) => {
+  if (!file.type.startsWith('image/')) {
+    resolve(undefined);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : undefined);
+  reader.onerror = () => resolve(undefined);
+  reader.readAsDataURL(file);
+});
 
 const TypingIndicator = () => (
   <motion.div
@@ -36,15 +53,26 @@ const TypingIndicator = () => (
   </motion.div>
 );
 
-const MessageBubble = ({ message, onRegenerate }: { message: ChatMessage; onRegenerate: () => void }) => {
+const MessageBubble = ({
+  message,
+  onRegenerate,
+  onReact,
+}: {
+  message: ChatMessage;
+  onRegenerate: () => void;
+  onReact: (messageId: string, reaction: MessageReaction) => void;
+}) => {
   const [copied, setCopied] = useState(false);
-  const [liked, setLiked] = useState<null | boolean>(null);
   const isUser = message.role === 'user';
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(message.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleReaction = (reaction: Exclude<MessageReaction, null>) => {
+    onReact(message.id, message.reaction === reaction ? null : reaction);
   };
 
   return (
@@ -56,7 +84,6 @@ const MessageBubble = ({ message, onRegenerate }: { message: ChatMessage; onRege
       role="article"
       aria-label={isUser ? 'Your message' : 'Pulse AI message'}
     >
-      {/* Avatar */}
       <div className={cn(
         'w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-1',
         isUser
@@ -66,17 +93,20 @@ const MessageBubble = ({ message, onRegenerate }: { message: ChatMessage; onRege
         {isUser ? 'A' : <Sparkles size={14} className="text-white" />}
       </div>
 
-      {/* Bubble */}
       <div className={cn('max-w-[78%] flex flex-col', isUser && 'items-end')}>
-        <div className={cn(isUser ? 'chat-bubble-user' : 'chat-bubble-ai', 'px-4 py-3 shadow-card')}>
-          <MarkdownRenderer
-            content={message.content}
-            tone={isUser ? 'user' : 'assistant'}
-            className={cn(isUser ? 'text-white' : 'text-[#1F1F1F]')}
-          />
+        <div className={cn(isUser ? 'chat-bubble-user' : 'chat-bubble-ai', 'px-4 py-3 shadow-card space-y-3')}>
+          {message.content && (
+            <MarkdownRenderer
+              content={message.content}
+              tone={isUser ? 'user' : 'assistant'}
+              className={cn(isUser ? 'text-white' : 'text-[#1F1F1F]')}
+            />
+          )}
+          {message.attachments?.length ? (
+            <ChatAttachmentPreview attachments={message.attachments} compact={message.attachments.length === 1} />
+          ) : null}
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150">
           <button
             type="button"
@@ -96,19 +126,19 @@ const MessageBubble = ({ message, onRegenerate }: { message: ChatMessage; onRege
             <>
               <button
                 type="button"
-                onClick={() => setLiked(true)}
+                onClick={() => handleReaction('like')}
                 aria-label="Mark response as helpful"
-                aria-pressed={liked === true}
-                className={cn('p-1.5 rounded-lg transition-all focus-ring', liked === true ? 'text-[#E9A24C]' : 'text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)]')}
+                aria-pressed={message.reaction === 'like'}
+                className={cn('p-1.5 rounded-lg transition-all focus-ring', message.reaction === 'like' ? 'text-[#E9A24C]' : 'text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)]')}
               >
                 <ThumbsUp size={11} aria-hidden="true" />
               </button>
               <button
                 type="button"
-                onClick={() => setLiked(false)}
+                onClick={() => handleReaction('dislike')}
                 aria-label="Mark response as not helpful"
-                aria-pressed={liked === false}
-                className={cn('p-1.5 rounded-lg transition-all focus-ring', liked === false ? 'text-red-400' : 'text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)]')}
+                aria-pressed={message.reaction === 'dislike'}
+                className={cn('p-1.5 rounded-lg transition-all focus-ring', message.reaction === 'dislike' ? 'text-red-400' : 'text-[#999] hover:text-[#666] hover:bg-[rgba(0,0,0,0.04)]')}
               >
                 <ThumbsDown size={11} aria-hidden="true" />
               </button>
@@ -247,6 +277,7 @@ const ChatPage = () => {
     addMessage,
     addAssistantReply,
     regenerateLastAssistantMessage,
+    updateMessageReaction,
     isLoading: isMessagesLoading,
     isError: isMessagesError,
     isRegenerating,
@@ -256,44 +287,102 @@ const ChatPage = () => {
   const [selectedModel, setSelectedModel] = useState('GPT-4o');
   const [showModelMenu, setShowModelMenu] = useState(false);
   const [showCode, setShowCode] = useState(true);
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
+  const [streamingContent, setStreamingContent] = useState('');
+  const [streamMode, setStreamMode] = useState<'reply' | 'regenerate' | null>(null);
+  const [streamConversationId, setStreamConversationId] = useState<string | null>(null);
+  const streamFinalizedRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping, activeConversation?.id]);
+  }, [messages, isTyping, activeConversation?.id, streamingContent]);
 
   const activeConversationId = activeConversation?.id;
 
+  const startStreaming = useCallback((conversationId: string, content: string, mode: 'reply' | 'regenerate') => {
+    setStreamingContent('');
+    setStreamMode(null);
+    setStreamConversationId(null);
+    setIsTyping(true);
+    streamFinalizedRef.current = false;
+
+    window.setTimeout(() => {
+      setIsTyping(false);
+      setStreamConversationId(conversationId);
+      setStreamMode(mode);
+      setStreamingContent(content);
+    }, 520);
+  }, []);
+
+  const handleStreamingComplete = useCallback(() => {
+    if (!streamConversationId || !streamMode || streamFinalizedRef.current) return;
+    streamFinalizedRef.current = true;
+
+    const complete = async () => {
+      if (streamMode === 'regenerate') {
+        await regenerateLastAssistantMessage(streamConversationId);
+      } else {
+        await addAssistantReply(streamConversationId);
+      }
+      setStreamingContent('');
+      setStreamMode(null);
+      setStreamConversationId(null);
+    };
+
+    void complete();
+  }, [addAssistantReply, regenerateLastAssistantMessage, streamConversationId, streamMode]);
+
+  const handleAttachmentChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+
+    const nextAttachments = await Promise.all(files.slice(0, 6).map(async (file) => ({
+      id: `${file.name}-${file.lastModified}-${file.size}`,
+      name: file.name,
+      size: formatFileSize(file.size),
+      type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
+      mimeType: file.type || 'application/octet-stream',
+      previewUrl: await readImagePreview(file),
+    })));
+
+    setAttachments((current) => [...current, ...nextAttachments]);
+    event.target.value = '';
+  };
+
+  const removeAttachment = (attachmentId: string) => {
+    setAttachments((current) => current.filter((attachment) => attachment.id !== attachmentId));
+  };
+
   const handleSend = async () => {
     const content = input.trim();
-    if (!content || !activeConversationId) return;
+    if ((!content && !attachments.length) || !activeConversationId || streamingContent) return;
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
       content,
       timestamp: new Date(),
+      attachments: attachments.length ? attachments : undefined,
     };
 
     await addMessage({ conversationId: activeConversationId, message: userMsg });
     setInput('');
-    setIsTyping(true);
+    setAttachments([]);
     setShowCode(false);
-
-    setTimeout(() => {
-      setIsTyping(false);
-      void addAssistantReply(activeConversationId);
-    }, 900);
+    startStreaming(activeConversationId, DEFAULT_ASSISTANT_REPLY, 'reply');
   };
 
   const handleRegenerate = async () => {
+    if (!activeConversationId || streamingContent) return;
+    startStreaming(activeConversationId, REGENERATED_ASSISTANT_REPLY, 'regenerate');
+  };
+
+  const handleReact = (messageId: string, reaction: MessageReaction) => {
     if (!activeConversationId) return;
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      void regenerateLastAssistantMessage(activeConversationId);
-    }, 700);
+    void updateMessageReaction({ conversationId: activeConversationId, messageId, reaction });
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -327,7 +416,6 @@ const ChatPage = () => {
 
   return (
     <div className="flex h-full">
-      {/* Conversations Sidebar */}
       <aside className="hidden xl:flex flex-col w-64 border-r border-[rgba(0,0,0,0.06)] bg-[#FFFDF8]/50 backdrop-blur-sm" aria-label="Conversation history">
         <div className="p-4 border-b border-[rgba(0,0,0,0.05)]">
           <button
@@ -367,21 +455,18 @@ const ChatPage = () => {
         </div>
       </aside>
 
-      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Chat Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[rgba(0,0,0,0.06)] bg-[#FFFDF8]/80 backdrop-blur-sm shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E9A24C] to-[#D4853A] flex items-center justify-center" aria-hidden="true">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E9A24C] to-[#D4853A] flex items-center justify-center shrink-0" aria-hidden="true">
               <Sparkles size={14} className="text-white" />
             </div>
-            <div>
-              <p className="text-sm font-bold text-[#1F1F1F]">{activeConversation?.title || 'New conversation'}</p>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-[#1F1F1F] truncate">{activeConversation?.title || 'New conversation'}</p>
               <p className="text-[11px] text-[#999]">{messages.length} messages · {activeConversation?.time || 'now'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* Model Selector */}
             <div className="relative">
               <button
                 type="button"
@@ -428,25 +513,35 @@ const ChatPage = () => {
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-6 space-y-5" role="log" aria-live="polite" aria-relevant="additions text">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 sm:px-5 py-6 space-y-5" role="log" aria-live="polite" aria-relevant="additions text">
           {isMessagesLoading && <TypingIndicator />}
           {isMessagesError && (
             <div className="chat-bubble-ai px-4 py-3 shadow-card text-sm text-red-400" role="alert">Unable to load chat messages.</div>
           )}
           {!isMessagesLoading && !isMessagesError && messages.map((message) => (
-            <MessageBubble key={message.id} message={message} onRegenerate={handleRegenerate} />
+            <MessageBubble key={message.id} message={message} onRegenerate={handleRegenerate} onReact={handleReact} />
           ))}
           {showCode && <CodeExampleBlock />}
           <AnimatePresence>
             {(isTyping || isRegenerating) && <TypingIndicator />}
           </AnimatePresence>
+          <AnimatePresence>
+            {streamingContent && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex gap-3">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E9A24C] to-[#D4853A] flex items-center justify-center shrink-0 mt-1 shadow-premium-sm" aria-hidden="true">
+                  <Sparkles size={14} className="text-white" />
+                </div>
+                <div className="max-w-[78%] chat-bubble-ai px-4 py-3 shadow-card">
+                  <StreamingMessage content={streamingContent} onComplete={handleStreamingComplete} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Suggestions */}
-        {messages.length <= 3 && (
-          <div className="px-5 pb-3 flex gap-2 flex-wrap" aria-label="Suggested prompts">
+        {messages.length <= 3 && !streamingContent && (
+          <div className="px-4 sm:px-5 pb-3 flex gap-2 flex-wrap" aria-label="Suggested prompts">
             {SUGGESTIONS.map((s, i) => (
               <motion.button
                 key={i}
@@ -463,9 +558,13 @@ const ChatPage = () => {
           </div>
         )}
 
-        {/* Input */}
-        <div className="px-5 pb-6 pt-2 shrink-0">
+        <div className="px-4 sm:px-5 pb-6 pt-2 shrink-0">
           <div className="glass-card rounded-2xl shadow-float border-[rgba(255,255,255,0.8)] overflow-hidden">
+            {attachments.length > 0 && (
+              <div className="px-4 pt-4">
+                <ChatAttachmentPreview attachments={attachments} removable onRemove={removeAttachment} />
+              </div>
+            )}
             <label className="sr-only" htmlFor="chat-message-input">Message Pulse AI</label>
             <textarea
               id="chat-message-input"
@@ -483,21 +582,29 @@ const ChatPage = () => {
                 el.style.height = Math.min(el.scrollHeight, 160) + 'px';
               }}
             />
-            <div className="flex items-center justify-between px-4 pb-3 pt-1">
-              <div className="flex items-center gap-1">
-                <button type="button" aria-label="Attach file" className="p-2 rounded-xl hover:bg-[rgba(0,0,0,0.04)] transition-colors text-[#CCC] hover:text-[#999] focus-ring">
+            <div className="flex items-center justify-between px-4 pb-3 pt-1 gap-3">
+              <div className="flex items-center gap-1 min-w-0">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf,.doc,.docx,.txt,.md,.csv,.xlsx"
+                  onChange={handleAttachmentChange}
+                  className="hidden"
+                />
+                <button type="button" onClick={() => fileInputRef.current?.click()} aria-label="Attach file" className="p-2 rounded-xl hover:bg-[rgba(0,0,0,0.04)] transition-colors text-[#CCC] hover:text-[#999] focus-ring">
                   <Paperclip size={16} aria-hidden="true" />
                 </button>
                 <button type="button" aria-label="Start voice input" className="p-2 rounded-xl hover:bg-[rgba(0,0,0,0.04)] transition-colors text-[#CCC] hover:text-[#999] focus-ring">
                   <Mic size={16} aria-hidden="true" />
                 </button>
-                <button type="button" aria-label="Insert code snippet" className="p-2 rounded-xl hover:bg-[rgba(0,0,0,0.04)] transition-colors text-[#CCC] hover:text-[#999] focus-ring">
+                <button type="button" aria-label="Insert code snippet" onClick={() => setInput((current) => `${current}${current ? '\n\n' : ''}\`\`\`tsx\n\n\`\`\``)} className="p-2 rounded-xl hover:bg-[rgba(0,0,0,0.04)] transition-colors text-[#CCC] hover:text-[#999] focus-ring">
                   <Code2 size={16} aria-hidden="true" />
                 </button>
                 <div className="mx-1 h-4 w-px bg-[rgba(0,0,0,0.08)]" aria-hidden="true" />
-                <div className="flex items-center gap-1.5 text-[11px] text-[#CCC]">
-                  <Zap size={11} className="text-[#E9A24C]" aria-hidden="true" />
-                  <span>{selectedModel}</span>
+                <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-[#CCC] min-w-0">
+                  <Zap size={11} className="text-[#E9A24C] shrink-0" aria-hidden="true" />
+                  <span className="truncate">{selectedModel}</span>
                 </div>
               </div>
               <motion.button
@@ -506,10 +613,10 @@ const ChatPage = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.93 }}
                 onClick={() => void handleSend()}
-                disabled={!input.trim() || !activeConversationId}
+                disabled={(!input.trim() && !attachments.length) || !activeConversationId || Boolean(streamingContent)}
                 className={cn(
-                  'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 focus-ring',
-                  input.trim() && activeConversationId
+                  'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 focus-ring shrink-0',
+                  (input.trim() || attachments.length) && activeConversationId && !streamingContent
                     ? 'bg-gradient-to-br from-[#E9A24C] to-[#D4853A] text-white shadow-premium-sm hover:shadow-premium'
                     : 'bg-[rgba(0,0,0,0.06)] text-[#CCC]'
                 )}
