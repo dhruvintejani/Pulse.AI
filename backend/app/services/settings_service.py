@@ -11,11 +11,38 @@ class SettingsService:
 
         document = UserSettings(
             user_id=current_user.id,
-            profile_settings={"name": current_user.full_name, "email": current_user.email},
-            notification_preferences={"email": True, "in_app": True, "push": False, "weekly_digest": True},
-            privacy_settings={"data_sharing": False, "profile_visibility": "workspace"},
-            security_settings={"session_alerts": True, "device_review": True},
-            appearance_settings={"density": "comfortable", "animations": True, "glass_effects": True},
+            profile_settings={
+                "name": current_user.full_name,
+                "email": current_user.email,
+                "company": current_user.company or "",
+                "location": current_user.location or "",
+            },
+            notification_preferences={
+                "email": True,
+                "push": False,
+                "weeklyDigest": True,
+                "productUpdates": True,
+                "teamMentions": True,
+                "billingAlerts": True,
+            },
+            privacy_settings={
+                "username": current_user.username or "pulseuser",
+                "recoveryEmail": current_user.email,
+                "dataSharing": False,
+                "betaAccess": True,
+            },
+            security_settings={
+                "twoFactor": False,
+                "sessionAlerts": True,
+                "deviceReview": True,
+            },
+            appearance_settings={
+                "density": "Comfortable",
+                "sidebarBehavior": "Expanded",
+                "fontSize": "Default",
+                "animations": True,
+                "glassEffects": True,
+            },
         )
         return await document.insert()
 
