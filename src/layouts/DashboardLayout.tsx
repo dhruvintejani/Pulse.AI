@@ -19,6 +19,9 @@ const DashboardLayout = () => {
 
   return (
     <div className="relative flex h-dvh min-h-dvh min-w-0 overflow-hidden bg-[#F8F4EC]">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-[#1F1F1F] focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white focus:shadow-float">
+        Skip to main content
+      </a>
       <MeshBackground />
 
       <div className="relative z-10 hidden shrink-0 md:flex">
@@ -57,6 +60,7 @@ const DashboardLayout = () => {
             onClick={handleOpenMobileSidebar}
             aria-label="Open navigation menu"
             aria-expanded={mobileSidebarOpen}
+            aria-controls="dashboard-mobile-navigation"
             className="rounded-xl p-2 transition-colors hover:bg-[rgba(233,162,76,0.08)] focus-ring"
           >
             <Menu size={20} className="text-[#666]" aria-hidden="true" />
@@ -65,7 +69,7 @@ const DashboardLayout = () => {
           <div className="w-9" aria-hidden="true" />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-hidden" id="main-content">
+        <main className="min-w-0 flex-1 overflow-hidden focus:outline-none" id="main-content" tabIndex={-1}>
           <Outlet />
         </main>
       </div>
