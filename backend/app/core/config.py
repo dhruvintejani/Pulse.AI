@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     CLERK_SECRET_KEY: str | None = None
     CLERK_API_BASE_URL: str = "https://api.clerk.com/v1"
 
+    ADMIN_EMAILS: list[str] = Field(default_factory=list)
+    ADMIN_CLERK_USER_IDS: list[str] = Field(default_factory=list)
+
     INTERNAL_JWT_SECRET: str = "change-this-in-production"
     INTERNAL_JWT_ALGORITHM: str = "HS256"
     INTERNAL_JWT_EXPIRES_MINUTES: int = 15
@@ -60,7 +63,14 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_JSON: bool = False
 
-    @field_validator("BACKEND_CORS_ORIGINS", "CLERK_AUTHORIZED_PARTIES", "AI_ENABLED_PROVIDERS", mode="before")
+    @field_validator(
+        "BACKEND_CORS_ORIGINS",
+        "CLERK_AUTHORIZED_PARTIES",
+        "AI_ENABLED_PROVIDERS",
+        "ADMIN_EMAILS",
+        "ADMIN_CLERK_USER_IDS",
+        mode="before",
+    )
     @classmethod
     def parse_csv_list(cls, value: str | list[str] | None) -> list[str]:
         if value is None:
