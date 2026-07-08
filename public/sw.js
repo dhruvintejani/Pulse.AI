@@ -33,6 +33,11 @@ const isNavigationRequest = (request) => request.mode === 'navigate';
 const isStaticAsset = (url) => url.pathname.startsWith('/assets/') || /\.(?:js|css|svg|png|jpg|jpeg|webp|woff2?)$/i.test(url.pathname);
 const isApiRequest = (url) => url.pathname.startsWith('/api/') || url.origin.includes('onrender.com');
 
+const offlineResponse = () => new Response('Pulse AI is offline and this resource is not cached yet.', {
+  status: 503,
+  headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+});
+
 const cacheFirst = async (request) => {
   const cached = await caches.match(request);
   if (cached) return cached;
@@ -52,7 +57,8 @@ const networkFirst = async (request) => {
     return response;
   } catch {
     const cached = await cache.match(request);
-    return cached ?? caches.match(OFFLINE_URL);
+    const offline = await caches.match(OFFLINE_URL);
+    return cached ?? offline ?? offlineResponse();
   }
 };
 
