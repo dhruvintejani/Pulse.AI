@@ -62,6 +62,15 @@ GET /api/v1/health/ready
 GET /api/v1/auth/me
 GET /api/v1/users/me
 
+GET /api/v1/search
+GET /api/v1/search/filters
+
+GET /api/v1/settings/me
+PATCH /api/v1/settings/me
+GET /api/v1/settings/me/recent-searches
+POST /api/v1/settings/me/recent-searches
+DELETE /api/v1/settings/me/recent-searches
+
 GET /api/v1/conversations
 POST /api/v1/conversations
 GET /api/v1/conversations/{conversation_id}
@@ -140,6 +149,30 @@ GET /api/v1/admin/permissions
 GET /api/v1/admin/settings
 ```
 
+## Global search
+
+Global search supports chats, messages, documents, users, and settings. It includes filters, pagination, highlighted snippets, and recent searches persisted in MongoDB user settings.
+
+## User settings
+
+User settings persist theme, language, timezone, notification preferences, profile settings, privacy settings, security settings, appearance settings, AI preferences, metadata, and recent searches in MongoDB.
+
+## Logging
+
+Loguru writes production logs to files under `LOG_DIR` with rotation, retention, and compression.
+
+```env
+LOG_LEVEL=INFO
+LOG_JSON=false
+LOG_DIR=logs
+LOG_ROTATION=50 MB
+LOG_RETENTION=30 days
+LOG_COMPRESSION=zip
+LOG_PERFORMANCE_THRESHOLD_MS=1000
+```
+
+Log files include `app.log`, `errors.log`, `warnings.log`, `requests.log`, `auth.log`, and `performance.log`.
+
 ## Upload module
 
 The secure upload module supports PDF, DOCX, TXT, CSV, JPG, JPEG, PNG, GIF, and WEBP. It validates extension, MIME type, file signature, UTF-8 text compatibility, maximum size, unsafe file names, and blocked executable extensions. Upload responses return metadata only and include fields needed by the frontend for upload progress UI.
@@ -202,4 +235,4 @@ app/
   utils
 ```
 
-The backend now includes architecture, MongoDB setup, ODM models, validation, indexes, soft delete, pagination/search utilities, middleware, Clerk auth integration, protected route dependencies, AI chat CRUD, document CRUD/upload/preview/search, secure metadata-only upload module, dashboard APIs, admin APIs, notification system, streaming response scaffolding, typing status, provider abstraction, document storage abstraction, error handling, rate limiting, logging, CORS, and Docker support.
+The backend now includes architecture, MongoDB setup, ODM models, validation, indexes, soft delete, pagination/search utilities, middleware, Clerk auth integration, protected route dependencies, global search, user settings persistence, AI chat CRUD, document CRUD/upload/preview/search, secure metadata-only upload module, dashboard APIs, admin APIs, notification system, streaming response scaffolding, typing status, provider abstraction, document storage abstraction, production Loguru file logging, rate limiting, CORS, and Docker support.
