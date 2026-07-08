@@ -4,6 +4,7 @@ import { Menu } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import DashboardSidebar from '@/components/layout/DashboardSidebar';
 import MeshBackground from '@/components/backgrounds/MeshBackground';
+import { GlobalSearch } from '@/components/search';
 import { useSidebar } from '@/hooks/useSidebar';
 
 const DashboardLayout = () => {
@@ -68,6 +69,10 @@ const DashboardLayout = () => {
           </button>
           <span className="text-sm font-bold text-[#1F1F1F]">Pulse AI</span>
           <div className="w-9" aria-hidden="true" />
+        </div>
+
+        <div className="shrink-0 px-4 pt-4 sm:px-6">
+          <GlobalSearch />
         </div>
 
         <main className="min-w-0 flex-1 overflow-hidden focus:outline-none" id="main-content" tabIndex={-1}>
