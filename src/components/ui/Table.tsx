@@ -29,8 +29,8 @@ const TableRow = forwardRef<HTMLTableRowElement, HTMLAttributes<HTMLTableRowElem
 ));
 TableRow.displayName = 'TableRow';
 
-const TableHead = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLTableCellElement>>(({ className, ...props }, ref) => (
-  <th ref={ref} scope={props.scope ?? 'col'} className={cn('h-11 whitespace-nowrap px-4 text-left align-middle text-[10px] font-black uppercase tracking-[0.18em] text-[var(--ds-color-subtle)]', className)} {...props} />
+const TableHead = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLTableCellElement>>(({ className, scope, ...props }, ref) => (
+  <th ref={ref} scope={scope ?? 'col'} className={cn('h-11 whitespace-nowrap px-4 text-left align-middle text-[10px] font-black uppercase tracking-[0.18em] text-[var(--ds-color-subtle)]', className)} {...props} />
 ));
 TableHead.displayName = 'TableHead';
 
