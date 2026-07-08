@@ -27,17 +27,17 @@ class ClerkAuthService:
             raise AppError("Invalid authorization token", status_code=401, error_code="INVALID_AUTH_TOKEN") from exc
 
         key = await self._get_signing_key(header.get("kid"))
-        decode_options = {"verify_aud": bool(settings.CLERK_AUDIENCE)}
+        decode_kwargs: dict[str, Any] = {
+            "key": key,
+            "algorithms": ["RS256"],
+            "issuer": settings.CLERK_ISSUER,
+            "options": {"verify_aud": bool(settings.CLERK_AUDIENCE)},
+        }
+        if settings.CLERK_AUDIENCE:
+            decode_kwargs["audience"] = settings.CLERK_AUDIENCE
 
         try:
-            payload = jwt.decode(
-                token,
-                key,
-                algorithms=["RS256"],
-                issuer=settings.CLERK_ISSUER,
-                audience=settings.CLERK_AUDIENCE,
-                options=decode_options,
-            )
+            payload = jwt.decode(token, **decode_kwargs)
         except JWTError as exc:
             raise AppError("Invalid or expired Clerk token", status_code=401, error_code="CLERK_TOKEN_INVALID") from exc
 
