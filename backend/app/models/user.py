@@ -39,34 +39,10 @@ class User(BaseDocument):
         validate_on_save = True
         indexes = [
             *BASE_INDEXES,
-            IndexModel(
-                [("clerk_user_id", ASCENDING)],
-                unique=True,
-                sparse=True,
-                name="uq_users_clerk_user_id",
-                partialFilterExpression={"is_deleted": False},
-            ),
-            IndexModel(
-                [("email", ASCENDING)],
-                unique=True,
-                sparse=True,
-                name="uq_users_email",
-                partialFilterExpression={"is_deleted": False},
-            ),
-            IndexModel(
-                [("external_auth_id", ASCENDING)],
-                unique=True,
-                sparse=True,
-                name="uq_users_external_auth_id",
-                partialFilterExpression={"is_deleted": False},
-            ),
-            IndexModel(
-                [("username", ASCENDING)],
-                unique=True,
-                sparse=True,
-                name="uq_users_username",
-                partialFilterExpression={"is_deleted": False},
-            ),
+            IndexModel([("clerk_user_id", ASCENDING)], unique=True, sparse=True, name="uq_users_clerk_user_id"),
+            IndexModel([("email", ASCENDING)], unique=True, sparse=True, name="uq_users_email"),
+            IndexModel([("external_auth_id", ASCENDING)], unique=True, sparse=True, name="uq_users_external_auth_id"),
+            IndexModel([("username", ASCENDING)], unique=True, sparse=True, name="uq_users_username"),
             IndexModel([("status", ASCENDING), ("role", ASCENDING)], name="idx_users_status_role"),
             IndexModel([("full_name", TEXT), ("email", TEXT), ("username", TEXT)], name="txt_users_search"),
         ]
