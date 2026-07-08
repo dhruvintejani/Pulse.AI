@@ -10,8 +10,8 @@ export const AUTH_REDIRECTS = {
 export const PASSWORD_MIN_LENGTH = 8;
 
 export const LOGIN_DEFAULTS = {
-  email: 'demo@pulseai.com',
-  password: 'password123',
+  email: '',
+  password: '',
 } as const;
 
 export const OAUTH_STRATEGIES = {
