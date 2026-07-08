@@ -1,0 +1,194 @@
+:root {
+  --ds-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ds-color-bg: var(--pulse-bg, #F8F4EC);
+  --ds-color-surface: var(--pulse-surface, #FFFDF8);
+  --ds-color-surface-muted: rgba(255, 253, 248, 0.72);
+  --ds-color-surface-raised: rgba(255, 253, 248, 0.92);
+  --ds-color-text: var(--pulse-text, #1F1F1F);
+  --ds-color-muted: var(--pulse-muted, #666666);
+  --ds-color-subtle: var(--pulse-subtle, #999999);
+  --ds-color-border: var(--pulse-border, rgba(0, 0, 0, 0.08));
+  --ds-color-accent: #E9A24C;
+  --ds-color-accent-strong: #A56018;
+  --ds-color-accent-soft: rgba(233, 162, 76, 0.12);
+  --ds-color-success: #16A34A;
+  --ds-color-success-soft: rgba(34, 197, 94, 0.12);
+  --ds-color-warning: #B45309;
+  --ds-color-warning-soft: rgba(245, 158, 11, 0.14);
+  --ds-color-danger: #DC2626;
+  --ds-color-danger-soft: rgba(239, 68, 68, 0.12);
+  --ds-space-1: 0.25rem;
+  --ds-space-2: 0.5rem;
+  --ds-space-3: 0.75rem;
+  --ds-space-4: 1rem;
+  --ds-space-5: 1.25rem;
+  --ds-space-6: 1.5rem;
+  --ds-space-8: 2rem;
+  --ds-space-10: 2.5rem;
+  --ds-radius-sm: 0.5rem;
+  --ds-radius-md: 0.75rem;
+  --ds-radius-lg: 1rem;
+  --ds-radius-xl: 1.25rem;
+  --ds-radius-2xl: 1.5rem;
+  --ds-radius-full: 999px;
+  --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --ds-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --ds-shadow-md: 0 10px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --ds-shadow-lg: 0 24px 70px rgba(0, 0, 0, 0.12), 0 8px 22px rgba(0, 0, 0, 0.06);
+  --ds-duration-fast: 120ms;
+  --ds-duration-normal: 200ms;
+  --ds-duration-slow: 320ms;
+  --ds-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ds-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-focus-ring: 0 0 0 3px rgba(233, 162, 76, 0.24), 0 0 0 1px rgba(233, 162, 76, 0.72);
+}
+
+html.dark {
+  --ds-color-surface-muted: rgba(23, 19, 15, 0.72);
+  --ds-color-surface-raised: rgba(23, 19, 15, 0.94);
+  --ds-color-accent-strong: #FFD08A;
+  --ds-color-accent-soft: rgba(233, 162, 76, 0.16);
+  --ds-color-success-soft: rgba(34, 197, 94, 0.16);
+  --ds-color-warning-soft: rgba(245, 158, 11, 0.16);
+  --ds-color-danger-soft: rgba(239, 68, 68, 0.16);
+  --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --ds-shadow-sm: 0 10px 32px rgba(0, 0, 0, 0.24), 0 1px 4px rgba(0, 0, 0, 0.18);
+  --ds-shadow-md: 0 18px 48px rgba(0, 0, 0, 0.34), 0 3px 10px rgba(0, 0, 0, 0.22);
+  --ds-shadow-lg: 0 30px 90px rgba(0, 0, 0, 0.48), 0 10px 26px rgba(0, 0, 0, 0.32);
+}
+
+.ds-surface {
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  border-color: var(--ds-color-border);
+}
+
+.ds-card {
+  background: var(--ds-color-surface-raised);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-2xl);
+  box-shadow: var(--ds-shadow-sm);
+}
+
+.ds-card-interactive {
+  transition: transform var(--ds-duration-normal) var(--ds-ease-standard), box-shadow var(--ds-duration-normal) var(--ds-ease-standard), border-color var(--ds-duration-normal) var(--ds-ease-standard), background-color var(--ds-duration-normal) var(--ds-ease-standard);
+}
+
+.ds-card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: rgba(233, 162, 76, 0.3);
+  box-shadow: var(--ds-shadow-md);
+}
+
+.ds-glass {
+  background: color-mix(in srgb, var(--ds-color-surface) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ds-color-border) 78%, transparent);
+  backdrop-filter: saturate(150%) blur(20px);
+  -webkit-backdrop-filter: saturate(150%) blur(20px);
+}
+
+.ds-text-title {
+  color: var(--ds-color-text);
+  font-weight: 850;
+  letter-spacing: -0.025em;
+}
+
+.ds-text-muted {
+  color: var(--ds-color-muted);
+}
+
+.ds-text-subtle {
+  color: var(--ds-color-subtle);
+}
+
+.ds-transition {
+  transition-duration: var(--ds-duration-normal);
+  transition-timing-function: var(--ds-ease-standard);
+}
+
+.ds-focus-ring:focus {
+  outline: none;
+}
+
+.ds-focus-ring:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.focus-ring:focus-visible {
+  outline: none !important;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.ds-control {
+  min-height: 2.75rem;
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface-raised);
+  color: var(--ds-color-text);
+  transition: border-color var(--ds-duration-normal) var(--ds-ease-standard), box-shadow var(--ds-duration-normal) var(--ds-ease-standard), background-color var(--ds-duration-normal) var(--ds-ease-standard), color var(--ds-duration-normal) var(--ds-ease-standard);
+}
+
+.ds-control:focus-visible,
+.ds-control:focus-within {
+  border-color: var(--ds-color-accent);
+  box-shadow: var(--ds-focus-ring);
+  outline: none;
+}
+
+.ds-hit-target {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+.ds-visually-hidden:not(:focus):not(:active) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.ds-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(233, 162, 76, 0.45) transparent;
+}
+
+.ds-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.ds-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ds-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(233, 162, 76, 0.35);
+  border-radius: var(--ds-radius-full);
+}
+
+[aria-disabled='true'],
+:disabled {
+  cursor: not-allowed;
+}
+
+[aria-busy='true'] {
+  cursor: progress;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-card-interactive:hover {
+    transform: none;
+  }
+
+  .ds-transition,
+  .ds-card-interactive,
+  .ds-control {
+    transition-duration: 0.01ms !important;
+  }
+}
