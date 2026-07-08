@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Any
-from pydantic import EmailStr, Field, HttpUrl
+from pydantic import EmailStr, Field
 from pymongo import ASCENDING, TEXT, IndexModel
 from app.models.base import BASE_INDEXES, BaseDocument
 
@@ -24,7 +24,7 @@ class User(BaseDocument):
     email: EmailStr
     full_name: str = Field(..., min_length=1, max_length=120)
     username: str | None = Field(default=None, min_length=2, max_length=60)
-    avatar_url: HttpUrl | None = None
+    avatar_url: str | None = Field(default=None, max_length=2000)
     role: UserRole = UserRole.MEMBER
     status: UserStatus = UserStatus.ACTIVE
     company: str | None = Field(default=None, max_length=120)
