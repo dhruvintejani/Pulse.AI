@@ -7,10 +7,14 @@ type ApiMutationOptions<TData, TVariables> = Omit<
   'mutationFn'
 >;
 
+type ApiMutationFn<TData, TVariables> = [TVariables] extends [void]
+  ? (() => Promise<TData>) | ((variables: TVariables) => Promise<TData>)
+  : (variables: TVariables) => Promise<TData>;
+
 export const useApiMutation = <TData, TVariables = void>(
-  mutationFn: (variables: TVariables) => Promise<TData>,
+  mutationFn: ApiMutationFn<TData, TVariables>,
   options?: ApiMutationOptions<TData, TVariables>
 ) => useMutation<TData, ApiError, TVariables>({
-  mutationFn,
+  mutationFn: mutationFn as (variables: TVariables) => Promise<TData>,
   ...options,
 });
