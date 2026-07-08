@@ -6,6 +6,47 @@ interface CodeBlockProps {
   language?: string;
 }
 
+const keywordPattern = /\b(const|let|var|function|return|if|else|for|while|import|export|from|type|interface|class|extends|async|await|try|catch|new|true|false|null|undefined)\b/g;
+const stringPattern = /(['"`])(?:(?!\1).|\\.)*\1/g;
+const commentPattern = /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm;
+const numberPattern = /\b\d+(?:\.\d+)?\b/g;
+
+const highlightLine = (line: string) => {
+  const tokens: Array<{ text: string; className: string }> = [];
+  const matches: Array<{ start: number; end: number; className: string }> = [];
+
+  const collect = (pattern: RegExp, className: string) => {
+    for (const match of line.matchAll(pattern)) {
+      if (match.index === undefined) continue;
+      matches.push({ start: match.index, end: match.index + match[0].length, className });
+    }
+  };
+
+  collect(commentPattern, 'text-[#8B949E] italic');
+  collect(stringPattern, 'text-emerald-300');
+  collect(keywordPattern, 'text-sky-300');
+  collect(numberPattern, 'text-amber-200');
+
+  const ordered = matches
+    .sort((a, b) => a.start - b.start || b.end - a.end)
+    .filter((match, index, all) => !all.some((other, otherIndex) => otherIndex < index && match.start >= other.start && match.end <= other.end));
+
+  let cursor = 0;
+  ordered.forEach((match) => {
+    if (match.start > cursor) {
+      tokens.push({ text: line.slice(cursor, match.start), className: 'text-green-300/80' });
+    }
+    tokens.push({ text: line.slice(match.start, match.end), className: match.className });
+    cursor = match.end;
+  });
+
+  if (cursor < line.length) {
+    tokens.push({ text: line.slice(cursor), className: 'text-green-300/80' });
+  }
+
+  return tokens.length ? tokens : [{ text: line || ' ', className: 'text-green-300/80' }];
+};
+
 const CodeBlock = ({ code, language = 'text' }: CodeBlockProps) => {
   const [copied, setCopied] = useState(false);
   const codeLines = useMemo(() => code.split('\n'), [code]);
@@ -34,11 +75,15 @@ const CodeBlock = ({ code, language = 'text' }: CodeBlockProps) => {
         </button>
       </div>
       <pre className="px-4 py-4 overflow-x-auto no-scrollbar">
-        <code className="text-sm font-mono text-[#E9A24C]/80 leading-relaxed">
+        <code className="text-sm font-mono leading-relaxed">
           {codeLines.map((line, i) => (
             <div key={`${line}-${i}`} className="flex">
               <span className="text-white/20 select-none w-7 shrink-0 text-right mr-4 text-xs" aria-hidden="true">{i + 1}</span>
-              <span className="text-green-300/80">{line || ' '}</span>
+              <span>
+                {highlightLine(line).map((token, tokenIndex) => (
+                  <span key={`${token.text}-${tokenIndex}`} className={token.className}>{token.text}</span>
+                ))}
+              </span>
             </div>
           ))}
         </code>
