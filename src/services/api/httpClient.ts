@@ -16,12 +16,18 @@ const ensureHeaders = (config: InternalAxiosRequestConfig) => {
   return config.headers;
 };
 
+const isFormDataPayload = (data: unknown) => typeof FormData !== 'undefined' && data instanceof FormData;
+
 const applyAuthHeader = async (config: InternalAxiosRequestConfig) => {
   const apiConfig = config as InternalAxiosRequestConfig & Pick<ApiRequestConfig, 'skipAuth' | 'requestId'>;
   const headers = ensureHeaders(config);
 
   headers.set('X-Request-ID', apiConfig.requestId || createRequestId());
   headers.set('X-Client', 'pulse-ai-web');
+
+  if (isFormDataPayload(config.data)) {
+    headers.delete('Content-Type');
+  }
 
   if (apiConfig.skipAuth) return config;
 
