@@ -1,0 +1,73 @@
+name: Pulse AI CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: pulse-ai-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend typecheck and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY || 'your_clerk_publishable_key' }}
+          VITE_API_BASE_URL: http://localhost:8000
+          VITE_API_VERSION: v1
+          VITE_API_PREFIX: /api/v1
+          VITE_ENABLE_SOURCEMAPS: false
+
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest
+        env:
+          ENVIRONMENT: development
+          DEBUG: false
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DB_NAME: pulse_ai_test
+          CLERK_ISSUER: https://example.clerk.accounts.dev
+          CLERK_JWKS_URL: https://example.clerk.accounts.dev/.well-known/jwks.json
+          BACKEND_CORS_ORIGINS: http://localhost:5173
+          SECURITY_ALLOWED_HOSTS: '*'
