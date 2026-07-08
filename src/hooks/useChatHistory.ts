@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tansta
 import { useMemo, useState } from 'react';
 import { queryKeys } from '@/constants/queryKeys';
 import { chatService } from '@/services/chat/chatService';
-import type { ConversationMessagePayload, RenameConversationPayload } from '@/types/chat';
+import type { ConversationMessagePayload, MessageReactionPayload, RenameConversationPayload } from '@/types/chat';
 
 const invalidateChatQueries = (queryClient: QueryClient) => {
   void queryClient.invalidateQueries({ queryKey: queryKeys.conversations });
@@ -118,6 +118,11 @@ export const useChatMessages = () => {
     onSuccess: () => invalidateChatQueries(queryClient),
   });
 
+  const updateReactionMutation = useMutation({
+    mutationFn: chatService.updateMessageReaction,
+    onSuccess: () => invalidateChatQueries(queryClient),
+  });
+
   return {
     activeConversation: activeConversationQuery.data ?? null,
     messages: messagesQuery.data ?? [],
@@ -127,8 +132,10 @@ export const useChatMessages = () => {
     addMessage: (payload: ConversationMessagePayload) => addMessageMutation.mutateAsync(payload),
     addAssistantReply: (conversationId: string) => addAssistantReplyMutation.mutateAsync(conversationId),
     regenerateLastAssistantMessage: (conversationId: string) => regenerateMutation.mutateAsync(conversationId),
+    updateMessageReaction: (payload: MessageReactionPayload) => updateReactionMutation.mutateAsync(payload),
     isAddingMessage: addMessageMutation.isPending || addAssistantReplyMutation.isPending,
     isRegenerating: regenerateMutation.isPending,
+    isUpdatingReaction: updateReactionMutation.isPending,
   };
 };
 
