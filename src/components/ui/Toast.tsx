@@ -43,6 +43,12 @@ const iconMap = {
   error: <AlertCircle size={18} className="text-red-500" aria-hidden="true" />,
 };
 
+const createToastId = () => (
+  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+);
+
 export const ToastProvider = memo(({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
@@ -51,7 +57,7 @@ export const ToastProvider = memo(({ children }: { children: ReactNode }) => {
   }, []);
 
   const toast = useCallback(({ title, description, variant = 'info', duration = 4200 }: ToastInput) => {
-    const id = crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const id = createToastId();
     setToasts((current) => [{ id, title, description, variant }, ...current].slice(0, 5));
     if (duration > 0) window.setTimeout(() => dismiss(id), duration);
     return id;
