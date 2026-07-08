@@ -1,0 +1,111 @@
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+#root {
+  isolation: isolate;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+button,
+a,
+[role='button'] {
+  touch-action: manipulation;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  min-width: 0;
+}
+
+.focus-ring:focus {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid rgba(233, 162, 76, 0.78);
+  outline-offset: 3px;
+}
+
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+}
+
+@media (max-width: 768px) {
+  .shadow-float {
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.1), 0 3px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-premium-lg {
+    box-shadow: 0 6px 26px rgba(233, 162, 76, 0.18), 0 1px 6px rgba(0, 0, 0, 0.08);
+  }
+
+  .glass,
+  .glass-card {
+    backdrop-filter: saturate(125%) blur(16px);
+    -webkit-backdrop-filter: saturate(125%) blur(16px);
+  }
+}
+
+@media (max-width: 640px) {
+  h1,
+  h2,
+  h3,
+  p,
+  span,
+  a,
+  button {
+    overflow-wrap: anywhere;
+  }
+
+  button,
+  [role='button'],
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input,
+  textarea,
+  select {
+    max-width: 100%;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  button,
+  [role='button'],
+  a,
+  select,
+  input[type='button'],
+  input[type='submit'] {
+    min-height: 38px;
+  }
+}
+
+@supports (height: 100dvh) {
+  .h-screen {
+    height: 100dvh;
+  }
+
+  .min-h-screen {
+    min-height: 100dvh;
+  }
+}
