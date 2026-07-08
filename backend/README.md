@@ -36,14 +36,14 @@ docker compose up --build
 
 Pulse AI uses Clerk as the only authentication provider.
 
-Set these values in `.env`:
-
 ```env
 CLERK_ISSUER=https://your-clerk-domain.clerk.accounts.dev
 CLERK_JWKS_URL=https://your-clerk-domain.clerk.accounts.dev/.well-known/jwks.json
 CLERK_AUDIENCE=
 CLERK_AUTHORIZED_PARTIES=http://localhost:5173,http://localhost:3000
 CLERK_SECRET_KEY=
+ADMIN_EMAILS=admin@example.com
+ADMIN_CLERK_USER_IDS=
 ```
 
 Protected endpoints expect:
@@ -52,7 +52,7 @@ Protected endpoints expect:
 Authorization: Bearer <clerk_jwt>
 ```
 
-The API verifies the Clerk JWT, resolves the Clerk user ID, creates the MongoDB user profile on first authenticated request, and keeps `clerk_user_id` synchronized with MongoDB.
+The API verifies the Clerk JWT, resolves the Clerk user ID, creates the MongoDB user profile on first authenticated request, keeps `clerk_user_id` synchronized with MongoDB, and promotes users listed in `ADMIN_EMAILS` or `ADMIN_CLERK_USER_IDS` to owner role.
 
 ## Endpoints
 
@@ -106,11 +106,51 @@ GET /api/v1/dashboard/notifications
 GET /api/v1/dashboard/activity-timeline
 GET /api/v1/dashboard/charts
 GET /api/v1/dashboard/search
+
+GET /api/v1/notifications
+POST /api/v1/notifications
+GET /api/v1/notifications/unread-count
+GET /api/v1/notifications/categories
+GET /api/v1/notifications/preferences
+PATCH /api/v1/notifications/preferences
+POST /api/v1/notifications/mark-all-read
+DELETE /api/v1/notifications/clear-all
+GET /api/v1/notifications/stream
+PATCH /api/v1/notifications/{notification_id}
+PATCH /api/v1/notifications/{notification_id}/read
+PATCH /api/v1/notifications/{notification_id}/unread
+DELETE /api/v1/notifications/{notification_id}
+
+GET /api/v1/admin/dashboard
+GET /api/v1/admin/users
+PATCH /api/v1/admin/users/{user_id}
+DELETE /api/v1/admin/users/{user_id}
+GET /api/v1/admin/chats
+GET /api/v1/admin/documents
+GET /api/v1/admin/analytics
+GET /api/v1/admin/system-logs
+POST /api/v1/admin/system-logs
+GET /api/v1/admin/feedback
+PATCH /api/v1/admin/feedback/{feedback_id}
+GET /api/v1/admin/notifications
+POST /api/v1/admin/notifications/broadcast
+GET /api/v1/admin/roles
+POST /api/v1/admin/roles
+GET /api/v1/admin/permissions
+GET /api/v1/admin/settings
 ```
 
 ## Upload module
 
 The secure upload module supports PDF, DOCX, TXT, CSV, JPG, JPEG, PNG, GIF, and WEBP. It validates extension, MIME type, file signature, UTF-8 text compatibility, maximum size, unsafe file names, and blocked executable extensions. Upload responses return metadata only and include fields needed by the frontend for upload progress UI.
+
+## Notification system
+
+Notifications are stored in MongoDB and support unread count, read/unread state, delete, clear all, categories, notification preferences, and SSE real-time readiness through `/api/v1/notifications/stream`.
+
+## Admin panel
+
+The admin API is protected by `require_admin_user`. Only users with `owner` or `admin` role can access `/api/v1/admin/*`. Admin features include dashboard, users, chats, documents, analytics, system logs, feedback, notifications, roles, permissions, and settings.
 
 ## Document storage
 
@@ -162,4 +202,4 @@ app/
   utils
 ```
 
-The backend now includes architecture, MongoDB setup, ODM models, validation, indexes, soft delete, pagination/search utilities, middleware, Clerk auth integration, protected route dependencies, AI chat CRUD, document CRUD/upload/preview/search, secure metadata-only upload module, dashboard overview/statistics/charts APIs, streaming response scaffolding, typing status, provider abstraction, document storage abstraction, error handling, rate limiting, logging, CORS, and Docker support.
+The backend now includes architecture, MongoDB setup, ODM models, validation, indexes, soft delete, pagination/search utilities, middleware, Clerk auth integration, protected route dependencies, AI chat CRUD, document CRUD/upload/preview/search, secure metadata-only upload module, dashboard APIs, admin APIs, notification system, streaming response scaffolding, typing status, provider abstraction, document storage abstraction, error handling, rate limiting, logging, CORS, and Docker support.
