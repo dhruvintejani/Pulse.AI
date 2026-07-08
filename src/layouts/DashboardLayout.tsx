@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Menu } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import DashboardSidebar from '@/components/layout/DashboardSidebar';
 import MeshBackground from '@/components/backgrounds/MeshBackground';
 import { useSidebar } from '@/hooks/useSidebar';
@@ -18,15 +18,13 @@ const DashboardLayout = () => {
   }, [closeMobileSidebar]);
 
   return (
-    <div className="relative flex h-screen overflow-hidden bg-[#F8F4EC]">
+    <div className="relative flex h-dvh min-h-dvh min-w-0 overflow-hidden bg-[#F8F4EC]">
       <MeshBackground />
-      
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex relative z-10">
+
+      <div className="relative z-10 hidden shrink-0 md:flex">
         <DashboardSidebar />
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {mobileSidebarOpen && (
           <>
@@ -37,14 +35,14 @@ const DashboardLayout = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleCloseMobileSidebar}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden focus:outline-none"
+              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm focus:outline-none md:hidden"
             />
             <motion.div
-              initial={{ x: -280 }}
+              initial={{ x: -288 }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
+              exit={{ x: -288 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed left-0 top-0 h-full z-50 md:hidden shadow-float"
+              className="fixed left-0 top-0 z-50 h-dvh max-w-[86vw] shadow-float md:hidden"
             >
               <DashboardSidebar />
             </motion.div>
@@ -52,16 +50,14 @@ const DashboardLayout = () => {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#FFFDF8]/80 backdrop-blur-lg border-b border-[rgba(0,0,0,0.06)]">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex shrink-0 items-center justify-between border-b border-[rgba(0,0,0,0.06)] bg-[#FFFDF8]/80 px-4 py-3 backdrop-blur-lg md:hidden">
           <button
             type="button"
             onClick={handleOpenMobileSidebar}
             aria-label="Open navigation menu"
             aria-expanded={mobileSidebarOpen}
-            className="p-2 rounded-xl hover:bg-[rgba(233,162,76,0.08)] transition-colors focus-ring"
+            className="rounded-xl p-2 transition-colors hover:bg-[rgba(233,162,76,0.08)] focus-ring"
           >
             <Menu size={20} className="text-[#666]" aria-hidden="true" />
           </button>
@@ -69,7 +65,7 @@ const DashboardLayout = () => {
           <div className="w-9" aria-hidden="true" />
         </div>
 
-        <main className="flex-1 overflow-hidden" id="main-content">
+        <main className="min-w-0 flex-1 overflow-hidden" id="main-content">
           <Outlet />
         </main>
       </div>
