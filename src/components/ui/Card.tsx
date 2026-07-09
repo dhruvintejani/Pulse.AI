@@ -1,6 +1,7 @@
 import { forwardRef, memo } from 'react';
 import type { ComponentProps, HTMLAttributes, KeyboardEvent, ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { premiumHover, softSpringTransition } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
 type CardVariant = 'default' | 'glass' | 'subtle' | 'elevated';
@@ -65,13 +66,14 @@ const CardRoot = forwardRef<HTMLDivElement, CardProps>(({
   return (
     <motion.div
       ref={ref}
+      layout="position"
       role={role ?? (onClick ? 'button' : undefined)}
       tabIndex={tabIndex ?? (onClick ? 0 : undefined)}
-      initial={shouldAnimate ? { opacity: 0, y: 14 } : false}
-      animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
-      transition={shouldAnimate ? { duration: 0.32, delay, ease: [0.2, 0, 0, 1] } : undefined}
-      whileHover={shouldAnimate && isInteractive ? { y: -3, scale: 1.005 } : undefined}
-      className={cn(cardVariants[resolvedVariant], cardPadding[padding], isInteractive && 'ds-card-interactive cursor-pointer ds-focus-ring', className)}
+      initial={shouldAnimate ? { opacity: 0, y: 16, filter: 'blur(10px)' } : false}
+      animate={shouldAnimate ? { opacity: 1, y: 0, filter: 'blur(0px)' } : undefined}
+      transition={shouldAnimate ? { ...softSpringTransition, delay } : undefined}
+      whileHover={shouldAnimate && isInteractive ? premiumHover : undefined}
+      className={cn(cardVariants[resolvedVariant], cardPadding[padding], 'premium-motion-card', isInteractive && 'ds-card-interactive cursor-pointer ds-focus-ring', className)}
       onClick={onClick}
       onKeyDown={handleKeyDown}
       {...(props as ComponentProps<typeof motion.div>)}
