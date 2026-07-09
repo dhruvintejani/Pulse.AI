@@ -1,4 +1,4 @@
-import type { Transition, Variants } from 'framer-motion';
+import type { TargetAndTransition, Transition, Variants } from 'framer-motion';
 
 type CubicBezier = [number, number, number, number];
 
@@ -70,13 +70,13 @@ export const staggerItem: Variants = {
   },
 };
 
-export const premiumHover = {
+export const premiumHover: TargetAndTransition = {
   y: -4,
   scale: 1.012,
   transition: springTransition,
 };
 
-export const premiumTap = {
+export const premiumTap: TargetAndTransition = {
   y: 0,
   scale: 0.985,
   transition: { type: 'spring', stiffness: 520, damping: 34 },
