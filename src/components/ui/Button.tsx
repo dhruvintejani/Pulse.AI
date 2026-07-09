@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { forwardRef, memo } from 'react';
 import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from 'react';
+import { premiumTap, springTransition } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -43,8 +44,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
 }, ref) => {
   const prefersReducedMotion = useReducedMotion();
   const isDisabled = disabled || loading;
-  const hoverState = prefersReducedMotion ? undefined : { scale: isDisabled ? 1 : 1.015 };
-  const tapState = prefersReducedMotion ? undefined : { scale: isDisabled ? 1 : 0.985 };
+  const hoverState = prefersReducedMotion || isDisabled ? undefined : { y: -2, scale: 1.018, transition: springTransition };
+  const tapState = prefersReducedMotion || isDisabled ? undefined : premiumTap;
 
   return (
     <motion.button
@@ -53,7 +54,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       whileHover={hoverState}
       whileTap={tapState}
       className={cn(
-        'inline-flex min-w-0 select-none items-center justify-center whitespace-nowrap transition-[transform,box-shadow,background-color,border-color,color,opacity] duration-200 ds-focus-ring motion-reduce:transition-none',
+        'premium-button inline-flex min-w-0 select-none items-center justify-center whitespace-nowrap transition-[transform,box-shadow,background-color,border-color,color,opacity,filter] duration-200 ds-focus-ring motion-reduce:transition-none',
         variants[variant],
         sizes[size],
         isDisabled && 'cursor-not-allowed opacity-50 hover:translate-y-0',
@@ -67,11 +68,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       {loading ? (
         <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin motion-reduce:animate-none" aria-hidden="true" />
       ) : icon ? (
-        <span className="shrink-0" aria-hidden="true">{icon}</span>
+        <span className="premium-button-icon shrink-0" aria-hidden="true">{icon}</span>
       ) : null}
       {children && <span className="min-w-0 truncate">{children}</span>}
       {loading && <span className="sr-only">{loadingLabel}</span>}
-      {iconRight && !loading && <span className="ml-auto shrink-0" aria-hidden="true">{iconRight}</span>}
+      {iconRight && !loading && <span className="premium-button-icon ml-auto shrink-0" aria-hidden="true">{iconRight}</span>}
     </motion.button>
   );
 });
