@@ -13,6 +13,7 @@ interface ImportMetaEnv {
   readonly VITE_APP_ENV?: string;
   readonly VITE_ENABLE_SOURCEMAPS?: string;
   readonly VITE_SITE_URL?: string;
+  readonly VITE_ERROR_LOG_ENDPOINT?: string;
 }
 
 interface ImportMeta {
