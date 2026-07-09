@@ -6,5 +6,7 @@ Disallow: /login
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /verify
+Disallow: /offline
+Disallow: /500
 
 Sitemap: https://pulse-ai.vercel.app/sitemap.xml
