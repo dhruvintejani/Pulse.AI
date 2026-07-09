@@ -21,6 +21,13 @@ const defaultSeo: SeoConfig = {
   type: 'website',
 };
 
+const notFoundSeo: SeoConfig = {
+  title: 'Page not found — Pulse AI',
+  description: 'The requested Pulse AI page could not be found.',
+  image: defaultSeo.image,
+  noIndex: true,
+};
+
 const routeSeo: Record<string, SeoConfig> = {
   [ROUTES.HOME]: defaultSeo,
   [ROUTES.LOGIN]: { title: 'Sign in — Pulse AI', description: 'Sign in to your Pulse AI workspace.', image: defaultSeo.image, noIndex: true },
@@ -28,6 +35,8 @@ const routeSeo: Record<string, SeoConfig> = {
   [ROUTES.FORGOT_PASSWORD]: { title: 'Recover account — Pulse AI', description: 'Recover access to your Pulse AI account.', image: defaultSeo.image, noIndex: true },
   [ROUTES.RESET_PASSWORD]: { title: 'Reset password — Pulse AI', description: 'Reset your Pulse AI account password.', image: defaultSeo.image, noIndex: true },
   [ROUTES.VERIFY]: { title: 'Verify account — Pulse AI', description: 'Verify your Pulse AI account email.', image: defaultSeo.image, noIndex: true },
+  [ROUTES.OFFLINE]: { title: 'Offline — Pulse AI', description: 'Pulse AI offline mode keeps the cached app shell available while connection is restored.', image: defaultSeo.image, noIndex: true },
+  [ROUTES.SERVER_ERROR]: { title: 'System error — Pulse AI', description: 'Pulse AI encountered a recoverable application error.', image: defaultSeo.image, noIndex: true },
   [DASHBOARD_PATHS.ROOT]: { title: 'Dashboard — Pulse AI', description: 'Your Pulse AI dashboard with recent chats, documents, analytics, activity, and notifications.', image: defaultSeo.image, noIndex: true },
   [DASHBOARD_PATHS.CHAT]: { title: 'AI Chat — Pulse AI', description: 'Chat with Pulse AI using beautiful streaming responses, history, shortcuts, and document context.', image: defaultSeo.image, noIndex: true },
   [DASHBOARD_PATHS.DOCUMENTS]: { title: 'Documents — Pulse AI', description: 'Upload, organize, preview, search, and analyze your documents with Pulse AI.', image: defaultSeo.image, noIndex: true },
@@ -74,7 +83,7 @@ const upsertStructuredData = (json: object) => {
 
 const Seo = () => {
   const location = useLocation();
-  const routeConfig = routeSeo[location.pathname] ?? defaultSeo;
+  const routeConfig = routeSeo[location.pathname] ?? notFoundSeo;
   const seo = location.pathname.startsWith(ROUTES.DASHBOARD)
     ? { ...routeConfig, noIndex: true }
     : routeConfig;
