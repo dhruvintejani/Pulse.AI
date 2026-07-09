@@ -9,6 +9,7 @@ import {
   fallbackRoute,
   publicRoutes,
   ssoCallbackRoute,
+  systemRoutes,
 } from '@/routes/routeConfig';
 import RouteFocusManager from '@/routes/RouteFocusManager';
 
@@ -21,6 +22,10 @@ const AppRouter = () => {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
           {publicRoutes.map((route) => (
+            <Route key={route.key} path={route.path} element={route.element} />
+          ))}
+
+          {systemRoutes.map((route) => (
             <Route key={route.key} path={route.path} element={route.element} />
           ))}
 
