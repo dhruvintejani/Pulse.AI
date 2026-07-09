@@ -6,6 +6,8 @@ export const ROUTES = {
   RESET_PASSWORD: '/reset-password',
   VERIFY: '/verify',
   SSO_CALLBACK: '/sso-callback',
+  OFFLINE: '/offline',
+  SERVER_ERROR: '/500',
   DASHBOARD: '/dashboard',
 } as const;
 
