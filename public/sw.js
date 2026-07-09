@@ -1,10 +1,11 @@
-const CACHE_VERSION = 'pulse-ai-v1';
+const CACHE_VERSION = 'pulse-ai-v2';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const OFFLINE_URL = '/offline.html';
 
 const APP_SHELL = [
   '/',
+  '/offline',
   '/offline.html',
   '/manifest.webmanifest',
   '/pwa-icon.svg',
