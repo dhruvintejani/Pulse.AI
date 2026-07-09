@@ -10,6 +10,10 @@ export const ForgotPasswordPage = lazyWithPreload(() => import('@/pages/auth/For
 export const ResetPasswordPage = lazyWithPreload(() => import('@/pages/auth/ResetPasswordPage'));
 export const VerifyPage = lazyWithPreload(() => import('@/pages/auth/VerifyPage'));
 
+export const NotFoundPage = lazyWithPreload(() => import('@/pages/errors/NotFoundPage'));
+export const OfflinePage = lazyWithPreload(() => import('@/pages/errors/OfflinePage'));
+export const ServerErrorPage = lazyWithPreload(() => import('@/pages/errors/ServerErrorPage'));
+
 export const DashboardHome = lazyWithPreload(() => import('@/pages/dashboard/DashboardHome'));
 export const ChatPage = lazyWithPreload(() => import('@/pages/dashboard/ChatPage'));
 export const DocumentsPage = lazyWithPreload(() => import('@/pages/dashboard/DocumentsPage'));
@@ -37,4 +41,7 @@ export const routePreloaders = {
   models: ModelsPage.preload,
   team: TeamPage.preload,
   admin: AdminPage.preload,
+  notFound: NotFoundPage.preload,
+  offline: OfflinePage.preload,
+  serverError: ServerErrorPage.preload,
 };
