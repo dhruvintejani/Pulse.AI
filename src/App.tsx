@@ -1,6 +1,6 @@
 import { BrowserRouter } from 'react-router-dom';
-import { AppErrorBoundary, RouteAnnouncer, Seo } from '@/components/common';
-import { CommandPalette, InstallPrompt, KeyboardShortcuts, OfflineBanner } from '@/components/experience';
+import { AppErrorBoundary, GlobalErrorHandlers, RouteAnnouncer, Seo } from '@/components/common';
+import { CommandPalette, InstallPrompt, KeyboardShortcuts, OfflineBanner, PremiumCursor } from '@/components/experience';
 import { AppRouter } from '@/routes';
 
 function App() {
@@ -8,11 +8,13 @@ function App() {
     <AppErrorBoundary>
       <BrowserRouter>
         <Seo />
+        <GlobalErrorHandlers />
         <RouteAnnouncer />
         <KeyboardShortcuts />
         <CommandPalette />
         <OfflineBanner />
         <InstallPrompt />
+        <PremiumCursor />
         <AppRouter />
       </BrowserRouter>
     </AppErrorBoundary>
