@@ -1,6 +1,5 @@
 import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 import type { ReactElement } from 'react';
-import { Navigate } from 'react-router-dom';
 import { ProtectedRoute, PublicRoute } from '@/components/auth';
 import { DASHBOARD_SEGMENTS, ROUTES } from '@/constants/routes';
 import RouteTransition from '@/routes/RouteTransition';
@@ -16,9 +15,12 @@ import {
   LandingPage,
   LoginPage,
   ModelsPage,
+  NotFoundPage,
   NotificationsPage,
+  OfflinePage,
   ProfilePage,
   ResetPasswordPage,
+  ServerErrorPage,
   SettingsPage,
   SignupPage,
   TeamPage,
@@ -60,6 +62,11 @@ export const publicRoutes = [
   { key: 'verify', path: ROUTES.VERIFY, element: publicElement(<VerifyPage />) },
 ] satisfies AppRouteConfig[];
 
+export const systemRoutes = [
+  { key: 'offline', path: ROUTES.OFFLINE, element: withTransition(<OfflinePage />) },
+  { key: 'server-error', path: ROUTES.SERVER_ERROR, element: withTransition(<ServerErrorPage />) },
+] satisfies AppRouteConfig[];
+
 export const ssoCallbackRoute = {
   key: 'sso-callback',
   path: ROUTES.SSO_CALLBACK,
@@ -89,10 +96,11 @@ export const dashboardRoutes = [
   { key: 'dashboard-profile', path: DASHBOARD_SEGMENTS.PROFILE, element: withTransition(<ProfilePage />) },
   { key: 'dashboard-team', path: DASHBOARD_SEGMENTS.TEAM, element: withTransition(<TeamPage />) },
   { key: 'dashboard-admin', path: DASHBOARD_SEGMENTS.ADMIN, element: withTransition(<AdminPage />) },
+  { key: 'dashboard-not-found', path: '*', element: withTransition(<NotFoundPage />) },
 ] satisfies AppRouteConfig[];
 
 export const fallbackRoute = {
   key: 'not-found',
   path: '*',
-  element: <Navigate to={ROUTES.HOME} replace />,
+  element: withTransition(<NotFoundPage />),
 } satisfies PathRouteConfig;
