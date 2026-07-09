@@ -8,6 +8,8 @@ const PAGE_TITLES: Record<string, string> = {
   '/forgot-password': 'Forgot password — Pulse AI',
   '/reset-password': 'Reset password — Pulse AI',
   '/verify': 'Verify email — Pulse AI',
+  '/offline': 'Offline — Pulse AI',
+  '/500': 'System error — Pulse AI',
   '/dashboard': 'Dashboard — Pulse AI',
   '/dashboard/chat': 'AI Chat — Pulse AI',
   '/dashboard/documents': 'Documents — Pulse AI',
@@ -19,6 +21,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/billing': 'Billing — Pulse AI',
   '/dashboard/profile': 'Profile — Pulse AI',
   '/dashboard/team': 'Team — Pulse AI',
+  '/dashboard/admin': 'Admin — Pulse AI',
 };
 
 const formatPathname = (pathname: string) => {
