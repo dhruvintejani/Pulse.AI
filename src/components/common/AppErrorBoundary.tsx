@@ -62,7 +62,6 @@ class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundary
         secondaryLabel="Refresh app"
         onPrimary={this.handleReset}
         onSecondary={this.handleReload}
-        onHome={this.handleReload}
       />
     );
   }
