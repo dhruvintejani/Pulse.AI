@@ -6,6 +6,7 @@ import './styles/design-system.css';
 import './styles/polish.css';
 import './styles/responsive.css';
 import './styles/product-polish.css';
+import './styles/animation-system.css';
 import App from './App';
 import { AppProviders } from './contexts';
 import { registerServiceWorker } from './utils';
