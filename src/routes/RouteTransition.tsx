@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { blurReveal, reduceMotionTransition } from '@/lib/motion';
 
 interface RouteTransitionProps {
   children: ReactNode;
@@ -11,11 +12,12 @@ const RouteTransition = ({ children }: RouteTransitionProps) => {
 
   return (
     <motion.div
-      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
-      transition={{ duration: prefersReducedMotion ? 0.12 : 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="h-full min-w-0"
+      layout="position"
+      initial={prefersReducedMotion ? { opacity: 0 } : 'hidden'}
+      animate={prefersReducedMotion ? { opacity: 1, transition: reduceMotionTransition } : 'visible'}
+      exit={prefersReducedMotion ? { opacity: 0, transition: reduceMotionTransition } : 'exit'}
+      variants={prefersReducedMotion ? undefined : blurReveal}
+      className="h-full min-w-0 will-change-transform"
     >
       {children}
     </motion.div>
