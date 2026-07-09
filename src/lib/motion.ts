@@ -1,9 +1,11 @@
 import type { Transition, Variants } from 'framer-motion';
 
-export const motionEasing = {
-  premium: [0.22, 1, 0.36, 1] as const,
-  crisp: [0.16, 1, 0.3, 1] as const,
-  soft: [0.2, 0, 0, 1] as const,
+type CubicBezier = [number, number, number, number];
+
+export const motionEasing: Record<'premium' | 'crisp' | 'soft', CubicBezier> = {
+  premium: [0.22, 1, 0.36, 1],
+  crisp: [0.16, 1, 0.3, 1],
+  soft: [0.2, 0, 0, 1],
 };
 
 export const springTransition: Transition = {
