@@ -80,6 +80,7 @@ jobs:
         working-directory: backend
     env:
       ENVIRONMENT: ci
+      SKIP_DATABASE_INIT: true
       DEBUG: false
       APP_NAME: Pulse AI API
       APP_VERSION: 1.0.0
