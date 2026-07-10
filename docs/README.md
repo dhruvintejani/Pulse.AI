@@ -19,6 +19,7 @@ This folder contains the complete documentation set for Pulse AI.
 
 ## Shipping
 
+- [CI/CD guide](CI_CD.md)
 - [Deployment guide](DEPLOYMENT.md)
 - [Future roadmap](ROADMAP.md)
 - [Professional commit plan](COMMIT_PLAN.md)
