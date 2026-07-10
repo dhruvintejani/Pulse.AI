@@ -15,6 +15,7 @@
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Beanie_ODM-47A248?logo=mongodb&logoColor=fff" />
   <img alt="Clerk" src="https://img.shields.io/badge/Auth-Clerk-6C47FF?logo=clerk&logoColor=fff" />
   <img alt="PWA" src="https://img.shields.io/badge/PWA-Offline_ready-5A0FC8?logo=pwa&logoColor=fff" />
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-111111" />
 </p>
 
 Pulse AI is a polished AI SaaS application that combines a premium React frontend with a production-ready FastAPI backend. It includes AI chat workflows, document management, analytics, global search, notifications, settings, admin tooling, Clerk authentication, MongoDB persistence, PWA support, dynamic SEO, accessibility patterns, and deployment documentation.
@@ -110,6 +111,8 @@ Pulse.AI/
 │   ├── docker-compose.yml
 │   └── requirements.txt
 ├── docs/
+│   ├── README.md
+│   ├── PROJECT_OVERVIEW.md
 │   ├── ACCESSIBILITY_AUDIT.md
 │   ├── API_DOCUMENTATION.md
 │   ├── ARCHITECTURE.md
@@ -135,6 +138,7 @@ Pulse.AI/
 │   ├── types/
 │   └── utils/
 ├── CONTRIBUTING.md
+├── LICENSE
 ├── README.md
 ├── render.yaml
 └── vercel.json
@@ -264,6 +268,8 @@ Before sharing the project as a portfolio centerpiece:
 
 ## Documentation
 
+- [Documentation index](docs/README.md)
+- [Project overview](docs/PROJECT_OVERVIEW.md)
 - [Project architecture](docs/ARCHITECTURE.md)
 - [Frontend guide](docs/FRONTEND_GUIDE.md)
 - [Backend guide](docs/BACKEND_GUIDE.md)
@@ -311,4 +317,4 @@ Use Conventional Commits. The recommended development history is documented in [
 
 ## License
 
-This repository is a portfolio project. Add a license before distributing or accepting external contributions.
+Pulse AI is released under the [MIT License](LICENSE).
