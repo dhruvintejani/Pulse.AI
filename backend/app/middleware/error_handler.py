@@ -7,6 +7,9 @@ from app.core.errors import AppError
 
 
 def _request_id(request: Request) -> str | None:
+    state_request_id = getattr(request.state, "request_id", None)
+    if isinstance(state_request_id, str):
+        return state_request_id
     return request.headers.get("X-Request-ID")
 
 
