@@ -18,6 +18,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -78,10 +79,10 @@ const quickActions = [
   { icon: Zap, label: 'Workflows', desc: 'Automate tasks', color: 'from-emerald-50 to-green-50', iconColor: 'text-emerald-500', path: DASHBOARD_PATHS.WORKSPACE },
 ];
 
-const statIcons = [MessageSquare, FileText, Clock, Activity];
+const statIcons: LucideIcon[] = [MessageSquare, FileText, Clock, Activity];
 const modelColors = ['#E9A24C', '#8B5CF6', '#3B82F6'];
 
-const timelineIcons: Record<TimelineType, typeof MessageSquare> = {
+const timelineIcons: Record<TimelineType, LucideIcon> = {
   chat: MessageSquare,
   document: FileText,
   workspace: Layers,
