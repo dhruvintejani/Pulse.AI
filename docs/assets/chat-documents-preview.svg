@@ -1,0 +1,49 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Pulse AI chat and documents preview</title>
+  <desc id="desc">A professional preview showing Pulse AI chat, document upload, global search, and command palette surfaces.</desc>
+  <rect width="1440" height="900" rx="42" fill="#F8F4EC"/>
+  <circle cx="1210" cy="146" r="300" fill="#E9A24C" fill-opacity="0.13"/>
+  <circle cx="210" cy="760" r="260" fill="#D7B98E" fill-opacity="0.15"/>
+  <rect x="70" y="70" width="1300" height="760" rx="38" fill="#FFFDF8" stroke="rgba(31,31,31,0.08)" stroke-width="2"/>
+  <rect x="104" y="104" width="1232" height="78" rx="26" fill="#1F1F1F"/>
+  <rect x="134" y="126" width="34" height="34" rx="11" fill="#E9A24C"/>
+  <text x="184" y="149" fill="white" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900">Pulse AI</text>
+  <rect x="440" y="124" width="560" height="38" rx="16" fill="rgba(255,255,255,0.08)"/>
+  <text x="468" y="149" fill="rgba(255,255,255,0.58)" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Search chats, documents, users, settings...</text>
+  <rect x="1168" y="122" width="136" height="42" rx="16" fill="#E9A24C"/>
+  <text x="1198" y="149" fill="white" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="900">New chat</text>
+  <rect x="104" y="214" width="760" height="574" rx="32" fill="white" stroke="rgba(31,31,31,0.06)"/>
+  <text x="144" y="260" fill="#1F1F1F" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="900">AI Chat</text>
+  <text x="144" y="286" fill="#777" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600">Streaming-ready conversations with code, reactions, attachments, and history.</text>
+  <rect x="144" y="328" width="520" height="86" rx="24" fill="#F8F4EC" stroke="rgba(31,31,31,0.05)"/>
+  <circle cx="176" cy="360" r="18" fill="#E9A24C"/>
+  <text x="206" y="357" fill="#1F1F1F" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="900">Pulse Assistant</text>
+  <text x="206" y="382" fill="#666" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600">I found the strongest signals in your product analytics report.</text>
+  <rect x="336" y="442" width="488" height="76" rx="24" fill="#1F1F1F"/>
+  <text x="370" y="486" fill="white" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Create a concise summary for the executive team.</text>
+  <rect x="144" y="546" width="560" height="118" rx="24" fill="#F8F4EC" stroke="rgba(31,31,31,0.05)"/>
+  <circle cx="176" cy="580" r="18" fill="#E9A24C"/>
+  <text x="206" y="577" fill="#1F1F1F" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="900">Pulse Assistant</text>
+  <text x="206" y="604" fill="#666" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600">Summary generated with key risks, opportunities, and next actions.</text>
+  <rect x="206" y="626" width="404" height="14" rx="7" fill="rgba(233,162,76,0.2)"/>
+  <rect x="144" y="704" width="680" height="48" rx="20" fill="#FFFDF8" stroke="rgba(31,31,31,0.08)"/>
+  <text x="172" y="734" fill="#999" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Ask Pulse AI anything...</text>
+  <rect x="894" y="214" width="442" height="270" rx="32" fill="white" stroke="rgba(31,31,31,0.06)"/>
+  <text x="934" y="260" fill="#1F1F1F" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="900">Documents</text>
+  <text x="934" y="286" fill="#777" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600">Upload queue, tags, categories, preview, and metadata.</text>
+  <rect x="934" y="322" width="362" height="98" rx="24" fill="#F8F4EC" stroke="rgba(233,162,76,0.24)" stroke-dasharray="10 8"/>
+  <text x="1030" y="364" fill="#1F1F1F" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="900">Drop files to upload</text>
+  <text x="1004" y="390" fill="#999" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700">PDF, DOCX, TXT, CSV, images</text>
+  <rect x="934" y="442" width="362" height="14" rx="7" fill="rgba(31,31,31,0.07)"/>
+  <rect x="934" y="442" width="248" height="14" rx="7" fill="#E9A24C"/>
+  <rect x="894" y="516" width="442" height="272" rx="32" fill="white" stroke="rgba(31,31,31,0.06)"/>
+  <text x="934" y="562" fill="#1F1F1F" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="900">Command Palette</text>
+  <rect x="934" y="594" width="362" height="48" rx="18" fill="#F8F4EC"/>
+  <text x="962" y="625" fill="#999" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Search commands, pages, settings...</text>
+  <g font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800">
+    <rect x="934" y="664" width="362" height="42" rx="16" fill="rgba(233,162,76,0.14)"/>
+    <text x="964" y="691" fill="#A56018">Open AI Chat</text>
+    <rect x="934" y="716" width="362" height="42" rx="16" fill="rgba(31,31,31,0.04)"/>
+    <text x="964" y="743" fill="#666">Open Documents</text>
+  </g>
+</svg>
