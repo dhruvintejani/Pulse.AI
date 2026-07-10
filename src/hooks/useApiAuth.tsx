@@ -21,7 +21,8 @@ const ApiAuthProviderComponent = ({ children }: ApiAuthProviderProps) => {
 
   const getAccessToken = useMemo(() => async () => {
     if (!isLoaded || !isSignedIn) return null;
-    return getToken(env.clerkJwtTemplate ? { template: env.clerkJwtTemplate } : undefined);
+    if (env.clerkJwtTemplate) return getToken({ template: env.clerkJwtTemplate });
+    return getToken();
   }, [getToken, isLoaded, isSignedIn]);
 
   const getAuthHeaders = useMemo(() => async () => {
