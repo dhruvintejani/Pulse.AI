@@ -17,7 +17,7 @@ const createRequestId = () => {
   return `req_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 };
 
-const delay = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+const delay = (milliseconds: number) => new Promise((resolve) => globalThis.setTimeout(resolve, milliseconds));
 
 const ensureHeaders = (config: InternalAxiosRequestConfig) => {
   if (config.headers instanceof AxiosHeaders) return config.headers;
