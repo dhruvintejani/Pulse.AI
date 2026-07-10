@@ -6,7 +6,6 @@ import {
   Bot,
   CheckCircle2,
   FileText,
-  Github,
   Layers3,
   Lock,
   MessageSquare,
@@ -21,7 +20,6 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { blurReveal, staggerContainer, staggerItem } from '@/lib/motion';
-import { cn } from '@/lib/utils';
 
 const navItems = [
   { label: 'Product', id: 'product' },
@@ -229,7 +227,7 @@ const LandingPage = () => {
             </div>
             <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
               <Button variant="primary" size="lg" onClick={() => navigate('/signup')} iconRight={<ArrowRight size={16} />}>Explore Pulse AI</Button>
-              <Button variant="secondary" size="lg" onClick={() => navigate('/dashboard')} icon={<Github size={16} />}>Review dashboard</Button>
+              <Button variant="secondary" size="lg" onClick={() => navigate('/dashboard')} icon={<Bot size={16} />}>Review dashboard</Button>
             </div>
           </div>
         </section>
