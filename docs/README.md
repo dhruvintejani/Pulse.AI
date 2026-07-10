@@ -12,6 +12,7 @@ This folder contains the complete documentation set for Pulse AI.
 
 ## Product quality
 
+- [Staff engineering review](STAFF_ENGINEERING_REVIEW.md)
 - [Design system](DESIGN_SYSTEM.md)
 - [Accessibility audit](ACCESSIBILITY_AUDIT.md)
 - [PWA, SEO, and premium UX](PWA_SEO_UX.md)
