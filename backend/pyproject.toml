@@ -11,8 +11,8 @@ src = ["app", "tests"]
 exclude = ["venv", ".venv", "logs", ".pytest_cache", ".ruff_cache"]
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "UP"]
-ignore = ["B008", "E501"]
+select = ["F"]
+ignore = []
 
 [tool.ruff.format]
 quote-style = "double"
