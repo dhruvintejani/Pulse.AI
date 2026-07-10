@@ -1,24 +1,56 @@
 import time
+from urllib.parse import parse_qsl, urlencode
 from uuid import uuid4
 from fastapi import Request, Response
 from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from app.core.config import settings
 
+SENSITIVE_QUERY_KEYS = {
+    "access_token",
+    "api_key",
+    "auth",
+    "code",
+    "key",
+    "password",
+    "refresh_token",
+    "secret",
+    "signature",
+    "token",
+}
+
+
+def redact_query_string(query: str) -> str:
+    if not query:
+        return ""
+
+    try:
+        pairs = parse_qsl(query, keep_blank_values=True)
+    except ValueError:
+        return "[unparseable]"
+
+    redacted_pairs = [
+        (key, "[REDACTED]" if key.lower() in SENSITIVE_QUERY_KEYS else value)
+        for key, value in pairs
+    ]
+    return urlencode(redacted_pairs)
+
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         request_id = request.headers.get("X-Request-ID", uuid4().hex)
+        request.state.request_id = request_id
         start_time = time.perf_counter()
         client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (request.client.host if request.client else None)
         user_agent = request.headers.get("User-Agent")
+        query = redact_query_string(str(request.url.query))
 
         with logger.contextualize(request_id=request_id):
             logger.bind(category="request").info(
                 "Request started",
                 method=request.method,
                 path=request.url.path,
-                query=str(request.url.query),
+                query=query,
                 client=client_ip,
                 user_agent=user_agent,
             )
