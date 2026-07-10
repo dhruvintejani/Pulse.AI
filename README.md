@@ -54,6 +54,9 @@ This project is designed to be reviewed like a real product: clean architecture,
 - Framer Motion
 - Recharts
 - Lucide React
+- ESLint
+- Prettier
+- Vitest
 - PWA service worker
 
 ### Backend
@@ -68,10 +71,13 @@ This project is designed to be reviewed like a real product: clean architecture,
 - Clerk JWT verification
 - SlowAPI rate limiting
 - Loguru logging
+- Ruff
+- Pytest
 - Docker
 
 ### Deployment
 
+- GitHub Actions for CI/CD
 - Vercel for frontend
 - Render for backend
 - MongoDB Atlas for database
@@ -95,6 +101,12 @@ Frontend source lives in `src`. Backend source lives in `backend/app`. Detailed 
 
 ```text
 Pulse.AI/
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   └── deploy.yml
+│   ├── dependabot.yml
+│   └── pull_request_template.md
 ├── backend/
 │   ├── app/
 │   │   ├── api/v1/
@@ -109,6 +121,7 @@ Pulse.AI/
 │   ├── tests/
 │   ├── Dockerfile
 │   ├── docker-compose.yml
+│   ├── pyproject.toml
 │   └── requirements.txt
 ├── docs/
 │   ├── README.md
@@ -117,6 +130,7 @@ Pulse.AI/
 │   ├── API_DOCUMENTATION.md
 │   ├── ARCHITECTURE.md
 │   ├── BACKEND_GUIDE.md
+│   ├── CI_CD.md
 │   ├── COMMIT_PLAN.md
 │   ├── DEPLOYMENT.md
 │   ├── DESIGN_SYSTEM.md
@@ -135,13 +149,16 @@ Pulse.AI/
 │   ├── routes/
 │   ├── services/
 │   ├── styles/
+│   ├── test/
 │   ├── types/
 │   └── utils/
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── README.md
+├── eslint.config.js
 ├── render.yaml
-└── vercel.json
+├── vercel.json
+└── vitest.config.ts
 ```
 
 ## Quick start
@@ -229,15 +246,19 @@ Read the complete endpoint reference in [docs/API_DOCUMENTATION.md](docs/API_DOC
 
 ```bash
 npm run dev
+npm run format:check
+npm run lint
 npm run typecheck
-npm run build
-npm run preview
+npm run test
+npm run build:production
+npm run ci
 ```
 
 ### Backend
 
 ```bash
 cd backend
+python -m ruff check .
 pytest
 uvicorn app.main:app --reload
 ```
@@ -250,12 +271,22 @@ docker build -t pulse-ai-api .
 docker run --env-file .env -p 8000:8000 pulse-ai-api
 ```
 
+## CI/CD
+
+GitHub Actions runs frontend formatting checks, ESLint, TypeScript type checking, Vitest, production build verification, Ruff, backend Pytest, and deployment workflow gates.
+
+- CI workflow: `.github/workflows/ci.yml`
+- Deployment workflow: `.github/workflows/deploy.yml`
+- Dependency updates: `.github/dependabot.yml`
+
+Read the full CI/CD guide in [docs/CI_CD.md](docs/CI_CD.md).
+
 ## Quality checklist
 
 Before sharing the project as a portfolio centerpiece:
 
-- `npm run typecheck` passes.
-- `npm run build` passes.
+- `npm run ci` passes.
+- `python -m ruff check .` passes in `backend`.
 - `pytest` passes in `backend`.
 - Landing page has professional copy and no inactive navigation.
 - Auth pages render correctly.
@@ -274,6 +305,7 @@ Before sharing the project as a portfolio centerpiece:
 - [Frontend guide](docs/FRONTEND_GUIDE.md)
 - [Backend guide](docs/BACKEND_GUIDE.md)
 - [API documentation](docs/API_DOCUMENTATION.md)
+- [CI/CD guide](docs/CI_CD.md)
 - [Deployment guide](docs/DEPLOYMENT.md)
 - [Design system](docs/DESIGN_SYSTEM.md)
 - [Accessibility audit](docs/ACCESSIBILITY_AUDIT.md)
@@ -291,6 +323,7 @@ The project includes:
 - `render.yaml` for Render backend deployment.
 - `backend/Dockerfile` for Dockerized FastAPI deployment.
 - Production environment examples for frontend and backend.
+- GitHub Actions deployment workflow for Vercel and Render.
 - Health checks for API liveness and MongoDB readiness.
 
 Read the full deployment guide in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
