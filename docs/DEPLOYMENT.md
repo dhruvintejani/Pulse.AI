@@ -1,117 +1,72 @@
-# Pulse AI Deployment Guide
+# Deployment Guide
 
-This guide prepares Pulse AI for a production-style deployment with:
+Pulse AI is prepared for a portfolio-grade production deployment with Vercel for the frontend, Render for the FastAPI backend, MongoDB Atlas for persistence, and Clerk for authentication.
 
-- Frontend on Vercel
-- Backend on Render
-- Database on MongoDB Atlas
-- Authentication through Clerk
-- Production environment variables
-- Health checks and deployment validation
-
-## 1. Deployment architecture
+## Deployment architecture
 
 ```text
-User Browser
-  -> Vercel Frontend
-  -> Render FastAPI Backend
+User Browser / PWA
+  -> Vercel frontend
+  -> Clerk session + JWT
+  -> Render FastAPI backend
   -> MongoDB Atlas
-  -> Clerk JWT Verification
 ```
 
-Frontend URL example:
+## 1. Prerequisites
+
+Create or prepare:
+
+- Vercel project for the frontend.
+- Render web service for the backend.
+- MongoDB Atlas cluster.
+- Clerk application.
+- Clerk JWT template only if the project needs a named JWT template.
+- Production frontend domain.
+- Production backend domain.
+
+## 2. Frontend deployment on Vercel
+
+Vercel settings:
 
 ```text
-https://pulse-ai.vercel.app
+Framework Preset: Vite
+Install Command: npm install
+Build Command: npm run build
+Output Directory: dist
 ```
 
-Backend URL example:
-
-```text
-https://pulse-ai-api.onrender.com
-```
-
-API root:
-
-```text
-https://pulse-ai-api.onrender.com/api/v1
-```
-
-Health check:
-
-```text
-https://pulse-ai-api.onrender.com/api/v1/health
-```
-
-Readiness check:
-
-```text
-https://pulse-ai-api.onrender.com/api/v1/health/ready
-```
-
-## 2. MongoDB Atlas setup
-
-1. Create a MongoDB Atlas project.
-2. Create a cluster.
-3. Create a database user with a strong password.
-4. Add network access for Render.
-   - For easiest initial deployment, use `0.0.0.0/0`.
-   - For stricter production hardening, restrict access to your Render outbound IPs when available.
-5. Copy the application connection string.
-6. Use it for `MONGODB_URI` in Render.
-
-Example:
+Required frontend environment variables:
 
 ```env
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/pulse_ai?retryWrites=true&w=majority
-MONGODB_DB_NAME=pulse_ai
+VITE_CLERK_PUBLISHABLE_KEY=pk_live_value_from_clerk
+VITE_CLERK_JWT_TEMPLATE=
+VITE_API_BASE_URL=https://your-render-backend.onrender.com
+VITE_API_VERSION=v1
+VITE_API_PREFIX=/api/v1
+VITE_API_TIMEOUT_MS=30000
+VITE_API_RETRY_COUNT=1
+VITE_API_WITH_CREDENTIALS=false
+VITE_ADMIN_EMAILS=admin@your-domain.com
+VITE_APP_ENV=production
+VITE_ENABLE_SOURCEMAPS=false
+VITE_SITE_URL=https://your-vercel-frontend.vercel.app
+VITE_ERROR_LOG_ENDPOINT=
 ```
 
-## 3. Clerk production setup
+The repository includes `vercel.json` with SPA rewrites, static asset caching, service worker headers, manifest headers, and security headers.
 
-Pulse AI uses Clerk as the only authentication provider.
+## 3. Backend deployment on Render
 
-Set these values in Render:
-
-```env
-CLERK_ISSUER=https://your-clerk-domain.clerk.accounts.dev
-CLERK_JWKS_URL=https://your-clerk-domain.clerk.accounts.dev/.well-known/jwks.json
-CLERK_AUTHORIZED_PARTIES=https://pulse-ai.vercel.app
-CLERK_SECRET_KEY=your_clerk_secret_key
-```
-
-Set this value in Vercel:
-
-```env
-VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-```
-
-If you use a Clerk JWT template, set the same template name in Vercel:
-
-```env
-VITE_CLERK_JWT_TEMPLATE=your_template_name
-```
-
-## 4. Deploy backend to Render
-
-The repository includes `render.yaml` for Blueprint deployment.
-
-Render configuration:
+Render settings:
 
 ```text
 Runtime: Docker
-Dockerfile: ./backend/Dockerfile
-Docker context: ./backend
-Health check path: /api/v1/health
+Dockerfile Path: ./backend/Dockerfile
+Docker Context: ./backend
+Health Check Path: /api/v1/health
 ```
 
-Production start command is handled inside the Dockerfile:
-
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'
-```
-
-### Required Render environment variables
+Required backend environment variables:
 
 ```env
 ENVIRONMENT=production
@@ -120,17 +75,17 @@ APP_NAME=Pulse AI API
 APP_VERSION=1.0.0
 API_V1_PREFIX=/api/v1
 
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/pulse_ai?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://user:password@cluster-url/pulse_ai?retryWrites=true&w=majority
 MONGODB_DB_NAME=pulse_ai
 MONGODB_SERVER_SELECTION_TIMEOUT_MS=5000
 
-BACKEND_CORS_ORIGINS=https://pulse-ai.vercel.app
+BACKEND_CORS_ORIGINS=https://your-vercel-frontend.vercel.app
 BACKEND_CORS_ALLOW_CREDENTIALS=true
 BACKEND_CORS_ALLOW_METHODS=GET,POST,PUT,PATCH,DELETE,OPTIONS
 BACKEND_CORS_ALLOW_HEADERS=Authorization,Content-Type,X-Request-ID,X-CSRF-Token
 BACKEND_CORS_EXPOSE_HEADERS=X-Request-ID,X-Process-Time-Ms
 
-SECURITY_ALLOWED_HOSTS=pulse-ai-api.onrender.com
+SECURITY_ALLOWED_HOSTS=your-render-backend.onrender.com
 SECURITY_HEADERS_ENABLED=true
 SECURITY_ENABLE_HSTS=true
 SECURITY_MAX_REQUEST_SIZE_BYTES=2097152
@@ -139,14 +94,14 @@ SECURITY_BLOCK_SUSPICIOUS_INPUT=true
 
 CLERK_ISSUER=https://your-clerk-domain.clerk.accounts.dev
 CLERK_JWKS_URL=https://your-clerk-domain.clerk.accounts.dev/.well-known/jwks.json
-CLERK_AUTHORIZED_PARTIES=https://pulse-ai.vercel.app
-CLERK_SECRET_KEY=your_clerk_secret_key
+CLERK_AUTHORIZED_PARTIES=https://your-vercel-frontend.vercel.app
+CLERK_SECRET_KEY=sk_live_value_from_clerk
 
-ADMIN_EMAILS=admin@example.com
-INTERNAL_JWT_SECRET=replace-with-a-long-random-secret
+ADMIN_EMAILS=admin@your-domain.com
+INTERNAL_JWT_SECRET=use-a-long-random-secret
 ```
 
-Optional provider keys can stay empty until real AI providers are enabled:
+Optional AI provider values:
 
 ```env
 AI_DEFAULT_PROVIDER=mock
@@ -158,69 +113,59 @@ GROQ_API_KEY=
 DEEPSEEK_API_KEY=
 ```
 
-## 5. Deploy frontend to Vercel
+Keep provider keys empty until real provider calls are enabled. The frontend should not branch by provider.
 
-The repository includes `vercel.json` for Vite deployment.
+## 4. MongoDB Atlas setup
 
-Vercel settings:
+1. Create a MongoDB Atlas project.
+2. Create a cluster.
+3. Create a database user with a strong password.
+4. Add network access for Render.
+5. Copy the Atlas connection string.
+6. Set `MONGODB_URI` in Render.
+7. Set `MONGODB_DB_NAME=pulse_ai`.
 
-```text
-Framework Preset: Vite
-Build Command: npm run build
-Output Directory: dist
-Install Command: npm install
-```
+For a portfolio deployment, a broad initial network rule can be used temporarily. For production hardening, restrict network access to the backend provider's outbound IP strategy.
 
-Required Vercel environment variables:
+## 5. Clerk setup
 
-```env
-VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-VITE_CLERK_JWT_TEMPLATE=
-VITE_API_BASE_URL=https://pulse-ai-api.onrender.com
-VITE_API_VERSION=v1
-VITE_API_PREFIX=/api/v1
-VITE_API_TIMEOUT_MS=30000
-VITE_API_RETRY_COUNT=1
-VITE_API_WITH_CREDENTIALS=false
-VITE_ADMIN_EMAILS=admin@example.com
-VITE_APP_ENV=production
-VITE_ENABLE_SOURCEMAPS=false
-```
+Pulse AI uses Clerk as the only authentication provider.
 
-After Vercel gives you the final production domain, update Render:
+Configure Clerk with:
 
-```env
-BACKEND_CORS_ORIGINS=https://your-final-vercel-domain.vercel.app
-CLERK_AUTHORIZED_PARTIES=https://your-final-vercel-domain.vercel.app
-```
+- Frontend application URL.
+- Allowed redirect URLs.
+- Allowed origin for the deployed Vercel domain.
+- JWT verification values for the backend.
+- Authorized parties matching the deployed frontend domain.
 
-If Render gives you a custom backend domain, update Vercel:
+Set the Clerk publishable key in Vercel and Clerk secret/JWKS values in Render.
 
-```env
-VITE_API_BASE_URL=https://your-final-render-domain.onrender.com
-```
+## 6. Production validation
 
-## 6. Health checks
-
-Frontend smoke check:
-
-```text
-Open the Vercel URL and verify the landing page loads.
-```
-
-Backend health check:
+Frontend checks:
 
 ```bash
-curl https://pulse-ai-api.onrender.com/api/v1/health
+npm run typecheck
+npm run build
+npm run preview
 ```
 
-Backend database readiness check:
+Backend checks:
 
 ```bash
-curl https://pulse-ai-api.onrender.com/api/v1/health/ready
+cd backend
+pytest
 ```
 
-Expected health response:
+Health checks after deployment:
+
+```bash
+curl https://your-render-backend.onrender.com/api/v1/health
+curl https://your-render-backend.onrender.com/api/v1/health/ready
+```
+
+Expected liveness response:
 
 ```json
 {
@@ -231,7 +176,7 @@ Expected health response:
 }
 ```
 
-Expected readiness response after MongoDB Atlas is connected:
+Expected readiness response after MongoDB connects:
 
 ```json
 {
@@ -240,117 +185,36 @@ Expected readiness response after MongoDB Atlas is connected:
 }
 ```
 
-## 7. Production verification checklist
-
-Before sharing the portfolio link:
+## 7. Post-deployment checklist
 
 - Vercel build succeeds.
-- Render deploy succeeds.
+- Render deployment succeeds.
 - `/api/v1/health` returns `200`.
 - `/api/v1/health/ready` returns `200` after MongoDB Atlas is connected.
-- Clerk login/signup works from the Vercel domain.
-- Render CORS allows the final Vercel domain.
-- Clerk authorized parties include the final Vercel domain.
-- MongoDB Atlas contains created user profiles after login.
-- Browser console has no CORS errors.
+- Clerk login and signup work from the deployed frontend.
+- Backend CORS allows only the final frontend domain.
+- Clerk authorized parties include the final frontend domain.
+- First login creates or syncs the MongoDB user profile.
 - API requests include `Authorization: Bearer <Clerk token>`.
-- Admin emails are configured for admin panel access.
+- Admin emails are configured.
+- Browser console has no CORS, service worker, or route errors.
+- Lighthouse validates SEO, accessibility, best practices, and PWA behavior.
+- README screenshots render on GitHub.
 
 ## 8. Build optimization notes
 
-Frontend deployment is optimized with:
+The frontend already includes:
 
-- Vite production build
-- Manual vendor chunk splitting
-- CSS code splitting
-- Esbuild minification
-- Console/debugger removal in production
-- Immutable caching for hashed assets through Vercel headers
-- SPA rewrites for React Router routes
-- Optional source maps through `VITE_ENABLE_SOURCEMAPS`
+- Vite production build.
+- Static asset caching headers.
+- Service worker caching for the app shell.
+- Route-level lazy loading.
+- SEO metadata manager.
+- PWA manifest.
+- Responsive app shell.
 
-Backend deployment is optimized with:
+Recommended next deployment improvement:
 
-- Python 3.13 slim Docker image
-- Non-root container user
-- Render `$PORT` support
-- Proxy header support
-- Production docs disabled
-- Loguru JSON logging support
-- Request size limit
-- Security headers
-- Rate limiting
-- Strict CORS environment configuration
-
-## 9. Common deployment fixes
-
-### CORS error in browser
-
-Update Render:
-
-```env
-BACKEND_CORS_ORIGINS=https://your-vercel-domain.vercel.app
-CLERK_AUTHORIZED_PARTIES=https://your-vercel-domain.vercel.app
-```
-
-Redeploy backend.
-
-### Backend health works but readiness fails
-
-Check:
-
-```env
-MONGODB_URI
-MONGODB_DB_NAME
-```
-
-Also verify MongoDB Atlas network access and database user credentials.
-
-### Clerk token rejected
-
-Check:
-
-```env
-CLERK_ISSUER
-CLERK_JWKS_URL
-CLERK_AUTHORIZED_PARTIES
-VITE_CLERK_PUBLISHABLE_KEY
-VITE_CLERK_JWT_TEMPLATE
-```
-
-### Render deploy starts but app is unreachable
-
-Verify the Dockerfile command uses Render's dynamic `$PORT`:
-
-```bash
---port ${PORT:-8000}
-```
-
-## 10. Local production test
-
-Frontend:
-
-```bash
-npm install
-npm run build
-npm run preview
-```
-
-Backend:
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.production.example .env
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-Docker backend:
-
-```bash
-cd backend
-docker build -t pulse-ai-api .
-docker run --env-file .env -p 8000:8000 pulse-ai-api
-```
+- Add GitHub Actions to run `npm run typecheck`, `npm run build`, and `pytest` on pull requests.
+- Add Render/Vercel deployment badges after public deployment URLs are finalized.
+- Add production screenshots captured from the deployed app.
