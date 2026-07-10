@@ -14,7 +14,7 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\" \"*.config.ts\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" \"*.config.ts\" --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{json,md,js,ts}\" \".github/workflows/*.yml\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"*.{json,md,js,ts}\" \".github/workflows/*.yml\"",
+    "format:check": "prettier --check package.json tsconfig.json eslint.config.js vitest.config.ts \".github/workflows/*.yml\"",
     "test": "vitest run --passWithNoTests --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
