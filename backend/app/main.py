@@ -25,6 +25,13 @@ from app.middleware import (
 async def lifespan(app: FastAPI):
     configure_logging()
     logger.info("Starting Pulse AI API", environment=settings.ENVIRONMENT)
+
+    if settings.should_skip_database_init:
+        logger.warning("MongoDB initialization skipped", environment=settings.ENVIRONMENT)
+        yield
+        logger.info("Pulse AI API stopped")
+        return
+
     await init_db()
     yield
     await close_db()
