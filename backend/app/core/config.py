@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     MONGODB_URI: str = "mongodb://localhost:27017"
     MONGODB_DB_NAME: str = "pulse_ai"
     MONGODB_SERVER_SELECTION_TIMEOUT_MS: int = 5000
+    SKIP_DATABASE_INIT: bool = False
 
     BACKEND_CORS_ORIGINS: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
     BACKEND_CORS_ALLOW_CREDENTIALS: bool = True
@@ -123,6 +124,8 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_security_settings(self) -> "Settings":
         if self.is_production:
+            if self.SKIP_DATABASE_INIT:
+                raise ValueError("SKIP_DATABASE_INIT cannot be enabled in production")
             if "*" in self.BACKEND_CORS_ORIGINS and self.BACKEND_CORS_ALLOW_CREDENTIALS:
                 raise ValueError("Wildcard CORS origins cannot be used with credentials in production")
             if self.SECURITY_ALLOWED_HOSTS == ["*"]:
@@ -134,6 +137,10 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT.lower() == "production"
+
+    @property
+    def should_skip_database_init(self) -> bool:
+        return self.SKIP_DATABASE_INIT or self.ENVIRONMENT.lower() in {"ci", "test"}
 
     @property
     def document_max_upload_size_bytes(self) -> int:
