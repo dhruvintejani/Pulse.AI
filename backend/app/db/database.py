@@ -1,6 +1,6 @@
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from beanie import init_beanie
 from loguru import logger
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from app.core.config import settings
 from app.models import DOCUMENT_MODELS
 
@@ -44,7 +44,16 @@ def get_database() -> AsyncIOMotorDatabase:
 
 
 async def ping_database() -> bool:
+    if settings.should_skip_database_init:
+        return True
+
     if mongodb_client is None:
         return False
-    await mongodb_client.admin.command("ping")
+
+    try:
+        await mongodb_client.admin.command("ping")
+    except Exception as exc:
+        logger.bind(category="database").warning("MongoDB readiness check failed", error=str(exc))
+        return False
+
     return True
