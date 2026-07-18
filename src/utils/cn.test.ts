@@ -3,6 +3,9 @@ import { cn } from './cn';
 
 describe('cn', () => {
   it('merges conditional and conflicting Tailwind classes', () => {
-    expect(cn('px-2 text-sm', 'px-4', false && 'hidden', ['font-bold'])).toBe('text-sm px-4 font-bold');
+    const shouldHide = false;
+    expect(cn('px-2 text-sm', 'px-4', shouldHide ? 'hidden' : undefined, ['font-bold'])).toBe(
+      'text-sm px-4 font-bold'
+    );
   });
 });
