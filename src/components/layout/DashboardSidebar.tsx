@@ -19,6 +19,7 @@ import {
   Cpu,
   ShieldCheck,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { DASHBOARD_PATHS } from '@/constants/routes';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -28,7 +29,17 @@ import { cn } from '@/lib/utils';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
 
-const mainNav = [
+type DashboardNavPath = (typeof DASHBOARD_PATHS)[keyof typeof DASHBOARD_PATHS];
+
+interface SidebarNavItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  path: DashboardNavPath;
+  badge: string;
+}
+
+const mainNav: SidebarNavItem[] = [
   { id: 'chat', label: 'AI Chat', icon: MessageSquare, path: DASHBOARD_PATHS.CHAT, badge: '' },
   { id: 'documents', label: 'Documents', icon: FileText, path: DASHBOARD_PATHS.DOCUMENTS, badge: '' },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, path: DASHBOARD_PATHS.ANALYTICS, badge: '' },
@@ -45,16 +56,28 @@ const DashboardSidebar = () => {
   const { recentChats } = useRecentChats();
   const { createConversation, setActiveConversation } = useConversations();
 
-  const secondaryNav = useMemo(() => {
-    const items = [
-      { id: 'notifications', label: 'Notifications', icon: Bell, path: DASHBOARD_PATHS.NOTIFICATIONS, badge: unreadCount ? String(unreadCount) : '' },
+  const secondaryNav = useMemo<SidebarNavItem[]>(() => {
+    const items: SidebarNavItem[] = [
+      {
+        id: 'notifications',
+        label: 'Notifications',
+        icon: Bell,
+        path: DASHBOARD_PATHS.NOTIFICATIONS,
+        badge: unreadCount ? String(unreadCount) : '',
+      },
       { id: 'billing', label: 'Billing', icon: CreditCard, path: DASHBOARD_PATHS.BILLING, badge: '' },
       { id: 'team', label: 'Team', icon: Users, path: DASHBOARD_PATHS.TEAM, badge: '' },
       { id: 'settings', label: 'Settings', icon: Settings, path: DASHBOARD_PATHS.SETTINGS, badge: '' },
     ];
 
     if (currentUser?.isAdmin) {
-      items.splice(3, 0, { id: 'admin', label: 'Admin', icon: ShieldCheck, path: DASHBOARD_PATHS.ADMIN, badge: 'Admin' });
+      items.splice(3, 0, {
+        id: 'admin',
+        label: 'Admin',
+        icon: ShieldCheck,
+        path: DASHBOARD_PATHS.ADMIN,
+        badge: 'Admin',
+      });
     }
 
     return items;
@@ -63,10 +86,13 @@ const DashboardSidebar = () => {
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
   const displayName = useMemo(() => currentUser?.fullName || 'Alex Morgan', [currentUser?.fullName]);
 
-  const handleNavigate = useCallback((path: string) => {
-    navigate(path);
-    closeMobileSidebar();
-  }, [closeMobileSidebar, navigate]);
+  const handleNavigate = useCallback(
+    (path: string) => {
+      navigate(path);
+      closeMobileSidebar();
+    },
+    [closeMobileSidebar, navigate]
+  );
 
   const handleNewConversation = useCallback(() => {
     void createConversation().then(() => {
@@ -75,12 +101,15 @@ const DashboardSidebar = () => {
     });
   }, [closeMobileSidebar, createConversation, navigate]);
 
-  const handleRecentChatClick = useCallback((chatId: string) => {
-    void setActiveConversation(chatId).then(() => {
-      navigate(DASHBOARD_PATHS.CHAT);
-      closeMobileSidebar();
-    });
-  }, [closeMobileSidebar, navigate, setActiveConversation]);
+  const handleRecentChatClick = useCallback(
+    (chatId: string) => {
+      void setActiveConversation(chatId).then(() => {
+        navigate(DASHBOARD_PATHS.CHAT);
+        closeMobileSidebar();
+      });
+    },
+    [closeMobileSidebar, navigate, setActiveConversation]
+  );
 
   const handleProfileClick = useCallback(() => {
     navigate(DASHBOARD_PATHS.PROFILE);
@@ -144,7 +173,9 @@ const DashboardSidebar = () => {
               <Icon size={17} className={cn('shrink-0', active ? 'text-[#E9A24C]' : 'text-[#999]')} aria-hidden="true" />
               {!collapsed && (
                 <>
-                  <span className={cn('text-sm flex-1 truncate', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>{item.label}</span>
+                  <span className={cn('text-sm flex-1 truncate', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>
+                    {item.label}
+                  </span>
                   {item.badge && (
                     <Badge variant={item.badge === 'New' ? 'accent' : 'neutral'} size="sm">
                       {item.badge}
@@ -208,15 +239,26 @@ const DashboardSidebar = () => {
               <div className="relative shrink-0">
                 <Icon size={17} className={cn(active ? 'text-[#E9A24C]' : 'text-[#999]')} aria-hidden="true" />
                 {item.badge && item.id === 'notifications' && (
-                  <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-[#E9A24C] text-white text-[9px] font-bold flex items-center justify-center" aria-hidden="true">
+                  <span
+                    className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-[#E9A24C] text-white text-[9px] font-bold flex items-center justify-center"
+                    aria-hidden="true"
+                  >
                     {item.badge}
                   </span>
                 )}
               </div>
               {!collapsed && (
                 <>
-                  <span className={cn('text-sm flex-1 truncate', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>{item.label}</span>
-                  {item.id === 'admin' ? <Badge variant="accent" size="sm">Admin</Badge> : <ChevronRight size={14} className="text-[#CCC]" aria-hidden="true" />}
+                  <span className={cn('text-sm flex-1 truncate', active ? 'font-semibold text-[#1F1F1F]' : 'font-medium')}>
+                    {item.label}
+                  </span>
+                  {item.id === 'admin' ? (
+                    <Badge variant="accent" size="sm">
+                      Admin
+                    </Badge>
+                  ) : (
+                    <ChevronRight size={14} className="text-[#CCC]" aria-hidden="true" />
+                  )}
                 </>
               )}
             </motion.button>
@@ -240,7 +282,9 @@ const DashboardSidebar = () => {
           )}
           {!collapsed && (
             <div className="shrink-0">
-              <Badge variant="accent" size="sm">Pro</Badge>
+              <Badge variant="accent" size="sm">
+                Pro
+              </Badge>
             </div>
           )}
         </button>
