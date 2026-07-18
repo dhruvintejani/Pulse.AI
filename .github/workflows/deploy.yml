@@ -1,9 +1,9 @@
-name: Deploy
+name: Frontend Deploy
 
 on:
   workflow_run:
     workflows:
-      - CI
+      - Frontend CI
     branches:
       - main
     types:
@@ -15,12 +15,12 @@ permissions:
   deployments: write
 
 concurrency:
-  group: deploy-production
+  group: frontend-deploy-production
   cancel-in-progress: false
 
 jobs:
   production:
-    name: Production deployment
+    name: Vercel production deployment
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
@@ -29,7 +29,6 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
       VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
       VITE_CLERK_JWT_TEMPLATE: ${{ secrets.VITE_CLERK_JWT_TEMPLATE }}
       VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
@@ -69,11 +68,3 @@ jobs:
       - name: Skip Vercel deployment when secrets are missing
         if: ${{ env.VERCEL_TOKEN == '' || env.VERCEL_ORG_ID == '' || env.VERCEL_PROJECT_ID == '' }}
         run: echo "Vercel deployment skipped because VERCEL_TOKEN, VERCEL_ORG_ID, or VERCEL_PROJECT_ID is not configured."
-
-      - name: Trigger Render backend deployment
-        if: ${{ env.RENDER_DEPLOY_HOOK_URL != '' }}
-        run: curl --fail --silent --show-error --request POST "$RENDER_DEPLOY_HOOK_URL"
-
-      - name: Skip Render deployment when hook is missing
-        if: ${{ env.RENDER_DEPLOY_HOOK_URL == '' }}
-        run: echo "Render deployment skipped because RENDER_DEPLOY_HOOK_URL is not configured."
