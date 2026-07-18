@@ -8,9 +8,7 @@ import {
   Clock,
   Edit2,
   FileText,
-  Github,
   Globe,
-  Linkedin,
   Mail,
   MapPin,
   MessageSquare,
@@ -44,12 +42,7 @@ type ProfileErrors = Partial<Record<keyof ProfileDetails | 'skillsText' | 'socia
 
 const statIcons: LucideIcon[] = [MessageSquare, FileText, Clock, TrendingUp];
 
-const getSocialIcon = (label: string) => {
-  const normalized = label.toLowerCase();
-  if (normalized.includes('github')) return Github;
-  if (normalized.includes('linkedin')) return Linkedin;
-  return Globe;
-};
+const getSocialIcon = (): LucideIcon => Globe;
 
 const isValidEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value.trim());
 
@@ -207,7 +200,7 @@ const ProfilePage = () => {
             </div>
             <div className="space-y-3">
               {profile.socials.map((social) => {
-                const SocialIcon = getSocialIcon(social.label);
+                const SocialIcon = getSocialIcon();
                 return (
                   <motion.a key={social.id} href={`https://${social.url.replace(/^https?:\/\//, '')}`} target="_blank" rel="noreferrer" whileHover={{ x: 3 }} className="flex items-center gap-3 rounded-2xl border border-[rgba(0,0,0,0.05)] p-3 transition-colors hover:bg-[rgba(233,162,76,0.04)] focus-ring">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(233,162,76,0.1)]">
