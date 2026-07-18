@@ -65,6 +65,7 @@ export const API_ENDPOINTS = {
   },
   settings: {
     root: '/settings/me',
+    section: (section: string) => `/settings/me/${section}`,
     recentSearches: '/settings/me/recent-searches',
   },
   billing: {
