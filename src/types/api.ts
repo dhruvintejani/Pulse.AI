@@ -38,7 +38,9 @@ export interface AuthSessionResponse {
   expiresAt?: ISODateString;
 }
 
-export interface UpdateProfileRequest extends Partial<Pick<ProfileDetails, 'name' | 'email' | 'company' | 'role' | 'location' | 'biography' | 'timezone' | 'skills' | 'socials'>> {}
+export type UpdateProfileRequest = Partial<
+  Pick<ProfileDetails, 'name' | 'email' | 'company' | 'role' | 'location' | 'biography' | 'timezone' | 'skills' | 'socials'>
+>;
 
 export interface ApiChatMessage {
   id: EntityId;
