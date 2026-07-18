@@ -1,15 +1,16 @@
 import { lazy } from 'react';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
-export type PreloadableComponent<TComponent extends ComponentType<unknown>> = LazyExoticComponent<TComponent> & {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type PreloadableComponent<TComponent extends ComponentType<any>> = LazyExoticComponent<TComponent> & {
   preload: () => Promise<{ default: TComponent }>;
 };
 
-export const lazyWithPreload = <TProps extends object = Record<string, never>>(
-  factory: () => Promise<{ default: ComponentType<TProps> }>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const lazyWithPreload = <TComponent extends ComponentType<any>>(
+  factory: () => Promise<{ default: TComponent }>
 ) => {
-  type LoadedComponent = ComponentType<TProps>;
-  const Component = lazy(factory) as PreloadableComponent<LoadedComponent>;
+  const Component = lazy(factory) as PreloadableComponent<TComponent>;
   Component.preload = factory;
   return Component;
 };
