@@ -19,28 +19,38 @@ interface ApiAuthProviderProps {
 const ApiAuthProviderComponent = ({ children }: ApiAuthProviderProps) => {
   const { getToken, isLoaded, isSignedIn } = useAuth();
 
-  const getAccessToken = useMemo(() => async () => {
-    if (!isLoaded || !isSignedIn) return null;
-    if (env.clerkJwtTemplate) return getToken({ template: env.clerkJwtTemplate });
-    return getToken();
-  }, [getToken, isLoaded, isSignedIn]);
+  const getAccessToken = useMemo(
+    () => async () => {
+      if (!isLoaded || !isSignedIn) return null;
+      if (env.clerkJwtTemplate) return getToken({ template: env.clerkJwtTemplate });
+      return getToken();
+    },
+    [getToken, isLoaded, isSignedIn]
+  );
 
-  const getAuthHeaders = useMemo(() => async () => {
-    const token = await getAccessToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  }, [getAccessToken]);
+  const getAuthHeaders = useMemo<() => Promise<Record<string, string>>>(
+    () => async () => {
+      const token = await getAccessToken();
+      if (!token) return {};
+      return { Authorization: `Bearer ${token}` };
+    },
+    [getAccessToken]
+  );
 
   useEffect(() => {
     setApiTokenProvider(getAccessToken);
     return () => clearApiTokenProvider();
   }, [getAccessToken]);
 
-  const value = useMemo<ApiAuthContextValue>(() => ({
-    getAccessToken,
-    getAuthHeaders,
-    isAuthLoaded: isLoaded,
-    isAuthenticated: Boolean(isSignedIn),
-  }), [getAccessToken, getAuthHeaders, isLoaded, isSignedIn]);
+  const value = useMemo<ApiAuthContextValue>(
+    () => ({
+      getAccessToken,
+      getAuthHeaders,
+      isAuthLoaded: isLoaded,
+      isAuthenticated: Boolean(isSignedIn),
+    }),
+    [getAccessToken, getAuthHeaders, isLoaded, isSignedIn]
+  );
 
   return <ApiAuthContext.Provider value={value}>{children}</ApiAuthContext.Provider>;
 };
