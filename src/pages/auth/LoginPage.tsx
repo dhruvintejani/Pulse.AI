@@ -21,8 +21,8 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoaded, signIn, setActive } = useSignIn();
-  const [email, setEmail] = useState(LOGIN_DEFAULTS.email);
-  const [password, setPassword] = useState(LOGIN_DEFAULTS.password);
+  const [email, setEmail] = useState<string>(LOGIN_DEFAULTS.email);
+  const [password, setPassword] = useState<string>(LOGIN_DEFAULTS.password);
   const { fieldErrors, setFieldErrors, authError, setAuthError, clearFieldError } = useAuthFormErrors();
   const { oauthLoading, setOauthLoading, isOAuthLoading } = useOAuthLoading();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,14 +90,12 @@ const LoginPage = () => {
     <div className="relative min-h-screen flex overflow-hidden">
       <AuroraBackground />
 
-      {/* Left Panel - Illustration */}
       <motion.div
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.7 }}
         className="hidden lg:flex flex-col flex-1 relative z-10 p-12"
       >
-        {/* Logo */}
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E9A24C] to-[#D4853A] flex items-center justify-center shadow-premium">
             <Sparkles size={16} className="text-white" />
@@ -105,13 +103,8 @@ const LoginPage = () => {
           <span className="text-sm font-bold text-[#1F1F1F]">Pulse AI</span>
         </div>
 
-        {/* Center content */}
         <div className="flex-1 flex flex-col justify-center max-w-md">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}>
             <h1 className="text-4xl font-black text-[#1F1F1F] leading-tight mb-4 tracking-tight">
               Welcome back to
               <br />
@@ -121,15 +114,14 @@ const LoginPage = () => {
               Sign in to continue your conversations, access your documents, and pick up right where you left off.
             </p>
 
-            {/* Feature list */}
             <div className="space-y-4">
               {[
-                { icon: '⚡', title: 'Lightning fast responses', desc: 'Get answers in under 50ms' },
-                { icon: '🔒', title: 'Enterprise-grade security', desc: 'Your data stays private' },
-                { icon: '🌐', title: 'Multi-model AI access', desc: 'GPT-4, Claude, Gemini & more' },
+                { icon: '⚡', title: 'Fast AI workflows', desc: 'Move from prompt to polished output quickly' },
+                { icon: '🔒', title: 'Secure by design', desc: 'Authentication and API access are protected with Clerk' },
+                { icon: '🌐', title: 'Multi-model ready', desc: 'Provider abstraction supports multiple AI vendors' },
               ].map((f, i) => (
                 <motion.div
-                  key={i}
+                  key={f.title}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 + i * 0.1 }}
@@ -146,22 +138,22 @@ const LoginPage = () => {
           </motion.div>
         </div>
 
-        {/* Bottom quote */}
         <div className="glass rounded-2xl p-5 max-w-sm">
           <p className="text-sm text-[#444] italic leading-relaxed mb-3">
-            "Pulse AI cut our research time by 70%. It's the tool we didn't know we needed."
+            "A polished AI workspace built to demonstrate production-level frontend and full-stack engineering."
           </p>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#E9A24C] to-[#D4853A] flex items-center justify-center text-white text-[10px] font-bold">TC</div>
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#E9A24C] to-[#D4853A] flex items-center justify-center text-white text-[10px] font-bold">
+              PA
+            </div>
             <div>
-              <p className="text-xs font-semibold text-[#1F1F1F]">Tom Chen</p>
-              <p className="text-[10px] text-[#999]">Head of Research, Vertex AI</p>
+              <p className="text-xs font-semibold text-[#1F1F1F]">Pulse AI</p>
+              <p className="text-[10px] text-[#999]">Portfolio SaaS workspace</p>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Right Panel - Form */}
       <motion.div
         initial={{ opacity: 0, x: 40 }}
         animate={{ opacity: 1, x: 0 }}
@@ -169,7 +161,6 @@ const LoginPage = () => {
         className="relative z-10 flex flex-col items-center justify-center w-full lg:w-[480px] xl:w-[520px] p-8 lg:p-12"
       >
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
           <div className="flex lg:hidden items-center gap-2.5 mb-8">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E9A24C] to-[#D4853A] flex items-center justify-center">
               <Sparkles size={16} className="text-white" />
@@ -187,7 +178,6 @@ const LoginPage = () => {
             </p>
           </div>
 
-          {/* Social logins */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             <motion.button
               type="button"
@@ -221,7 +211,6 @@ const LoginPage = () => {
             </motion.button>
           </div>
 
-          {/* Divider */}
           <div className="relative flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-[rgba(0,0,0,0.07)]" />
             <span className="text-xs text-[#BBB] font-medium">or continue with email</span>
@@ -232,7 +221,6 @@ const LoginPage = () => {
             <AuthAlert message={authError} />
           </div>
 
-          {/* Form */}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <Input
               label="Email address"
@@ -260,7 +248,6 @@ const LoginPage = () => {
               error={fieldErrors.password}
             />
 
-            {/* Forgot password */}
             <div className="flex justify-end">
               <button
                 type="button"
@@ -284,12 +271,8 @@ const LoginPage = () => {
             </Button>
           </form>
 
-          {/* Terms */}
           <p className="text-[11px] text-[#CCC] text-center mt-6 leading-relaxed">
-            By signing in, you agree to our{' '}
-            <a href="#" className="text-[#999] underline">Terms of Service</a>
-            {' '}and{' '}
-            <a href="#" className="text-[#999] underline">Privacy Policy</a>.
+            By signing in, you agree to use Pulse AI responsibly and keep workspace data secure.
           </p>
         </div>
       </motion.div>
