@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 type AlertVariant = 'info' | 'success' | 'warning' | 'error' | 'neutral';
 
-interface AlertProps extends HTMLAttributes<HTMLDivElement> {
+interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   variant?: AlertVariant;
   title?: ReactNode;
   description?: ReactNode;
@@ -30,36 +30,32 @@ const defaultIcons: Record<AlertVariant, ReactNode> = {
   neutral: <Info size={18} aria-hidden="true" />,
 };
 
-const Alert = forwardRef<HTMLDivElement, AlertProps>(({
-  variant = 'info',
-  title,
-  description,
-  icon,
-  action,
-  children,
-  className,
-  role,
-  ...props
-}, ref) => {
-  const liveRole = role ?? (variant === 'error' || variant === 'warning' ? 'alert' : 'status');
+const Alert = forwardRef<HTMLDivElement, AlertProps>(
+  ({ variant = 'info', title, description, icon, action, children, className, role, ...props }, ref) => {
+    const liveRole = role ?? (variant === 'error' || variant === 'warning' ? 'alert' : 'status');
 
-  return (
-    <div
-      ref={ref}
-      role={liveRole}
-      className={cn('flex min-w-0 gap-3 rounded-2xl border p-4 text-sm shadow-[var(--ds-shadow-xs)]', variants[variant], className)}
-      {...props}
-    >
-      <div className="mt-0.5 shrink-0">{icon ?? defaultIcons[variant]}</div>
-      <div className="min-w-0 flex-1">
-        {title && <p className="font-bold leading-5 text-[var(--ds-color-text)]">{title}</p>}
-        {description && <p className="mt-1 leading-relaxed text-current opacity-90">{description}</p>}
-        {children}
+    return (
+      <div
+        ref={ref}
+        role={liveRole}
+        className={cn(
+          'flex min-w-0 gap-3 rounded-2xl border p-4 text-sm shadow-[var(--ds-shadow-xs)]',
+          variants[variant],
+          className
+        )}
+        {...props}
+      >
+        <div className="mt-0.5 shrink-0">{icon ?? defaultIcons[variant]}</div>
+        <div className="min-w-0 flex-1">
+          {title && <p className="font-bold leading-5 text-[var(--ds-color-text)]">{title}</p>}
+          {description && <p className="mt-1 leading-relaxed text-current opacity-90">{description}</p>}
+          {children}
+        </div>
+        {action && <div className="shrink-0 self-start">{action}</div>}
       </div>
-      {action && <div className="shrink-0 self-start">{action}</div>}
-    </div>
-  );
-});
+    );
+  }
+);
 
 Alert.displayName = 'Alert';
 export default memo(Alert);
